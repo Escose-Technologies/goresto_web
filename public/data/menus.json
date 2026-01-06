@@ -1,0 +1,35 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "items": [
+      {
+        "id": "item-1",
+        "name": "Caesar Salad",
+        "price": 12.99,
+        "description": "Fresh romaine lettuce with Caesar dressing, croutons, and parmesan cheese",
+        "image": "",
+        "category": "Salads",
+        "available": true
+      },
+      {
+        "id": "item-2",
+        "name": "Grilled Chicken",
+        "price": 18.99,
+        "description": "Tender grilled chicken breast served with seasonal vegetables",
+        "image": "",
+        "category": "Main Course",
+        "available": true
+      },
+      {
+        "id": "item-3",
+        "name": "Chocolate Cake",
+        "price": 8.99,
+        "description": "Rich chocolate cake with vanilla ice cream",
+        "image": "",
+        "category": "Desserts",
+        "available": true
+      }
+    ]
+  }
+]
+

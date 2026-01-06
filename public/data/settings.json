@@ -1,0 +1,22 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "restaurantName": "The Gourmet Kitchen",
+    "address": "123 Main Street, City Center",
+    "phone": "+1 (555) 123-4567",
+    "email": "info@gourmetkitchen.com",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "openingTime": "09:00",
+    "closingTime": "22:00",
+    "primaryColor": "#7C3AED",
+    "secondaryColor": "#9333EA",
+    "timezone": "America/New_York",
+    "taxRate": 0.08,
+    "serviceCharge": 0.1,
+    "allowOnlineOrders": true,
+    "allowTableReservations": true,
+    "notificationEmail": "admin@gourmetkitchen.com"
+  }
+]
+

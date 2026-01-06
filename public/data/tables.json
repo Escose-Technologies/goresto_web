@@ -1,0 +1,22 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "tables": [
+      {
+        "id": "table-1",
+        "number": "1",
+        "capacity": 4,
+        "status": "available",
+        "location": "Indoor"
+      },
+      {
+        "id": "table-2",
+        "number": "2",
+        "capacity": 2,
+        "status": "available",
+        "location": "Outdoor"
+      }
+    ]
+  }
+]
+

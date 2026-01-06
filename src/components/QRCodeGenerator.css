@@ -1,0 +1,49 @@
+.qr-generator-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.qr-code-wrapper {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qr-info {
+  text-align: center;
+  max-width: 300px;
+}
+
+.qr-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.qr-url {
+  font-size: 0.75rem;
+  color: #6B7280;
+  word-break: break-all;
+  margin-bottom: 0.5rem;
+}
+
+.qr-download-btn {
+  padding: 0.625rem 1.25rem;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.qr-download-btn:hover {
+  opacity: 0.9;
+}
+
