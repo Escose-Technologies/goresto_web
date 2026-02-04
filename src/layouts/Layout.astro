@@ -1,0 +1,107 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "The First Step International School - Nurturing young minds for a brighter future." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <!-- Fonts - Can change Google Font here -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="antialiased font-sans bg-background text-foreground">
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  /*
+   * ============================================
+   * TFS SCHOOL - CSS CUSTOM PROPERTIES
+   * ============================================
+   * 
+   * These CSS variables are synced with tailwind.config.js
+   * They allow for runtime theming if needed (dark mode, etc.)
+   * 
+   * For most changes, update tailwind.config.js instead.
+   * Update these only for dynamic/runtime theming needs.
+   */
+  :root {
+    /* Primary Colors */
+    --primary: 224 64% 33%;
+    --primary-light: 224 64% 45%;
+    --primary-dark: 224 64% 25%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary Colors */
+    --secondary: 45 93% 47%;
+    --secondary-light: 45 93% 60%;
+    --secondary-dark: 45 93% 40%;
+    --secondary-foreground: 222 47% 11%;
+    
+    /* Background */
+    --background: 210 40% 98%;
+    --background-card: 0 0% 100%;
+    --background-dark: 222 47% 11%;
+    
+    /* Foreground / Text */
+    --foreground: 222 47% 11%;
+    --foreground-muted: 215 16% 47%;
+    --foreground-light: 215 20% 65%;
+    
+    /* UI */
+    --border: 214 32% 91%;
+    --ring: 224 64% 33%;
+  }
+
+  /* ============================================
+   * UTILITY CLASSES
+   * ============================================ */
+  
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(30, 58, 138, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Floating animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: hsl(224 64% 33% / 0.2);
+    color: hsl(224, 64%, 25%);
+  }
+</style>
