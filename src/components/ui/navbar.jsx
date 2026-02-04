@@ -21,11 +21,13 @@ const Navbar = () => {
     });
 
     const navLinks = [
-        { name: "Home", href: "/" },
+        { name: "About Us", href: "#about" },
         { name: "Academics", href: "#academics" },
-        { name: "Admissions", href: "#admissions" },
-        { name: "Campus Life", href: "#campus" },
-        { name: "Parent Portal", href: "#portal" },
+        { name: "Administration", href: "#administration" },
+        { name: "Infrastructure", href: "#infrastructure" },
+        { name: "Activities", href: "#activities" },
+        { name: "Gallery", href: "#gallery" },
+        { name: "News & Update", href: "#news" },
     ];
 
     return (

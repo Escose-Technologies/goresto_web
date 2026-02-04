@@ -24,15 +24,19 @@ export const TopBar = () => {
 
                     {/* Right Side - Quick Links */}
                     <div className="flex items-center gap-3">
-                        <span className="text-white/80">CBSE Affiliation: 1234567</span>
+                        <span className="text-white/80">CBSE Affiliation: 1730604</span>
                         <span className="text-white/40">|</span>
-                        <span className="text-white/80">School Code: 12345</span>
+                        <span className="text-white/80">School Code: 10950</span>
                         <span className="text-white/40">|</span>
                         <a href="#contact" className="hover:text-secondary transition-colors">Contact Us</a>
                         <span className="text-white/40">|</span>
                         <a href="#admissions" className="hover:text-secondary transition-colors">Admission Enquiry</a>
                         <span className="text-white/40">|</span>
                         <a href="#" className="hover:text-secondary transition-colors">Career</a>
+                        <span className="text-white/40">|</span>
+                        <a href="#" className="hover:text-secondary transition-colors">Student Login</a>
+                        <span className="text-white/40">|</span>
+                        <a href="#" className="hover:text-secondary transition-colors">Staff Login</a>
                         <span className="text-white/40">|</span>
                         <a href="#" className="text-secondary font-semibold hover:text-white transition-colors">Notice Board</a>
                     </div>
