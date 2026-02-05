@@ -1,0 +1,167 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Infrastructure", href: "/infrastructure" }
+];
+
+const facilities = [
+  {
+    title: "Smart Classrooms",
+    description: "Technology-enabled classrooms with digital boards, projectors, and audio-visual aids for interactive learning",
+    icon: "💻",
+    color: "from-blue-500 to-cyan-500"
+  },
+  {
+    title: "Science Laboratories",
+    description: "Well-equipped Physics, Chemistry, and Biology labs for hands-on experimentation",
+    icon: "🔬",
+    color: "from-purple-500 to-violet-500"
+  },
+  {
+    title: "Computer Lab",
+    description: "Modern computer lab with high-speed internet, latest software, and dedicated workstations",
+    icon: "🖥️",
+    color: "from-emerald-500 to-teal-500"
+  },
+  {
+    title: "Library",
+    description: "Extensive collection of books, journals, magazines, and digital resources for research and reading",
+    icon: "📚",
+    color: "from-amber-500 to-orange-500"
+  },
+  {
+    title: "Sports Facilities",
+    description: "Multiple playgrounds, basketball court, volleyball court, and indoor games for physical development",
+    icon: "⚽",
+    color: "from-green-500 to-lime-500"
+  },
+  {
+    title: "Auditorium",
+    description: "State-of-the-art auditorium for cultural programs, seminars, and school events",
+    icon: "🎭",
+    color: "from-red-500 to-rose-500"
+  },
+  {
+    title: "Medical Room",
+    description: "On-campus medical facility with trained staff and first-aid equipment",
+    icon: "🏥",
+    color: "from-pink-500 to-fuchsia-500"
+  },
+  {
+    title: "Transport",
+    description: "GPS-enabled buses covering major routes with trained drivers and attendants",
+    icon: "🚌",
+    color: "from-indigo-500 to-blue-500"
+  },
+  {
+    title: "CCTV Surveillance",
+    description: "Complete campus coverage with 24/7 CCTV monitoring for safety and security",
+    icon: "📹",
+    color: "from-slate-500 to-gray-600"
+  }
+];
+
+const highlights = [
+  { label: "Sprawling Campus", value: "5+ Acres" },
+  { label: "Smart Classrooms", value: "50+" },
+  { label: "Science Labs", value: "3" },
+  { label: "Computer Systems", value: "100+" }
+];
+---
+
+<InnerPageLayout 
+  title="Infrastructure | The First Step International School"
+  description="Explore our world-class infrastructure - smart classrooms, science labs, sports facilities, library, and more designed for holistic development."
+  pageTitle="Infrastructure"
+  pageSubtitle="World-class facilities for holistic development"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Stats Banner -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-r from-primary to-primary-dark rounded-3xl p-8 text-white">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        {highlights.map((item) => (
+          <div>
+            <div class="text-3xl md:text-4xl font-bold mb-1">{item.value}</div>
+            <div class="text-sm text-white/70">{item.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Facilities Grid -->
+  <section class="mb-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-serif font-bold text-slate-900 mb-4">Our Facilities</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        State-of-the-art infrastructure designed to support 360-degree development of every student
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {facilities.map((facility) => (
+        <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg transition-all">
+          <div class={`w-14 h-14 rounded-xl bg-gradient-to-br ${facility.color} flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform`}>
+            {facility.icon}
+          </div>
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">{facility.title}</h3>
+          <p class="text-sm text-slate-600">{facility.description}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Campus Tour CTA -->
+  <section class="mb-16">
+    <div class="bg-slate-50 rounded-3xl p-8 md:p-12 text-center">
+      <h3 class="text-2xl font-serif font-bold text-slate-900 mb-4">Want to see our campus?</h3>
+      <p class="text-slate-600 mb-6 max-w-xl mx-auto">
+        Schedule a campus tour to experience our world-class infrastructure and facilities in person.
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/contact" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-full font-medium transition-colors">
+          Schedule a Visit
+        </a>
+        <a href="/gallery" class="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-full font-medium border border-slate-200 transition-colors">
+          View Photo Gallery
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section>
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Explore Facilities</h2>
+    <div class="grid md:grid-cols-3 gap-4">
+      <a href="/infrastructure/laboratories" class="group bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all">
+        <div class="flex items-center gap-4">
+          <div class="text-2xl">🔬</div>
+          <div>
+            <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors">Laboratories</h3>
+            <p class="text-xs text-slate-500">Science, Computer & Robotics Labs</p>
+          </div>
+        </div>
+      </a>
+      <a href="/infrastructure/library" class="group bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all">
+        <div class="flex items-center gap-4">
+          <div class="text-2xl">📚</div>
+          <div>
+            <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors">Library</h3>
+            <p class="text-xs text-slate-500">Books, Journals & Digital Resources</p>
+          </div>
+        </div>
+      </a>
+      <a href="/infrastructure/sports" class="group bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all">
+        <div class="flex items-center gap-4">
+          <div class="text-2xl">⚽</div>
+          <div>
+            <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors">Sports</h3>
+            <p class="text-xs text-slate-500">Playground, Courts & Indoor Games</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

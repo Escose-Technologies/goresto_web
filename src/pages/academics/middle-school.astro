@@ -1,0 +1,155 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Academics", href: "/academics" },
+  { name: "Middle School", href: "/academics/middle-school" }
+];
+
+const subjects = [
+  { name: "Science", icon: "🔬" },
+  { name: "Mathematics", icon: "📐" },
+  { name: "English", icon: "📚" },
+  { name: "Social Studies", icon: "🌐" },
+  { name: "Hindi", icon: "📝" },
+  { name: "Third Language", icon: "🗣️" },
+  { name: "Computer Science", icon: "💻" },
+  { name: "Art Education", icon: "🎨" },
+  { name: "Physical Education", icon: "🏃" }
+];
+
+const features = [
+  {
+    title: "Developing Reasoning Skills",
+    description: "Focus on developing thinking and reasoning skills through analytical approach"
+  },
+  {
+    title: "Balance in Learning",
+    description: "Perfect balance between basics, skills, and knowledge for holistic development"
+  },
+  {
+    title: "Arts & Culture Exposure",
+    description: "Regular exposure to arts, culture, and physical activity beyond academics"
+  },
+  {
+    title: "CCE Pattern",
+    description: "Co-curricular activities following Continuous and Comprehensive Evaluation guidelines"
+  }
+];
+---
+
+<InnerPageLayout 
+  title="Middle School Education | The First Step International School"
+  description="Middle school education for Classes VI-VIII focusing on developing thinking and reasoning skills with balance between basics, skills, and knowledge."
+  pageTitle="Middle School"
+  pageSubtitle="Developing Reasoning Skills - Classes VI to VIII"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-purple-500 via-violet-500 to-purple-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <span class="inline-block bg-white/20 px-4 py-1 rounded-full text-sm font-medium mb-4">
+            Classes VI - VIII
+          </span>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">Developing Reasoning Skills</h2>
+          <p class="text-white/90 leading-relaxed">
+            The middle school curriculum focuses on developing thinking and reasoning skills. We maintain a perfect balance between basics, skills, and knowledge to encourage independent thinking.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-6xl">🧠</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Subjects -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Core Subjects</h2>
+    <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
+      {subjects.map((subject) => (
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 text-center hover:shadow-md transition-shadow">
+          <div class="text-3xl mb-2">{subject.icon}</div>
+          <p class="text-xs text-slate-600">{subject.name}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Key Features</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      {features.map((feature, index) => (
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex gap-4">
+          <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold flex-shrink-0">
+            {index + 1}
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-1">{feature.title}</h3>
+            <p class="text-sm text-slate-600">{feature.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Assessment Pattern -->
+  <section class="mb-16">
+    <div class="bg-purple-50 rounded-3xl p-8 md:p-12">
+      <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">Assessment Pattern</h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <div class="text-2xl font-bold text-purple-600 mb-1">FA-1</div>
+          <p class="text-xs text-slate-500">Formative Assessment 1</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <div class="text-2xl font-bold text-purple-600 mb-1">FA-2</div>
+          <p class="text-xs text-slate-500">Formative Assessment 2</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <div class="text-2xl font-bold text-purple-600 mb-1">SA-1</div>
+          <p class="text-xs text-slate-500">Summative Assessment 1</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 text-center shadow-sm">
+          <div class="text-2xl font-bold text-purple-600 mb-1">SA-2</div>
+          <p class="text-xs text-slate-500">Summative Assessment 2</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/academics/primary" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Primary School (I-V)</p>
+          </div>
+        </div>
+      </a>
+      <a href="/academics/secondary" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-slate-500">Next</p>
+            <p class="font-medium text-slate-900">Secondary School (IX-X)</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

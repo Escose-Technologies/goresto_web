@@ -1,0 +1,225 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Academics", href: "/academics" },
+  { name: "Senior Secondary", href: "/academics/senior-secondary" }
+];
+
+const scienceSubjects = [
+  { name: "Physics", icon: "⚛️" },
+  { name: "Chemistry", icon: "🧪" },
+  { name: "Mathematics", icon: "📐" },
+  { name: "Biology", icon: "🧬" },
+  { name: "English", icon: "📚" },
+  { name: "Computer Science", icon: "💻" }
+];
+
+const commerceSubjects = [
+  { name: "Accountancy", icon: "📊" },
+  { name: "Business Studies", icon: "💼" },
+  { name: "Economics", icon: "📈" },
+  { name: "Mathematics", icon: "📐" },
+  { name: "English", icon: "📚" },
+  { name: "Informatics Practices", icon: "💻" }
+];
+
+const features = [
+  {
+    title: "Independent Thought",
+    description: "Devoted to developing independent thought and ethical action in students"
+  },
+  {
+    title: "Specialization",
+    description: "Subject specialization based on aptitude and interest for career readiness"
+  },
+  {
+    title: "Expert Guidance",
+    description: "Professional experts provide guidance for academic and career planning"
+  },
+  {
+    title: "Linguistic Excellence",
+    description: "Focus on English language development - grammar, vocabulary, and effective communication"
+  }
+];
+---
+
+<InnerPageLayout 
+  title="Senior Secondary Education | The First Step International School"
+  description="Senior Secondary education for Classes XI-XII with Science and Commerce streams. Devoted to independent thought, ethical action, and specialization."
+  pageTitle="Senior Secondary"
+  pageSubtitle="Embarking on a Lifelong Task - Classes XI to XII"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <span class="inline-block bg-white/20 px-4 py-1 rounded-full text-sm font-medium mb-4">
+            Classes XI - XII • CBSE Board
+          </span>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">Embarking on a Lifelong Task</h2>
+          <p class="text-white/90 leading-relaxed">
+            Our senior secondary program is devoted to independent thought, ethical action, and specialization. We focus on personal resourcefulness, intellectual insight, and social responsibility.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-6xl">🚀</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Streams -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-8 text-center">Streams Offered</h2>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Science Stream -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">🔬</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-slate-900">Science Stream</h3>
+            <p class="text-sm text-slate-500">PCM / PCB</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          {scienceSubjects.map((subject) => (
+            <div class="text-center p-3 bg-slate-50 rounded-lg">
+              <div class="text-2xl mb-1">{subject.icon}</div>
+              <p class="text-xs text-slate-600">{subject.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Commerce Stream -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+            <span class="text-2xl">💹</span>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-slate-900">Commerce Stream</h3>
+            <p class="text-sm text-slate-500">With/Without Mathematics</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          {commerceSubjects.map((subject) => (
+            <div class="text-center p-3 bg-slate-50 rounded-lg">
+              <div class="text-2xl mb-1">{subject.icon}</div>
+              <p class="text-xs text-slate-600">{subject.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Program Highlights</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      {features.map((feature, index) => (
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex gap-4">
+          <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold flex-shrink-0">
+            {index + 1}
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-1">{feature.title}</h3>
+            <p class="text-sm text-slate-600">{feature.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Board Exam & Career -->
+  <section class="mb-16">
+    <div class="bg-emerald-50 rounded-3xl p-8 md:p-12">
+      <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">Board Examination & Career Guidance</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl p-6 shadow-sm">
+          <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <span class="text-xl">📝</span> CBSE AISSCE
+          </h3>
+          <p class="text-sm text-slate-600 mb-4">
+            Class XII students appear for All India Senior School Certificate Examination conducted by CBSE.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Comprehensive board preparation
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Regular mock tests
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Subject-wise revision classes
+            </li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-xl p-6 shadow-sm">
+          <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <span class="text-xl">🎯</span> Career Counseling
+          </h3>
+          <p class="text-sm text-slate-600 mb-4">
+            Professional guidance to help students make informed decisions about higher education and career paths.
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Aptitude assessment
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              College admission guidance
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+              Competitive exam preparation support
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/academics/secondary" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Secondary School (IX-X)</p>
+          </div>
+        </div>
+      </a>
+      <a href="/admissions" class="flex-1 bg-emerald-500 hover:bg-emerald-600 rounded-xl p-6 shadow-sm transition-colors text-white text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-white/70">Ready to join?</p>
+            <p class="font-medium">Apply for Admission</p>
+          </div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

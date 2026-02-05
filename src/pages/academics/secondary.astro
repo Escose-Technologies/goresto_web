@@ -1,0 +1,173 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Academics", href: "/academics" },
+  { name: "Secondary School", href: "/academics/secondary" }
+];
+
+const subjects = [
+  { name: "English", icon: "📚" },
+  { name: "Hindi", icon: "📝" },
+  { name: "Mathematics", icon: "📐" },
+  { name: "Science", icon: "🔬" },
+  { name: "Social Science", icon: "🌐" },
+  { name: "Information Technology", icon: "💻" }
+];
+
+const features = [
+  {
+    title: "Self-Learning Skills",
+    description: "Designed to inculcate self-learning skills for independent academic growth"
+  },
+  {
+    title: "Career Preparation",
+    description: "Preparing students with solid foundation for their future careers"
+  },
+  {
+    title: "Theory + Practical",
+    description: "Integration of theory with experiments and project work for deeper understanding"
+  },
+  {
+    title: "Field Trips & Lectures",
+    description: "Guest lectures and field trips to enhance real-world learning"
+  }
+];
+---
+
+<InnerPageLayout 
+  title="Secondary Education | The First Step International School"
+  description="Secondary education for Classes IX-X designed to inculcate self-learning skills and prepare students for solid careers through CBSE curriculum."
+  pageTitle="Secondary School"
+  pageSubtitle="Building Strong Foundations - Classes IX to X"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <span class="inline-block bg-white/20 px-4 py-1 rounded-full text-sm font-medium mb-4">
+            Classes IX - X • CBSE Board
+          </span>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">Building Strong Foundations</h2>
+          <p class="text-white/90 leading-relaxed">
+            The secondary school program is designed to inculcate self-learning skills and prepare students for solid careers. We integrate theory with experiments and project work for comprehensive learning.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-6xl">🎯</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subjects -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Core Subjects</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {subjects.map((subject) => (
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 text-center hover:shadow-md transition-shadow">
+          <div class="text-4xl mb-3">{subject.icon}</div>
+          <p class="font-medium text-slate-900">{subject.name}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Program Highlights</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      {features.map((feature, index) => (
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex gap-4">
+          <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold flex-shrink-0">
+            {index + 1}
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-1">{feature.title}</h3>
+            <p class="text-sm text-slate-600">{feature.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Board Exam Info -->
+  <section class="mb-16">
+    <div class="bg-amber-50 rounded-3xl p-8 md:p-12">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-2xl font-serif font-bold text-slate-900 mb-4">CBSE Board Examination</h2>
+          <p class="text-slate-600 mb-4">
+            Class X students appear for the CBSE All India Secondary School Examination (AISSE). Our comprehensive preparation includes:
+          </p>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2 text-slate-600">
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Regular practice tests and mock exams</span>
+            </li>
+            <li class="flex items-start gap-2 text-slate-600">
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Sample papers and previous year question practice</span>
+            </li>
+            <li class="flex items-start gap-2 text-slate-600">
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Special doubt-clearing sessions</span>
+            </li>
+            <li class="flex items-start gap-2 text-slate-600">
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Career counseling and guidance</span>
+            </li>
+          </ul>
+        </div>
+        <div class="text-center">
+          <div class="inline-block bg-white rounded-2xl p-8 shadow-sm">
+            <div class="text-5xl font-bold text-amber-600 mb-2">95%+</div>
+            <p class="text-slate-600">Average Board Result</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/academics/middle-school" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Middle School (VI-VIII)</p>
+          </div>
+        </div>
+      </a>
+      <a href="/academics/senior-secondary" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-slate-500">Next</p>
+            <p class="font-medium text-slate-900">Senior Secondary (XI-XII)</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

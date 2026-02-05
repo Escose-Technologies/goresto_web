@@ -1,0 +1,135 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Infrastructure", href: "/infrastructure" },
+  { name: "Library", href: "/infrastructure/library" }
+];
+
+const collections = [
+  { type: "Books", count: "10,000+", icon: "📚" },
+  { type: "Reference Books", count: "2,000+", icon: "📖" },
+  { type: "Magazines", count: "50+", icon: "📰" },
+  { type: "E-Resources", count: "5,000+", icon: "💻" }
+];
+
+const facilities = [
+  "Spacious reading halls with natural lighting",
+  "Separate sections for junior and senior students",
+  "Reference section with encyclopedias and dictionaries",
+  "Digital library with e-books and online journals",
+  "Newspaper and magazine corner",
+  "Comfortable seating arrangements",
+  "Computer terminals for digital access",
+  "Book borrowing facility for students"
+];
+---
+
+<InnerPageLayout 
+  title="Library | The First Step International School"
+  description="Explore our rich library with over 10,000 books, digital resources, and comfortable reading spaces to foster a love for reading."
+  pageTitle="Library"
+  pageSubtitle="Gateway to knowledge and imagination"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">A Reader Lives a Thousand Lives</h2>
+          <p class="text-white/90 leading-relaxed">
+            Our library is the heart of the school - a space where curiosity is nurtured and imagination takes flight. With a vast collection of books and digital resources, we encourage students to explore, discover, and learn.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-8xl">📚</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collection Stats -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">Our Collection</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {collections.map((item) => (
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+          <div class="text-4xl mb-3">{item.icon}</div>
+          <div class="text-2xl font-bold text-primary mb-1">{item.count}</div>
+          <div class="text-sm text-slate-600">{item.type}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Facilities -->
+  <section class="mb-16">
+    <div class="bg-slate-50 rounded-3xl p-8 md:p-12">
+      <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Library Facilities</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        {facilities.map((facility) => (
+          <div class="flex items-start gap-3 bg-white p-4 rounded-xl">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-slate-600 text-sm">{facility}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Timing -->
+  <section class="mb-16">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+      <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Library Timings
+      </h3>
+      <div class="grid md:grid-cols-2 gap-4 text-sm">
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="text-slate-600">Regular Hours</span>
+          <span class="font-medium text-slate-900">8:00 AM - 4:00 PM</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-slate-100">
+          <span class="text-slate-600">Saturday</span>
+          <span class="font-medium text-slate-900">9:00 AM - 1:00 PM</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/infrastructure/laboratories" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Laboratories</p>
+          </div>
+        </div>
+      </a>
+      <a href="/infrastructure/sports" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-slate-500">Next</p>
+            <p class="font-medium text-slate-900">Sports Facilities</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

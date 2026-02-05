@@ -1,33 +1,83 @@
 import React, { useState } from "react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import { Bell, Menu, X } from "lucide-react";
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { Bell, Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const Navbar = () => {
     const { scrollY } = useScroll();
     const [hidden, setHidden] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState(null);
 
     // Hide navbar on scroll down, show on scroll up
     useMotionValueEvent(scrollY, "change", (latest) => {
         const previous = scrollY.getPrevious() ?? 0;
         if (latest > previous && latest > 150) {
             setHidden(true);
+            setActiveDropdown(null);
         } else {
             setHidden(false);
         }
-        setScrolled(latest > 50);
     });
 
     const navLinks = [
-        { name: "About Us", href: "#about" },
-        { name: "Academics", href: "#academics" },
-        { name: "Administration", href: "#administration" },
-        { name: "Infrastructure", href: "#infrastructure" },
-        { name: "Activities", href: "#activities" },
-        { name: "Gallery", href: "#gallery" },
-        { name: "News & Update", href: "#news" },
+        {
+            name: "About Us",
+            href: "/about",
+            children: [
+                { name: "About TFS", href: "/about" },
+                { name: "Vision & Mission", href: "/about/vision-mission" },
+                { name: "Principal's Message", href: "/about/principal-message" },
+                { name: "Salient Features", href: "/about/salient-features" },
+            ]
+        },
+        {
+            name: "Academics",
+            href: "/academics",
+            children: [
+                { name: "Overview", href: "/academics" },
+                { name: "Pre-Primary (Nursery-UKG)", href: "/academics/pre-primary" },
+                { name: "Primary (I-V)", href: "/academics/primary" },
+                { name: "Middle School (VI-VIII)", href: "/academics/middle-school" },
+                { name: "Secondary (IX-X)", href: "/academics/secondary" },
+                { name: "Senior Secondary (XI-XII)", href: "/academics/senior-secondary" },
+            ]
+        },
+        {
+            name: "Admissions",
+            href: "/admissions",
+            children: [
+                { name: "Admission Info", href: "/admissions" },
+                { name: "Admission Procedure", href: "/admissions/procedure" },
+                { name: "Fee Structure", href: "/admissions/fee-structure" },
+            ]
+        },
+        {
+            name: "Infrastructure",
+            href: "/infrastructure",
+            children: [
+                { name: "Overview", href: "/infrastructure" },
+                { name: "Laboratories", href: "/infrastructure/laboratories" },
+                { name: "Library", href: "/infrastructure/library" },
+                { name: "Sports Facilities", href: "/infrastructure/sports" },
+            ]
+        },
+        {
+            name: "Activities",
+            href: "/activities"
+        },
+        {
+            name: "Gallery",
+            href: "/gallery",
+            children: [
+                { name: "Photo Gallery", href: "/gallery/photos" },
+                { name: "Video Gallery", href: "/gallery/videos" },
+            ]
+        },
+        {
+            name: "Contact",
+            href: "/contact"
+        },
     ];
 
     return (
@@ -40,9 +90,10 @@ const Navbar = () => {
                 animate={hidden ? "hidden" : "visible"}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 className={cn(
-                    "fixed top-6 inset-x-0 mx-auto w-[95%] max-w-5xl z-50 rounded-full transition-all duration-300",
-                    scrolled ? "glass shadow-xl py-3 px-6" : "bg-transparent py-4 px-6"
+                    "fixed top-14 inset-x-0 mx-auto w-[95%] max-w-5xl z-50 rounded-full transition-all duration-300",
+                    "bg-white/90 backdrop-blur-md shadow-lg border border-slate-200/50 py-3 px-6"
                 )}
+                onMouseLeave={() => setActiveDropdown(null)}
             >
                 <nav className="flex items-center justify-between">
                     {/* Logo */}
@@ -50,44 +101,66 @@ const Navbar = () => {
                         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-serif font-bold text-xl">
                             F
                         </div>
-                        <span className={cn(
-                            "font-serif font-bold text-lg tracking-wide hidden sm:block",
-                            scrolled ? "text-primary" : "text-primary"
-                        )}>
+                        <span className="font-serif font-bold text-lg tracking-wide hidden sm:block text-primary">
                             The First Step
                         </span>
                     </a>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-8">
+                    <div className="hidden md:flex items-center gap-6">
                         {navLinks.map((link) => (
-                            <a
+                            <div
                                 key={link.name}
-                                href={link.href}
-                                className={cn(
-                                    "text-sm font-medium transition-colors hover:text-primary/80",
-                                    scrolled ? "text-slate-700" : "text-primary"
-                                )}
+                                className="relative"
+                                onMouseEnter={() => link.children && setActiveDropdown(link.name)}
                             >
-                                {link.name}
-                            </a>
+                                <a
+                                    href={link.href}
+                                    className="text-sm font-medium text-slate-700 hover:text-primary transition-colors flex items-center gap-1"
+                                >
+                                    {link.name}
+                                    {link.children && (
+                                        <ChevronDown className={cn(
+                                            "w-3.5 h-3.5 transition-transform",
+                                            activeDropdown === link.name && "rotate-180"
+                                        )} />
+                                    )}
+                                </a>
+
+                                {/* Dropdown */}
+                                <AnimatePresence>
+                                    {link.children && activeDropdown === link.name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute top-full left-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 overflow-hidden"
+                                        >
+                                            {link.children.map((child) => (
+                                                <a
+                                                    key={child.name}
+                                                    href={child.href}
+                                                    className="block px-4 py-2 text-sm text-slate-600 hover:bg-primary/5 hover:text-primary transition-colors"
+                                                >
+                                                    {child.name}
+                                                </a>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         ))}
                     </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-4">
-                        <button className={cn(
-                            "relative p-2 rounded-full transition-colors hover:bg-primary/10",
-                            scrolled ? "text-slate-700 hover:bg-slate-100" : "text-primary"
-                        )}>
+                        <button className="relative p-2 rounded-full text-slate-700 hover:bg-slate-100 transition-colors">
                             <Bell className="w-5 h-5" />
                             <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                         </button>
                         <button
-                            className={cn(
-                                "md:hidden p-2 rounded-full transition-colors",
-                                scrolled ? "text-slate-700 hover:bg-slate-100" : "text-primary hover:bg-primary/10"
-                            )}
+                            className="md:hidden p-2 rounded-full text-slate-700 hover:bg-slate-100 transition-colors"
                             onClick={() => setMobileMenuOpen(true)}
                         >
                             <Menu className="w-6 h-6" />
@@ -110,10 +183,10 @@ const Navbar = () => {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="absolute right-0 top-0 h-full w-[80%] max-w-sm bg-white p-6 shadow-2xl"
+                        className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white p-6 shadow-2xl overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center justify-between mb-6">
                             <span className="font-serif font-bold text-xl text-primary">Menu</span>
                             <button
                                 onClick={() => setMobileMenuOpen(false)}
@@ -122,21 +195,39 @@ const Navbar = () => {
                                 <X className="w-6 h-6" />
                             </button>
                         </div>
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-1">
                             {navLinks.map((link) => (
-                                <a
-                                    key={link.name}
-                                    href={link.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="text-lg font-medium text-slate-700 hover:text-primary transition-colors border-b border-slate-100 pb-2"
-                                >
-                                    {link.name}
-                                </a>
+                                <div key={link.name}>
+                                    <a
+                                        href={link.href}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block py-3 text-lg font-medium text-slate-800 hover:text-primary transition-colors border-b border-slate-100"
+                                    >
+                                        {link.name}
+                                    </a>
+                                    {link.children && (
+                                        <div className="pl-4 py-2 space-y-1 bg-slate-50 rounded-lg mb-2">
+                                            {link.children.map((child) => (
+                                                <a
+                                                    key={child.name}
+                                                    href={child.href}
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                    className="block py-2 text-sm text-slate-600 hover:text-primary transition-colors"
+                                                >
+                                                    {child.name}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ))}
-                            <div className="mt-4 p-4 bg-slate-50 rounded-lg">
-                                <h4 className="font-semibold text-primary mb-2">Latest Updates</h4>
-                                <p className="text-sm text-slate-600">Admissions for 2026-27 are now open! Apply online.</p>
-                            </div>
+                        </div>
+                        <div className="mt-6 p-4 bg-primary/5 rounded-xl">
+                            <h4 className="font-semibold text-primary mb-2">Admissions Open</h4>
+                            <p className="text-sm text-slate-600">Admissions for 2026-27 are now open!</p>
+                            <a href="/admissions" className="inline-block mt-2 text-sm font-medium text-primary hover:underline">
+                                Apply Now →
+                            </a>
                         </div>
                     </motion.div>
                 </motion.div>

@@ -1,0 +1,214 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Admissions", href: "/admissions" }
+];
+
+const admissionSteps = [
+  {
+    step: 1,
+    title: "Enquiry & Registration",
+    description: "Fill out the admission enquiry form online or visit the school office for registration."
+  },
+  {
+    step: 2,
+    title: "Document Submission",
+    description: "Submit required documents including birth certificate, previous school records, and photographs."
+  },
+  {
+    step: 3,
+    title: "Interaction/Assessment",
+    description: "Schedule an interaction session for the child and parents with the admission committee."
+  },
+  {
+    step: 4,
+    title: "Admission Confirmation",
+    description: "Upon successful assessment, confirm admission by paying the fee and completing formalities."
+  }
+];
+---
+
+<InnerPageLayout 
+  title="Admissions | The First Step International School"
+  description="Learn about the admission process at The First Step International School. Apply for Pre-Primary to Senior Secondary classes."
+  pageTitle="Admissions"
+  pageSubtitle="Join The First Step family - Where futures begin"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Admission Open Banner -->
+  <section class="mb-12">
+    <div class="bg-gradient-to-r from-secondary to-secondary-light rounded-3xl p-8 md:p-12 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative text-center md:text-left md:flex items-center justify-between gap-8">
+        <div>
+          <span class="inline-block bg-white/20 text-slate-900 text-sm font-medium px-4 py-1 rounded-full mb-4">
+            Admissions Open 2026-27
+          </span>
+          <h2 class="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-2">
+            Enroll Your Child Today!
+          </h2>
+          <p class="text-slate-700">Pre-Primary to Senior Secondary (Nursery - Class XII)</p>
+        </div>
+        <a 
+          href="#enquiry-form" 
+          class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-full font-medium transition-colors mt-6 md:mt-0"
+        >
+          Apply Now
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admission Process -->
+  <section class="mb-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-serif font-bold text-slate-900 mb-4">Admission Process</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        Follow these simple steps to enroll your child at The First Step International School
+      </p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {admissionSteps.map((item, index) => (
+        <div class="relative">
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg transition-shadow h-full">
+            <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-light rounded-full flex items-center justify-center text-white font-bold text-lg mb-4">
+              {item.step}
+            </div>
+            <h3 class="font-semibold text-slate-900 mb-2">{item.title}</h3>
+            <p class="text-sm text-slate-600">{item.description}</p>
+          </div>
+          {index < admissionSteps.length - 1 && (
+            <div class="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-primary/30"></div>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="mb-16">
+    <div class="grid md:grid-cols-2 gap-6">
+      <a href="/admissions/procedure" class="group bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+          <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900 group-hover:text-primary transition-colors mb-2">Admission Procedure</h3>
+        <p class="text-slate-600">Detailed step-by-step guide with required documents and eligibility criteria</p>
+      </a>
+      
+      <a href="/admissions/fee-structure" class="group bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+        <div class="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
+          <svg class="w-7 h-7 text-secondary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900 group-hover:text-primary transition-colors mb-2">Fee Structure</h3>
+        <p class="text-slate-600">Complete fee details for all classes with payment schedules and policies</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Enquiry Form -->
+  <section id="enquiry-form" class="scroll-mt-32">
+    <div class="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-white">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-serif font-bold text-center mb-8">Admission Enquiry</h2>
+        <form class="space-y-6">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="student-name" class="block text-sm font-medium text-white/80 mb-2">Student's Name *</label>
+              <input 
+                type="text" 
+                id="student-name" 
+                name="student-name" 
+                required
+                class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition-all"
+                placeholder="Student's full name"
+              />
+            </div>
+            <div>
+              <label for="parent-name" class="block text-sm font-medium text-white/80 mb-2">Parent's Name *</label>
+              <input 
+                type="text" 
+                id="parent-name" 
+                name="parent-name" 
+                required
+                class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition-all"
+                placeholder="Parent's full name"
+              />
+            </div>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="class-applying" class="block text-sm font-medium text-white/80 mb-2">Class Applying For *</label>
+              <select 
+                id="class-applying" 
+                name="class-applying" 
+                required
+                class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition-all"
+              >
+                <option value="" class="text-slate-900">Select Class</option>
+                <option value="nursery" class="text-slate-900">Nursery</option>
+                <option value="lkg" class="text-slate-900">LKG</option>
+                <option value="ukg" class="text-slate-900">UKG</option>
+                <option value="1" class="text-slate-900">Class I</option>
+                <option value="2" class="text-slate-900">Class II</option>
+                <option value="3" class="text-slate-900">Class III</option>
+                <option value="4" class="text-slate-900">Class IV</option>
+                <option value="5" class="text-slate-900">Class V</option>
+                <option value="6" class="text-slate-900">Class VI</option>
+                <option value="7" class="text-slate-900">Class VII</option>
+                <option value="8" class="text-slate-900">Class VIII</option>
+                <option value="9" class="text-slate-900">Class IX</option>
+                <option value="10" class="text-slate-900">Class X</option>
+                <option value="11" class="text-slate-900">Class XI</option>
+                <option value="12" class="text-slate-900">Class XII</option>
+              </select>
+            </div>
+            <div>
+              <label for="phone-enquiry" class="block text-sm font-medium text-white/80 mb-2">Phone Number *</label>
+              <input 
+                type="tel" 
+                id="phone-enquiry" 
+                name="phone-enquiry" 
+                required
+                class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition-all"
+                placeholder="+91 98765 43210"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label for="email-enquiry" class="block text-sm font-medium text-white/80 mb-2">Email Address *</label>
+            <input 
+              type="email" 
+              id="email-enquiry" 
+              name="email-enquiry" 
+              required
+              class="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 focus:border-white focus:ring-2 focus:ring-white/20 outline-none transition-all"
+              placeholder="your.email@example.com"
+            />
+          </div>
+          
+          <button 
+            type="submit"
+            class="w-full bg-secondary hover:bg-secondary-dark text-slate-900 font-semibold py-4 px-6 rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
+            Submit Enquiry
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</InnerPageLayout>

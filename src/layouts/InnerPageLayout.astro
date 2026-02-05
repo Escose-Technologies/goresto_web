@@ -1,0 +1,50 @@
+---
+import Layout from './Layout.astro';
+import { TopBar } from '../components/top-bar.jsx';
+import Navbar from '../components/ui/navbar.jsx';
+import { PageHeader } from '../components/page-header.jsx';
+import { Breadcrumbs } from '../components/breadcrumbs.jsx';
+import { Footer } from '../components/footer.jsx';
+
+interface Props {
+  title: string;
+  description?: string;
+  pageTitle: string;
+  pageSubtitle?: string;
+  breadcrumbs: Array<{ name: string; href: string }>;
+}
+
+const { title, description, pageTitle, pageSubtitle, breadcrumbs } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <main class="min-h-screen bg-slate-50">
+    <!-- Top Info Bar -->
+    <TopBar />
+    
+    <!-- Navbar -->
+    <Navbar client:load />
+    
+    <!-- Page Header with breadcrumbs -->
+    <PageHeader 
+      title={pageTitle} 
+      subtitle={pageSubtitle}
+      client:load 
+    />
+    
+    <!-- Breadcrumbs -->
+    <div class="bg-white border-b border-slate-100">
+      <div class="container mx-auto px-6 max-w-6xl">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+    </div>
+    
+    <!-- Page Content -->
+    <div class="container mx-auto px-6 py-12 max-w-6xl">
+      <slot />
+    </div>
+    
+    <!-- Footer -->
+    <Footer client:load />
+  </main>
+</Layout>

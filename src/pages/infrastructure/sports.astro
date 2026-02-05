@@ -1,0 +1,189 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Infrastructure", href: "/infrastructure" },
+  { name: "Sports", href: "/infrastructure/sports" }
+];
+
+const outdoorFacilities = [
+  { name: "Football Ground", icon: "⚽" },
+  { name: "Cricket Pitch", icon: "🏏" },
+  { name: "Basketball Court", icon: "🏀" },
+  { name: "Volleyball Court", icon: "🏐" },
+  { name: "Athletics Track", icon: "🏃" },
+  { name: "Kabaddi Ground", icon: "🤼" }
+];
+
+const indoorFacilities = [
+  { name: "Table Tennis", icon: "🏓" },
+  { name: "Badminton Court", icon: "🏸" },
+  { name: "Chess Club", icon: "♟️" },
+  { name: "Carrom", icon: "🎯" },
+  { name: "Yoga Hall", icon: "🧘" },
+  { name: "Indoor Games", icon: "🎲" }
+];
+
+const sports = [
+  "Annual Sports Day", 
+  "Inter-House Competitions",
+  "District Level Participation",
+  "Professional Coaching",
+  "Morning PT Sessions",
+  "Sports Scholarships"
+];
+---
+
+<InnerPageLayout 
+  title="Sports Facilities | The First Step International School"
+  description="State-of-the-art sports facilities including playgrounds, courts, and indoor games for physical development and competitive sports."
+  pageTitle="Sports Facilities"
+  pageSubtitle="Building champions through sports"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">A Healthy Mind in a Healthy Body</h2>
+          <p class="text-white/90 leading-relaxed">
+            We believe that sports and physical education are essential for overall development. Our extensive sports facilities provide students opportunities to excel in various sports and develop teamwork, discipline, and leadership skills.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-8xl">🏆</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Outdoor Sports -->
+  <section class="mb-12">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Outdoor Facilities</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {outdoorFacilities.map((facility) => (
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 text-center hover:shadow-md transition-shadow">
+          <div class="text-4xl mb-3">{facility.icon}</div>
+          <p class="font-medium text-slate-900 text-sm">{facility.name}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Indoor Sports -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Indoor Facilities</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {indoorFacilities.map((facility) => (
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 text-center hover:shadow-md transition-shadow">
+          <div class="text-4xl mb-3">{facility.icon}</div>
+          <p class="font-medium text-slate-900 text-sm">{facility.name}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Sports Programs -->
+  <section class="mb-16">
+    <div class="bg-green-50 rounded-3xl p-8 md:p-12">
+      <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">Sports Programs</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sports.map((sport) => (
+          <div class="flex items-center gap-3 bg-white p-4 rounded-xl">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-slate-700">{sport}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Physical Education -->
+  <section class="mb-16">
+    <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100">
+      <h3 class="text-xl font-semibold text-slate-900 mb-4">Physical Education Program</h3>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <p class="text-slate-600 mb-4">
+            Our comprehensive physical education program ensures that every student gets regular physical activity through:
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Daily morning assembly with exercise
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Regular PT periods for all classes
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              After-school sports activities
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Professional sports coaching
+            </li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-slate-600 mb-4">
+            Students can specialize in their sport of choice with dedicated training:
+          </p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Cricket coaching by certified coaches
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Football training sessions
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Basketball skill development
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              Athletics and track events
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/infrastructure/library" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Library</p>
+          </div>
+        </div>
+      </a>
+      <a href="/activities" class="flex-1 bg-green-500 hover:bg-green-600 rounded-xl p-6 shadow-sm transition-colors text-white text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-white/70">Explore</p>
+            <p class="font-medium">Activities & Events</p>
+          </div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

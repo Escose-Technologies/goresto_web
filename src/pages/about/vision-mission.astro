@@ -1,0 +1,115 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "About Us", href: "/about" },
+  { name: "Vision & Mission", href: "/about/vision-mission" }
+];
+---
+
+<InnerPageLayout 
+  title="Vision & Mission | The First Step International School"
+  description="Our vision is to nurture students to become responsible citizens of the world through quality education and holistic development."
+  pageTitle="Vision & Mission"
+  pageSubtitle="Guiding principles that shape our educational philosophy"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Vision Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+      
+      <div class="relative">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold">Our Vision</h2>
+        </div>
+        
+        <p class="text-lg text-white/90 leading-relaxed mb-8 max-w-3xl">
+          To provide a learning environment for our students to develop as responsible global citizens, equipped with knowledge, skills, and values to thrive in an ever-changing world.
+        </p>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Academic Excellence</h4>
+            <p class="text-sm text-white/80">Developing academically competent individuals</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Character Building</h4>
+            <p class="text-sm text-white/80">Nurturing individuals with exemplary behavior</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Creative Thinking</h4>
+            <p class="text-sm text-white/80">Fostering inquisitive and creative minds</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Emotional Intelligence</h4>
+            <p class="text-sm text-white/80">Building emotionally resilient individuals</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Social Responsibility</h4>
+            <p class="text-sm text-white/80">Creating socially responsible citizens</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+            <h4 class="font-semibold mb-2">Lifelong Learning</h4>
+            <p class="text-sm text-white/80">Inspiring continuous growth and learning</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-secondary to-secondary-dark rounded-3xl p-8 md:p-12 text-slate-900 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 bg-white/30 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold">Our Mission</h2>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-white/40 backdrop-blur-sm rounded-2xl p-6">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-secondary-dark mb-4">1</div>
+            <h3 class="text-xl font-semibold mb-3">Quality Education</h3>
+            <p class="text-slate-700 leading-relaxed">
+              Providing quality education and enabling students to learn and enjoy the learning process. We believe that education should be engaging, meaningful, and transformative.
+            </p>
+          </div>
+          <div class="bg-white/40 backdrop-blur-sm rounded-2xl p-6">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl font-bold text-secondary-dark mb-4">2</div>
+            <h3 class="text-xl font-semibold mb-3">Holistic Development</h3>
+            <p class="text-slate-700 leading-relaxed">
+              Aiming at an all-round development of each and every student. We nurture not just academic excellence but also physical fitness, emotional well-being, and social skills.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote Section -->
+  <section class="mb-16">
+    <div class="bg-slate-50 rounded-3xl p-8 md:p-12 text-center">
+      <svg class="w-12 h-12 text-primary/30 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+      </svg>
+      <blockquote class="text-xl md:text-2xl font-serif italic text-slate-700 leading-relaxed max-w-3xl mx-auto mb-6">
+        We inspire the children to dream and develop in them an inquisitive mind to make those dreams come true. We help them to develop a scientific mind, an athletic body and a pilgrim's soul by providing a suitable environment.
+      </blockquote>
+      <p class="text-primary font-semibold">— The First Step Philosophy</p>
+    </div>
+  </section>
+</InnerPageLayout>

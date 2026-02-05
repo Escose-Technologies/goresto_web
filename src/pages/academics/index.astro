@@ -1,0 +1,169 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Academics", href: "/academics" }
+];
+
+const programs = [
+  {
+    level: "Pre-Primary",
+    classes: "Nursery, LKG, UKG",
+    tagline: "Where Learning Begins",
+    description: "An inspiring and ultra-modern pre-school for toddlers providing education in a joyous, receptive, and supportive environment.",
+    icon: "sparkles",
+    color: "from-pink-500 to-rose-500",
+    href: "/academics/pre-primary"
+  },
+  {
+    level: "Primary",
+    classes: "Classes I - V",
+    tagline: "Learning Initiation",
+    description: "A trans-disciplinary educational program focusing on all developmental areas through activities, projects, and worksheets.",
+    icon: "book",
+    color: "from-blue-500 to-cyan-500",
+    href: "/academics/primary"
+  },
+  {
+    level: "Middle School",
+    classes: "Classes VI - VIII",
+    tagline: "Developing Reasoning Skills",
+    description: "Focus on developing thinking and reasoning skills with balance between basics, skills, and knowledge.",
+    icon: "brain",
+    color: "from-purple-500 to-violet-500",
+    href: "/academics/middle-school"
+  },
+  {
+    level: "Secondary",
+    classes: "Classes IX - X",
+    tagline: "Building Strong Foundations",
+    description: "Designed to inculcate self-learning skills and prepare students for solid careers through theory and practical integration.",
+    icon: "target",
+    color: "from-amber-500 to-orange-500",
+    href: "/academics/secondary"
+  },
+  {
+    level: "Senior Secondary",
+    classes: "Classes XI - XII",
+    tagline: "Embarking on a Lifelong Task",
+    description: "Devoted to independent thought, ethical action, and specialization with streams in Science and Commerce.",
+    icon: "rocket",
+    color: "from-emerald-500 to-teal-500",
+    href: "/academics/senior-secondary"
+  }
+];
+
+const academicHighlights = [
+  { title: "CBSE Curriculum", description: "Following the latest NCERT curriculum as prescribed by CBSE" },
+  { title: "Smart Classes", description: "Digital learning with interactive smart boards in every classroom" },
+  { title: "Activity-Based Learning", description: "Focus on experiential learning through projects and activities" },
+  { title: "CCE Pattern", description: "Continuous and Comprehensive Evaluation for holistic assessment" },
+  { title: "Language Skills", description: "English, Hindi, and third language for linguistic development" },
+  { title: "Updated Pedagogy", description: "Modern teaching methods aligned with NEP 2020 guidelines" }
+];
+---
+
+<InnerPageLayout 
+  title="Academics | The First Step International School"
+  description="Explore our academic programs from Pre-Primary to Senior Secondary. We offer a comprehensive CBSE curriculum focused on holistic development."
+  pageTitle="Academics"
+  pageSubtitle="Excellence in education at every level"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Academic Programs -->
+  <section class="mb-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-serif font-bold text-slate-900 mb-4">Academic Programs</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        A progressive curriculum designed to nurture young minds from their first step to the threshold of higher education
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      {programs.map((program, index) => (
+        <a href={program.href} class="group block bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div class={`w-16 h-16 rounded-2xl bg-gradient-to-br ${program.color} flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform`}>
+              <span class="text-2xl font-bold">{index + 1}</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
+                <h3 class="text-xl font-semibold text-slate-900 group-hover:text-primary transition-colors">
+                  {program.level}
+                </h3>
+                <span class="text-sm text-slate-500">({program.classes})</span>
+              </div>
+              <p class="text-primary text-sm font-medium mb-2">{program.tagline}</p>
+              <p class="text-slate-600 text-sm">{program.description}</p>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="text-sm font-medium">Learn More</span>
+              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Academic Highlights -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative">
+        <h2 class="text-2xl md:text-3xl font-serif font-bold mb-8 text-center">Academic Highlights</h2>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {academicHighlights.map((highlight) => (
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5">
+              <h4 class="font-semibold mb-2">{highlight.title}</h4>
+              <p class="text-sm text-white/80">{highlight.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CBSE Affiliation -->
+  <section class="mb-16">
+    <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+      <div class="flex flex-col md:flex-row gap-8 items-center">
+        <div class="w-24 h-24 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+          <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-slate-900 mb-2">CBSE Affiliated School</h3>
+          <p class="text-slate-600 mb-4">
+            We are proud to be affiliated with the Central Board of Secondary Education (CBSE), New Delhi. Our curriculum follows the NCERT pattern with focus on competency-based learning and holistic development.
+          </p>
+          <div class="flex flex-wrap gap-4 text-sm">
+            <span class="inline-flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full">
+              <span class="w-2 h-2 bg-primary rounded-full"></span>
+              Affiliation No: 1730604
+            </span>
+            <span class="inline-flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full">
+              <span class="w-2 h-2 bg-primary rounded-full"></span>
+              School Code: 10950
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="bg-secondary/10 rounded-3xl p-8 text-center">
+      <h3 class="text-xl font-semibold text-slate-900 mb-4">Want to know more about our curriculum?</h3>
+      <p class="text-slate-600 mb-6">Contact us for detailed syllabus and curriculum information</p>
+      <a href="/contact" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-full font-medium transition-colors">
+        Contact Us
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

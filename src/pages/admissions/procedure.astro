@@ -1,0 +1,143 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Admissions", href: "/admissions" },
+  { name: "Admission Procedure", href: "/admissions/procedure" }
+];
+
+const requiredDocuments = [
+  "Birth Certificate (Original & Photocopy)",
+  "Transfer Certificate (for Class II and above)",
+  "Report Card of Previous Class",
+  "Passport Size Photographs (6 copies)",
+  "Aadhar Card of Student (Photocopy)",
+  "Aadhar Card of Parents (Photocopy)",
+  "Address Proof (Electricity Bill/Ration Card)",
+  "Caste Certificate (if applicable)"
+];
+
+const eligibility = [
+  { class: "Nursery", age: "3+ years as on 31st March" },
+  { class: "LKG", age: "4+ years as on 31st March" },
+  { class: "UKG", age: "5+ years as on 31st March" },
+  { class: "Class I", age: "6+ years as on 31st March" },
+  { class: "Class II onwards", age: "As per CBSE norms" }
+];
+---
+
+<InnerPageLayout 
+  title="Admission Procedure | The First Step International School"
+  description="Detailed admission procedure including eligibility criteria, required documents, and step-by-step process."
+  pageTitle="Admission Procedure"
+  pageSubtitle="Step-by-step guide to join our school"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Procedure Steps -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-8">Admission Procedure</h2>
+    
+    <div class="space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex gap-6">
+        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">1</div>
+        <div>
+          <h3 class="font-semibold text-slate-900 mb-2">Registration & Enquiry</h3>
+          <p class="text-slate-600">Visit the school or fill the online enquiry form. Collect the registration form from the admission office.</p>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex gap-6">
+        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">2</div>
+        <div>
+          <h3 class="font-semibold text-slate-900 mb-2">Form Submission</h3>
+          <p class="text-slate-600">Submit the duly filled registration form along with required documents and registration fee.</p>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex gap-6">
+        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">3</div>
+        <div>
+          <h3 class="font-semibold text-slate-900 mb-2">Interaction Session</h3>
+          <p class="text-slate-600">An interaction/assessment session will be scheduled for the child and parents with the admission committee.</p>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex gap-6">
+        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">4</div>
+        <div>
+          <h3 class="font-semibold text-slate-900 mb-2">Admission Confirmation</h3>
+          <p class="text-slate-600">Upon successful assessment, admission is confirmed upon payment of admission fee and other charges.</p>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex gap-6">
+        <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-slate-900 font-bold flex-shrink-0">5</div>
+        <div>
+          <h3 class="font-semibold text-slate-900 mb-2">Welcome to The First Step!</h3>
+          <p class="text-slate-600">Complete formalities, collect uniform and books, and begin the educational journey with us.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Required Documents & Eligibility -->
+  <div class="grid md:grid-cols-2 gap-8 mb-16">
+    <!-- Documents -->
+    <section class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-slate-900">Required Documents</h2>
+      </div>
+      <ul class="space-y-3">
+        {requiredDocuments.map((doc) => (
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-slate-600">{doc}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Eligibility -->
+    <section class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-secondary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-slate-900">Age Eligibility</h2>
+      </div>
+      <div class="space-y-4">
+        {eligibility.map((item) => (
+          <div class="flex justify-between items-center py-3 border-b border-slate-100 last:border-0">
+            <span class="font-medium text-slate-900">{item.class}</span>
+            <span class="text-slate-600 text-sm">{item.age}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <!-- CTA -->
+  <section>
+    <div class="bg-slate-50 rounded-3xl p-8 text-center">
+      <h3 class="text-xl font-semibold text-slate-900 mb-4">Ready to Apply?</h3>
+      <p class="text-slate-600 mb-6">Start your child's journey at The First Step International School today.</p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/admissions#enquiry-form" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-full font-medium transition-colors">
+          Apply Online
+        </a>
+        <a href="/admissions/fee-structure" class="inline-flex items-center gap-2 bg-white hover:bg-slate-100 text-slate-700 px-6 py-3 rounded-full font-medium border border-slate-200 transition-colors">
+          View Fee Structure
+        </a>
+      </div>
+    </div>
+  </section>
+</InnerPageLayout>

@@ -1,0 +1,160 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+
+const breadcrumbs = [
+  { name: "Academics", href: "/academics" },
+  { name: "Primary School", href: "/academics/primary" }
+];
+
+const subjects = [
+  { name: "English", icon: "📚" },
+  { name: "Mathematics", icon: "🔢" },
+  { name: "Environmental Science", icon: "🌍" },
+  { name: "Hindi", icon: "📝" },
+  { name: "General Knowledge", icon: "💡" },
+  { name: "Computer Science", icon: "💻" },
+  { name: "Art & Craft", icon: "🎨" },
+  { name: "Music", icon: "🎵" },
+  { name: "Physical Education", icon: "⚽" }
+];
+
+const features = [
+  {
+    title: "Trans-disciplinary Program",
+    description: "A curriculum planned as an extension of pre-primary, focusing on all developmental areas"
+  },
+  {
+    title: "Activity-Based Learning",
+    description: "Learning through activities, projects, and work-sheets for better understanding"
+  },
+  {
+    title: "Safe Environment",
+    description: "A safe and stimulating environment for young learners to explore and grow"
+  },
+  {
+    title: "Foundation Building",
+    description: "Prepares students for future academic challenges with strong fundamentals"
+  }
+];
+---
+
+<InnerPageLayout 
+  title="Primary Education | The First Step International School"
+  description="Primary education for Classes I-V with trans-disciplinary curriculum focusing on all developmental areas through activities and projects."
+  pageTitle="Primary Education"
+  pageSubtitle="Learning Initiation - Classes I to V"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <span class="inline-block bg-white/20 px-4 py-1 rounded-full text-sm font-medium mb-4">
+            Classes I - V
+          </span>
+          <h2 class="text-3xl md:text-4xl font-serif font-bold mb-4">Learning Initiation</h2>
+          <p class="text-white/90 leading-relaxed">
+            A trans-disciplinary educational program focusing on all developmental areas. The curriculum is planned as an extension of pre-primary, creating a seamless learning journey for our young scholars.
+          </p>
+        </div>
+        <div class="flex justify-center">
+          <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <span class="text-6xl">📖</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subjects Grid -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Subjects Offered</h2>
+    <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
+      {subjects.map((subject) => (
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 text-center hover:shadow-md transition-shadow">
+          <div class="text-3xl mb-2">{subject.icon}</div>
+          <p class="text-xs text-slate-600">{subject.name}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="mb-16">
+    <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6">Key Features</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      {features.map((feature, index) => (
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 flex gap-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold flex-shrink-0">
+            {index + 1}
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-900 mb-1">{feature.title}</h3>
+            <p class="text-sm text-slate-600">{feature.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Learning Approach -->
+  <section class="mb-16">
+    <div class="bg-slate-50 rounded-3xl p-8 md:p-12">
+      <h2 class="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">Our Learning Approach</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">🎯</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Activities</h3>
+          <p class="text-sm text-slate-600">Hands-on activities that make learning engaging and fun</p>
+        </div>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">📋</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Projects</h3>
+          <p class="text-sm text-slate-600">Project-based learning to develop research and presentation skills</p>
+        </div>
+        <div class="text-center">
+          <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">📝</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Worksheets</h3>
+          <p class="text-sm text-slate-600">Practice sheets for reinforcement and concept clarity</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section>
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="/academics/pre-primary" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          <div>
+            <p class="text-xs text-slate-500">Previous</p>
+            <p class="font-medium text-slate-900">Pre-Primary (Nursery-UKG)</p>
+          </div>
+        </div>
+      </a>
+      <a href="/academics/middle-school" class="flex-1 bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow group text-right">
+        <div class="flex items-center justify-end gap-3">
+          <div>
+            <p class="text-xs text-slate-500">Next</p>
+            <p class="font-medium text-slate-900">Middle School (VI-VIII)</p>
+          </div>
+          <svg class="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </div>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>

@@ -1,0 +1,159 @@
+---
+import InnerPageLayout from '../../layouts/InnerPageLayout.astro';
+import { motion } from 'framer-motion';
+
+const breadcrumbs = [
+  { name: "About Us", href: "/about" }
+];
+
+const values = [
+  { title: "Determination", description: "Fostering persistence and resilience in students" },
+  { title: "Authenticity", description: "Encouraging genuine self-expression and integrity" },
+  { title: "Honesty", description: "Building a foundation of trust and truthfulness" },
+  { title: "Integrity", description: "Upholding strong moral principles" },
+  { title: "Devotion", description: "Nurturing dedication to learning and growth" },
+  { title: "Humanism", description: "Promoting compassion and respect for all" }
+];
+---
+
+<InnerPageLayout 
+  title="About Us | The First Step International School"
+  description="Learn about The First Step International School - our vision, mission, values, and commitment to nurturing young minds."
+  pageTitle="About Us"
+  pageSubtitle="Nurturing young minds for a brighter future"
+  breadcrumbs={breadcrumbs}
+>
+  <!-- About Section -->
+  <section class="mb-16">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <h2 class="text-3xl font-serif font-bold text-slate-900 mb-6">About The First Step</h2>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          The First Step International School is an English Medium, Co-educational Senior Secondary School affiliated with the Central Board of Secondary Education (CBSE), New Delhi. We are committed to providing a student-friendly environment for the development of character and mind.
+        </p>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Our school functions on the vision of nurturing students to become responsible citizens of the world. Spread over a sprawling campus, we feature exceptionally well-designed infrastructure to support 360-degree development of every student.
+        </p>
+        <p class="text-slate-600 leading-relaxed">
+          We inspire children to dream and develop in them an inquisitive mind to make those dreams come true. We help them develop a scientific mind, an athletic body, and a pilgrim's soul by providing a suitable environment.
+        </p>
+      </div>
+      <div class="relative">
+        <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+          <div class="text-center p-8">
+            <div class="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white font-serif font-bold text-5xl mx-auto mb-4">
+              F
+            </div>
+            <p class="text-primary font-serif text-xl font-semibold">The First Step</p>
+            <p class="text-slate-500 text-sm">International School</p>
+          </div>
+        </div>
+        <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-secondary/20 rounded-full -z-10"></div>
+        <div class="absolute -top-4 -left-4 w-24 h-24 bg-primary/10 rounded-full -z-10"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision & Mission -->
+  <section class="mb-16">
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Vision -->
+      <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition-shadow">
+        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+          <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-serif font-bold text-slate-900 mb-4">Our Vision</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          To provide a learning environment for our students to develop as:
+        </p>
+        <ul class="space-y-2 text-slate-600">
+          <li class="flex items-start gap-2">
+            <span class="text-primary mt-1">•</span>
+            <span>Academically competent persons</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary mt-1">•</span>
+            <span>Individuals with exemplary behavior</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary mt-1">•</span>
+            <span>Inquisitive and creative thinkers</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary mt-1">•</span>
+            <span>Emotionally resilient and socially responsible individuals</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary mt-1">•</span>
+            <span>Lifelong learners</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Mission -->
+      <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition-shadow">
+        <div class="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center mb-6">
+          <svg class="w-7 h-7 text-secondary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-serif font-bold text-slate-900 mb-4">Our Mission</h3>
+        <p class="text-slate-600 leading-relaxed mb-4">
+          Our mission is centered on two core objectives:
+        </p>
+        <ul class="space-y-4 text-slate-600">
+          <li class="flex items-start gap-3">
+            <span class="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center text-secondary-dark font-semibold text-sm flex-shrink-0">1</span>
+            <span>Providing quality education and enabling students to learn and enjoy the learning process</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center text-secondary-dark font-semibold text-sm flex-shrink-0">2</span>
+            <span>Aiming at an all-round development of each and every student</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Values -->
+  <section class="mb-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-serif font-bold text-slate-900 mb-4">Our Core Values</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        These values are infused into every aspect of The First Step experience
+      </p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {values.map((value, index) => (
+        <div class="bg-white rounded-xl p-6 text-center shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all group">
+          <div class="w-12 h-12 bg-gradient-to-br from-primary to-primary-light rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 group-hover:scale-110 transition-transform">
+            {value.title.charAt(0)}
+          </div>
+          <h4 class="font-semibold text-slate-900 mb-2">{value.title}</h4>
+          <p class="text-xs text-slate-500">{value.description}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Quick Links to Sub-pages -->
+  <section>
+    <div class="grid md:grid-cols-3 gap-6">
+      <a href="/about/vision-mission" class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+        <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors mb-2">Vision & Mission</h3>
+        <p class="text-sm text-slate-500">Learn more about our goals and objectives</p>
+      </a>
+      <a href="/about/principal-message" class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+        <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors mb-2">Principal's Message</h3>
+        <p class="text-sm text-slate-500">A message from our school principal</p>
+      </a>
+      <a href="/about/salient-features" class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-primary/20 transition-all">
+        <h3 class="font-semibold text-slate-900 group-hover:text-primary transition-colors mb-2">Salient Features</h3>
+        <p class="text-sm text-slate-500">What makes us unique</p>
+      </a>
+    </div>
+  </section>
+</InnerPageLayout>
