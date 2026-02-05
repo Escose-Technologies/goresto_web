@@ -4,13 +4,13 @@ import { Phone, MapPin, Clock, ArrowRight } from "lucide-react";
 
 export const AdmissionsCTA = () => {
     return (
-        <section className="py-20 bg-slate-900 relative overflow-hidden" id="admissions">
+        <section className="py-14 sm:py-20 bg-slate-900 relative overflow-hidden" id="admissions">
             {/* Subtle gradient accents */}
             <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-blue-900/30 to-transparent" />
             <div className="absolute bottom-0 right-0 w-1/3 h-1/2 bg-gradient-to-tl from-indigo-900/20 to-transparent" />
 
-            <div className="container mx-auto px-6 max-w-6xl relative z-10">
-                <div className="grid lg:grid-cols-5 gap-10 items-center">
+            <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
+                <div className="grid lg:grid-cols-5 gap-8 sm:gap-10 items-center">
                     {/* Left Content - Takes 3 columns */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -22,31 +22,29 @@ export const AdmissionsCTA = () => {
                             Admissions Open 2026-27
                         </span>
 
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-6 leading-tight">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight">
                             Ready to Begin <br />
                             <span className="text-blue-400">The First Step?</span>
                         </h2>
 
-                        <p className="text-lg text-slate-300 mb-8 max-w-xl">
+                        <p className="text-base sm:text-lg text-slate-300 mb-6 sm:mb-8 max-w-xl">
                             Join our community of learners. Admissions are now open for the 2026-27 academic session.
                             Schedule a campus tour and see the difference for yourself.
                         </p>
 
                         {/* Stats Row */}
-                        <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
+                        <div className="grid grid-cols-3 gap-4 sm:gap-6">
                             <div className="text-center lg:text-left">
-                                <p className="text-4xl font-bold text-white">98%</p>
-                                <p className="text-sm text-slate-400">Parent Satisfaction</p>
+                                <p className="text-2xl sm:text-4xl font-bold text-white">98%</p>
+                                <p className="text-xs sm:text-sm text-slate-400">Parent Satisfaction</p>
                             </div>
-                            <div className="w-px bg-slate-700 hidden sm:block" />
-                            <div className="text-center lg:text-left">
-                                <p className="text-4xl font-bold text-white">100%</p>
-                                <p className="text-sm text-slate-400">University Placement</p>
+                            <div className="text-center lg:text-left border-x border-slate-700">
+                                <p className="text-2xl sm:text-4xl font-bold text-white">100%</p>
+                                <p className="text-xs sm:text-sm text-slate-400">University Placement</p>
                             </div>
-                            <div className="w-px bg-slate-700 hidden sm:block" />
                             <div className="text-center lg:text-left">
-                                <p className="text-4xl font-bold text-blue-400">25+</p>
-                                <p className="text-sm text-slate-400">Years of Excellence</p>
+                                <p className="text-2xl sm:text-4xl font-bold text-blue-400">25+</p>
+                                <p className="text-xs sm:text-sm text-slate-400">Years of Excellence</p>
                             </div>
                         </div>
                     </motion.div>
@@ -59,7 +57,7 @@ export const AdmissionsCTA = () => {
                         transition={{ delay: 0.2 }}
                         className="lg:col-span-2"
                     >
-                        <div className="bg-white rounded-2xl p-8 shadow-2xl">
+                        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-2xl">
                             <h3 className="text-2xl font-bold text-slate-900 mb-6">Contact Us</h3>
 
                             {/* Contact Items */}

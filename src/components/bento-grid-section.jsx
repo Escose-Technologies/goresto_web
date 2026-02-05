@@ -63,7 +63,7 @@ const FeatureCard = ({ feature, index }) => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-primary/20"
+            className="group relative bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-primary/20"
         >
             {/* Icon */}
             <div className={`w-14 h-14 rounded-xl ${feature.lightColor} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
@@ -86,14 +86,14 @@ const FeatureCard = ({ feature, index }) => {
 
 export function BentoGridSection() {
     return (
-        <section className="py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden" id="why-choose">
+        <section className="py-14 sm:py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden" id="why-choose">
             {/* Background Decorations */}
             <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
             <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
 
-            <div className="container mx-auto px-6 max-w-6xl relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
                 {/* Section Header */}
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 sm:mb-16">
                     <motion.span
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -105,7 +105,7 @@ export function BentoGridSection() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-5"
+                        className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4 sm:mb-5"
                     >
                         The First Step <span className="text-primary">Advantage</span>
                     </motion.h2>

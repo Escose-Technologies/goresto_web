@@ -60,7 +60,7 @@ const ProgramCard = ({ program, index }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-slate-100"
+            className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all border border-slate-100"
         >
             <div className={`w-16 h-16 ${program.lightColor} rounded-xl flex items-center justify-center mb-6`}>
                 <Icon className={`w-8 h-8 ${program.color.replace('bg-', 'text-')}`} />
@@ -76,14 +76,14 @@ const ProgramCard = ({ program, index }) => {
 
 export const AcademicSection = () => {
     return (
-        <section className="py-24 bg-white relative overflow-hidden" id="academics">
+        <section className="py-14 sm:py-24 bg-white relative overflow-hidden" id="academics">
             {/* Background Decorations */}
             <div className="absolute top-20 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
             <div className="absolute bottom-20 left-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
 
-            <div className="container mx-auto px-6 max-w-6xl relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10">
                 {/* Section Header */}
-                <div className="text-center mb-16">
+                <div className="text-center mb-10 sm:mb-16">
                     <motion.span
                         initial={{ opacity: 0, y: 10 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -97,7 +97,7 @@ export const AcademicSection = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-5"
+                        className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4 sm:mb-5"
                     >
                         Academic <span className="text-primary">Excellence</span>
                     </motion.h2>
@@ -114,7 +114,7 @@ export const AcademicSection = () => {
                 </div>
 
                 {/* Programs Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-16">
                     {programs.map((program, index) => (
                         <ProgramCard key={program.title} program={program} index={index} />
                     ))}
@@ -125,7 +125,7 @@ export const AcademicSection = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 md:p-12"
+                    className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-6 sm:p-8 md:p-12"
                 >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {features.map((feature, index) => {

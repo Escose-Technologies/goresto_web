@@ -12,7 +12,7 @@ const fadeIn = {
 export const HeroSection = () => {
     return (
         <AuroraBackground>
-            <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center min-h-screen">
+            <div className="relative z-10 flex flex-col items-center justify-center px-4 sm:px-6 text-center min-h-[85vh] sm:min-h-screen pt-20 sm:pt-0">
                 {/* Badge */}
                 <motion.div
                     {...fadeIn}
@@ -28,7 +28,7 @@ export const HeroSection = () => {
                 <motion.h1
                     {...fadeIn}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-slate-900 mb-6 leading-tight max-w-5xl"
+                    className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-slate-900 mb-4 sm:mb-6 leading-tight max-w-5xl"
                 >
                     Where <span className="text-primary">Future Leaders</span> Take Their First Step.
                 </motion.h1>
@@ -37,7 +37,7 @@ export const HeroSection = () => {
                 <motion.p
                     {...fadeIn}
                     transition={{ duration: 0.8, delay: 0.4 }}
-                    className="text-base md:text-lg text-slate-700 max-w-2xl mx-auto mb-12 leading-relaxed font-sans"
+                    className="text-sm sm:text-base md:text-lg text-slate-700 max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed font-sans"
                 >
                     Experience a world-class curriculum designed to nurture curiosity, innovation, and character in a safe, state-of-the-art campus.
                 </motion.p>
@@ -50,7 +50,7 @@ export const HeroSection = () => {
                 >
                     <a
                         href="/admissions"
-                        className="px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg group"
+                        className="px-6 py-3 sm:px-8 sm:py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg group text-sm sm:text-base"
                     >
                         Admission Open 2026
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

@@ -7,6 +7,7 @@ import { StatsSection } from '../components/stats-section.jsx';
 import { BentoGridSection } from '../components/bento-grid-section.jsx';
 import { AcademicSection } from '../components/academic-section.jsx';
 import { AdmissionsCTA } from '../components/admissions-cta.jsx';
+import { ImageScroller } from '../components/image-scroller.jsx';
 ---
 
 <Layout title="The First Step International School | Shaping Future Leaders">
@@ -19,7 +20,10 @@ import { AdmissionsCTA } from '../components/admissions-cta.jsx';
     
     <!-- Hero with Framer Motion animations - deferred loading -->
     <HeroSection client:idle />
-    
+
+    <!-- Image Scroller - Campus life carousel -->
+    <ImageScroller client:visible />
+
     <!-- Stats with counting animation - load when visible for better performance -->
     <StatsSection client:visible />
     
@@ -35,32 +39,32 @@ import { AdmissionsCTA } from '../components/admissions-cta.jsx';
     <!-- Footer - Antigravity Style -->
     <footer class="bg-white border-t border-slate-200">
       <!-- Top Section with Links -->
-      <div class="container mx-auto px-6 py-16 max-w-6xl">
-        <div class="flex flex-col md:flex-row justify-between gap-12">
+      <div class="container mx-auto px-4 sm:px-6 py-10 sm:py-16 max-w-6xl">
+        <div class="flex flex-col md:flex-row justify-between gap-8 sm:gap-12">
           <!-- Left: Tagline -->
           <div class="md:max-w-xs">
-            <p class="text-xl md:text-2xl font-serif italic text-slate-900 leading-relaxed">
+            <p class="text-lg sm:text-xl md:text-2xl font-serif italic text-slate-900 leading-relaxed">
               Nurturing young minds for a brighter future
             </p>
           </div>
-          
+
           <!-- Center & Right: Link Columns -->
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16 text-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-16 text-sm">
             <div class="flex flex-col gap-3">
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">About Us</a>
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Academics</a>
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Admissions</a>
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Campus Life</a>
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Gallery</a>
+              <a href="/about" class="text-slate-800 hover:text-primary transition-colors">About Us</a>
+              <a href="/academics" class="text-slate-800 hover:text-primary transition-colors">Academics</a>
+              <a href="/admissions" class="text-slate-800 hover:text-primary transition-colors">Admissions</a>
+              <a href="/activities" class="text-slate-800 hover:text-primary transition-colors">Campus Life</a>
+              <a href="/gallery" class="text-slate-800 hover:text-primary transition-colors">Gallery</a>
             </div>
             <div class="flex flex-col gap-3">
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Infrastructure</a>
+              <a href="/infrastructure" class="text-slate-800 hover:text-primary transition-colors">Infrastructure</a>
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Faculty</a>
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Results</a>
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Events</a>
-              <a href="#" class="text-slate-800 hover:text-primary transition-colors">Contact</a>
+              <a href="/contact" class="text-slate-800 hover:text-primary transition-colors">Contact</a>
             </div>
-            <div class="flex flex-col gap-3 col-span-2 md:col-span-1">
+            <div class="flex flex-col gap-3 col-span-2 sm:col-span-1">
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Parent Portal</a>
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Careers</a>
               <a href="#" class="text-slate-800 hover:text-primary transition-colors">Blog</a>
@@ -71,17 +75,17 @@ import { AdmissionsCTA } from '../components/admissions-cta.jsx';
       </div>
 
       <!-- Large Text Section -->
-      <div class="w-full px-4 pb-8 overflow-hidden">
-        <h2 class="text-[18vw] md:text-[16vw] lg:text-[14vw] font-bold text-primary leading-[0.85] tracking-tighter font-serif text-center whitespace-nowrap">
+      <div class="w-full px-4 pb-6 sm:pb-8 overflow-hidden">
+        <h2 class="text-[11vw] sm:text-[18vw] md:text-[16vw] lg:text-[14vw] font-bold text-primary leading-[0.85] tracking-tighter font-serif text-center whitespace-nowrap">
           The First Step
         </h2>
       </div>
 
       <!-- Bottom Bar -->
       <div class="border-t border-slate-200">
-        <div class="container mx-auto px-6 py-6 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-          <p>© 2026 The First Step International School. All Rights Reserved.</p>
-          <div class="flex gap-6">
+        <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-6xl flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500">
+          <p class="text-center sm:text-left">© 2026 The First Step International School. All Rights Reserved.</p>
+          <div class="flex gap-4 sm:gap-6">
             <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" class="hover:text-primary transition-colors">Terms of Use</a>
           </div>

@@ -90,8 +90,8 @@ const Navbar = () => {
                 animate={hidden ? "hidden" : "visible"}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 className={cn(
-                    "fixed top-14 inset-x-0 mx-auto w-[95%] max-w-5xl z-50 rounded-full transition-all duration-300",
-                    "bg-white/90 backdrop-blur-md shadow-lg border border-slate-200/50 py-3 px-6"
+                    "fixed top-4 lg:top-14 inset-x-0 mx-auto w-[92%] sm:w-[95%] max-w-5xl z-50 rounded-full transition-all duration-300",
+                    "bg-white/90 backdrop-blur-md shadow-lg border border-slate-200/50 py-2.5 px-4 sm:py-3 sm:px-6"
                 )}
                 onMouseLeave={() => setActiveDropdown(null)}
             >
