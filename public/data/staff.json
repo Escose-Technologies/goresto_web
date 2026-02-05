@@ -1,0 +1,22 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "staff": [
+      {
+        "id": "staff-1",
+        "name": "John Doe",
+        "email": "john.doe@restaurant.com",
+        "phone": "+1 (555) 123-4567",
+        "role": "Waiter",
+        "photo": "",
+        "hireDate": "2024-01-15",
+        "status": "active",
+        "address": "123 Main St, City",
+        "emergencyContact": "Jane Doe - +1 (555) 987-6543",
+        "notes": "Experienced waiter with 5 years in hospitality"
+      }
+    ]
+  }
+]
+
+

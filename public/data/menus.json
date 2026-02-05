@@ -9,7 +9,15 @@
         "description": "Fresh romaine lettuce with Caesar dressing, croutons, and parmesan cheese",
         "image": "",
         "category": "Salads",
-        "available": true
+        "available": true,
+        "dietary": {
+          "type": "veg",
+          "spiceLevel": 0,
+          "allergens": ["dairy", "gluten"],
+          "labels": []
+        },
+        "rating": 4.5,
+        "reviewCount": 12
       },
       {
         "id": "item-2",
@@ -18,7 +26,15 @@
         "description": "Tender grilled chicken breast served with seasonal vegetables",
         "image": "",
         "category": "Main Course",
-        "available": true
+        "available": true,
+        "dietary": {
+          "type": "non-veg",
+          "spiceLevel": 1,
+          "allergens": [],
+          "labels": ["popular"]
+        },
+        "rating": 4.8,
+        "reviewCount": 28
       },
       {
         "id": "item-3",
@@ -27,9 +43,84 @@
         "description": "Rich chocolate cake with vanilla ice cream",
         "image": "",
         "category": "Desserts",
-        "available": true
+        "available": true,
+        "dietary": {
+          "type": "egg",
+          "spiceLevel": 0,
+          "allergens": ["dairy", "gluten", "eggs"],
+          "labels": ["chef-special"]
+        },
+        "rating": 4.9,
+        "reviewCount": 45
+      },
+      {
+        "id": "item-4",
+        "name": "Spicy Paneer Tikka",
+        "price": 14.99,
+        "description": "Marinated cottage cheese cubes grilled to perfection with spices",
+        "image": "",
+        "category": "Appetizers",
+        "available": true,
+        "dietary": {
+          "type": "veg",
+          "spiceLevel": 2,
+          "allergens": ["dairy"],
+          "labels": ["spicy", "popular"]
+        },
+        "rating": 4.6,
+        "reviewCount": 32
+      },
+      {
+        "id": "item-5",
+        "name": "Seafood Pasta",
+        "price": 22.99,
+        "description": "Creamy pasta with shrimp, mussels, and fresh herbs",
+        "image": "",
+        "category": "Main Course",
+        "available": true,
+        "dietary": {
+          "type": "non-veg",
+          "spiceLevel": 1,
+          "allergens": ["dairy", "gluten", "shellfish"],
+          "labels": ["new"]
+        },
+        "rating": 4.4,
+        "reviewCount": 8
+      },
+      {
+        "id": "item-6",
+        "name": "Vegan Buddha Bowl",
+        "price": 16.99,
+        "description": "Quinoa, roasted vegetables, chickpeas, and tahini dressing",
+        "image": "",
+        "category": "Main Course",
+        "available": true,
+        "dietary": {
+          "type": "veg",
+          "spiceLevel": 0,
+          "allergens": ["sesame"],
+          "labels": ["vegan", "gluten-free", "organic"]
+        },
+        "rating": 4.7,
+        "reviewCount": 18
+      },
+      {
+        "id": "item-7",
+        "name": "Fiery Chicken Wings",
+        "price": 13.99,
+        "description": "Crispy chicken wings tossed in our signature hot sauce",
+        "image": "",
+        "category": "Appetizers",
+        "available": true,
+        "dietary": {
+          "type": "non-veg",
+          "spiceLevel": 3,
+          "allergens": [],
+          "labels": ["spicy"]
+        },
+        "rating": 4.5,
+        "reviewCount": 22
       }
     ]
   }
 ]
-

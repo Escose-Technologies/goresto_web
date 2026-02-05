@@ -1,0 +1,47 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "reviews": [
+      {
+        "id": "review-1",
+        "menuItemId": "item-2",
+        "customerName": "John D.",
+        "rating": 5,
+        "comment": "Best grilled chicken I've ever had! Perfectly seasoned and juicy.",
+        "createdAt": "2024-12-15T10:30:00Z"
+      },
+      {
+        "id": "review-2",
+        "menuItemId": "item-2",
+        "customerName": "Sarah M.",
+        "rating": 4,
+        "comment": "Really good, would order again. The vegetables were fresh.",
+        "createdAt": "2024-12-10T14:20:00Z"
+      },
+      {
+        "id": "review-3",
+        "menuItemId": "item-3",
+        "customerName": "Mike R.",
+        "rating": 5,
+        "comment": "The chocolate cake is to die for! Perfect sweetness and so moist.",
+        "createdAt": "2024-12-14T18:45:00Z"
+      },
+      {
+        "id": "review-4",
+        "menuItemId": "item-4",
+        "customerName": "Priya S.",
+        "rating": 5,
+        "comment": "Authentic taste! The spice level is perfect. Highly recommend!",
+        "createdAt": "2024-12-13T12:00:00Z"
+      },
+      {
+        "id": "review-5",
+        "menuItemId": "item-1",
+        "customerName": "Emily W.",
+        "rating": 4,
+        "comment": "Fresh and crispy. Good portion size too.",
+        "createdAt": "2024-12-12T16:30:00Z"
+      }
+    ]
+  }
+]

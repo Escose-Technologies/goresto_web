@@ -1,0 +1,416 @@
+/* RestaurantProfileForm.css - Mobile-First Design */
+
+.restaurant-profile-form {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant-profile-form h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 1.25rem;
+}
+
+/* Form Section Title */
+.form-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #7C3AED;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 0.375rem;
+}
+
+.social-icon {
+  font-size: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  min-height: 48px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #7C3AED;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Cover Image */
+.cover-image-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cover-preview-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #E5E7EB;
+}
+
+.cover-preview {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 150px;
+  border: 2px dashed #D1D5DB;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #F9FAFB;
+  color: #6B7280;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.cover-placeholder:hover {
+  border-color: #7C3AED;
+  background: #F3F4F6;
+}
+
+.cover-placeholder svg {
+  color: #9CA3AF;
+}
+
+.cover-placeholder p {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.remove-image-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.image-file-input {
+  display: none;
+}
+
+.image-upload-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(180deg, #9333EA 0%, #7C3AED 100%);
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.2s;
+  min-height: 44px;
+}
+
+.image-upload-btn:hover {
+  opacity: 0.9;
+}
+
+/* Logo Upload */
+.logo-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-preview-wrapper {
+  position: relative;
+}
+
+.logo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #E5E7EB;
+}
+
+.logo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px dashed #D1D5DB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F9FAFB;
+  color: #9CA3AF;
+}
+
+.remove-logo-btn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: white;
+  border: 2px solid white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.remove-logo-btn:hover {
+  background: #DC2626;
+}
+
+.logo-upload-btn {
+  padding: 0.5rem 1rem;
+  background: #F3F4F6;
+  color: #7C3AED;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-upload-btn:hover {
+  background: #E5E7EB;
+  border-color: #7C3AED;
+}
+
+/* Cuisine Chips */
+.cuisine-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cuisine-chip {
+  padding: 0.5rem 0.875rem;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 36px;
+}
+
+.cuisine-chip:hover {
+  border-color: #7C3AED;
+  color: #7C3AED;
+}
+
+.cuisine-chip.active {
+  background: linear-gradient(180deg, #9333EA 0%, #7C3AED 100%);
+  border-color: #7C3AED;
+  color: white;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.btn-primary {
+  padding: 0.875rem 1.5rem;
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+  min-height: 48px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  padding: 0.875rem 1.5rem;
+  background: #E5E7EB;
+  color: #1F2937;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  min-height: 48px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-secondary:hover {
+  background: #D1D5DB;
+}
+
+/* =================================
+   TABLET BREAKPOINT (640px+)
+   ================================= */
+
+@media (min-width: 640px) {
+  .restaurant-profile-form {
+    padding: 1.5rem;
+  }
+
+  .restaurant-profile-form h3 {
+    font-size: 1.375rem;
+  }
+
+  .form-row {
+    flex-direction: row;
+  }
+
+  .form-row .form-group {
+    flex: 1;
+  }
+
+  .cover-preview {
+    height: 180px;
+  }
+
+  .cover-placeholder {
+    height: 180px;
+  }
+
+  .logo-preview,
+  .logo-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .form-actions {
+    flex-direction: row;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary {
+    width: auto;
+    flex: 1;
+    max-width: 200px;
+  }
+}
+
+/* =================================
+   DESKTOP BREAKPOINT (768px+)
+   ================================= */
+
+@media (min-width: 768px) {
+  .restaurant-profile-form {
+    padding: 2rem;
+  }
+
+  .restaurant-profile-form h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-section-title {
+    font-size: 1rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .cover-preview {
+    height: 220px;
+  }
+
+  .cover-placeholder {
+    height: 220px;
+  }
+
+  .logo-preview,
+  .logo-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+
+  .cuisine-chip {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 40px;
+  }
+}

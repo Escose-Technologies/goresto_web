@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { theme } from '../styles/theme';
+import { Logo } from '../components/Logo';
 import './Login.css';
 
 export const Login = () => {
@@ -35,20 +36,10 @@ export const Login = () => {
   return (
     <div className="login-container">
       <div className="login-header">
-        <div className="logo-icon">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="8" fill={theme.colors.primary.main} />
-            <path
-              d="M12 15L20 10L28 15M12 15V25L20 30L28 25V15M12 15L20 20M28 15L20 20M20 20V30"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h1 className="brand-name">GoResto</h1>
-        <p className="brand-subtitle">Restaurant Management Platform</p>
+        <Link to="/" className="login-logo-link">
+          <Logo size="xlarge" />
+        </Link>
+        <p className="brand-subtitle">Smart Restaurant Management, Simplified</p>
       </div>
 
       <div className="login-card">
@@ -158,6 +149,13 @@ export const Login = () => {
             <span className="demo-cred">owner@restaurant.com / owner123</span>
           </p>
         </div>
+
+        <Link to="/" className="back-to-home">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M10 12L6 8L10 4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back to Home
+        </Link>
       </div>
     </div>
   );

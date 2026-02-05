@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Plate/Circle base -->
+  <circle cx="32" cy="32" r="28" fill="url(#plateGradient)"/>
+
+  <!-- Inner plate ring -->
+  <circle cx="32" cy="32" r="22" fill="none" stroke="white" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Fork - left -->
+  <g transform="translate(18, 16)">
+    <path d="M4 0V12M4 12V24M4 12H0M4 12H8M0 0V8C0 10.2 1.8 12 4 12C6.2 12 8 10.2 8 8V0" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Knife - right -->
+  <g transform="translate(38, 16)">
+    <path d="M4 0C4 0 8 4 8 10C8 14 6 16 4 16M4 0V24M4 16V24" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Digital dot -->
+  <circle cx="50" cy="14" r="6" fill="#10B981"/>
+  <circle cx="50" cy="14" r="3" fill="white"/>
+
+  <defs>
+    <linearGradient id="plateGradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9333EA"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>

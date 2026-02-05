@@ -85,6 +85,18 @@ export const MenuPreview = ({ restaurantId, restaurant }) => {
         <span>Preview Mode - This is how customers will see your menu</span>
       </div>
 
+      {/* Restaurant Banner Image */}
+      {restaurant?.coverImage && (
+        <div className="restaurant-banner">
+          <img src={restaurant.coverImage} alt={restaurant?.name} className="restaurant-banner-image" />
+          <div className="restaurant-banner-overlay">
+            {restaurant?.logo && (
+              <img src={restaurant.logo} alt={`${restaurant?.name} logo`} className="restaurant-logo" />
+            )}
+          </div>
+        </div>
+      )}
+
       <header className="public-menu-header">
         <div className="restaurant-info">
           <h1>{settings?.restaurantName || restaurant?.name || 'Restaurant Name'}</h1>

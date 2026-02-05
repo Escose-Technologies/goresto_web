@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { RestaurantAdminDashboard } from './pages/RestaurantAdminDashboard';
@@ -30,7 +31,7 @@ const AppRoutes = () => {
         }
       />
       <Route path="/menu/:restaurantId" element={<PublicMenu />} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
     </Routes>
   );
 };
@@ -46,4 +47,5 @@ function App() {
 }
 
 export default App;
+
 

@@ -1,0 +1,246 @@
+/* Search Bar Component */
+
+.search-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.search-bar-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  pointer-events: none;
+}
+
+.search-bar-input {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md);
+  padding-left: calc(var(--spacing-md) + 28px);
+  padding-right: calc(var(--spacing-md) + 36px);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-base);
+  color: var(--color-text-primary);
+  min-height: var(--touch-min);
+  transition: all var(--animation-fast);
+}
+
+.search-bar-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.search-bar-input::placeholder {
+  color: var(--color-text-light);
+}
+
+/* Remove default search input decorations */
+.search-bar-input::-webkit-search-cancel-button,
+.search-bar-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-bar-clear {
+  position: absolute;
+  right: var(--spacing-sm);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  transition: all var(--animation-fast);
+}
+
+.search-bar-clear:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.search-bar-filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  min-width: var(--touch-min);
+  height: var(--touch-min);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  position: relative;
+  transition: all var(--animation-fast);
+}
+
+.search-bar-filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.search-bar-filter-btn.has-filters {
+  border-color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.05);
+  color: var(--color-primary);
+}
+
+.filter-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Filter Pills */
+.filter-pills {
+  width: 100%;
+  overflow: hidden;
+}
+
+.filter-pills-scroll {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding: var(--spacing-sm) 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-pills-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: all var(--animation-fast);
+  min-height: 36px;
+}
+
+.filter-pill:active {
+  transform: scale(0.98);
+}
+
+.filter-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filter-pill.active {
+  background: var(--gradient-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.filter-pill-clear {
+  background: var(--color-bg-tertiary);
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.filter-pill-clear:hover {
+  background: var(--color-border);
+  border-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.filter-pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-pill-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Price Range Filter */
+.price-range-filter {
+  padding: var(--spacing-lg);
+}
+
+.price-range-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-sm);
+}
+
+.price-range-value {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.price-range-slider {
+  width: 100%;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.price-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+}
+
+.price-range-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+}
+
+.price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-xs);
+  color: var(--color-text-light);
+}

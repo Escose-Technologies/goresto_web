@@ -1,0 +1,1 @@
+export { RestaurantProfileForm } from './RestaurantProfileForm';

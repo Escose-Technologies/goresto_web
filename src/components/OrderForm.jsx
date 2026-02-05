@@ -8,6 +8,8 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
     items: [],
     notes: '',
     status: 'pending',
+    customerName: '',
+    customerMobile: '',
   });
 
   const [selectedMenuItem, setSelectedMenuItem] = useState('');
@@ -20,6 +22,8 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
         items: order.items || [],
         notes: order.notes || '',
         status: order.status || 'pending',
+        customerName: order.customerName || '',
+        customerMobile: order.customerMobile || '',
       });
     }
   }, [order]);
@@ -116,11 +120,16 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               required
             >
-              <option value="pending">Pending</option>
-              <option value="preparing">Preparing</option>
-              <option value="ready">Ready</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+            <option value="on-hold">On Hold</option>
+            <option value="preparing">Preparing</option>
+            <option value="prepared">Prepared</option>
+            <option value="ready">Ready</option>
+            <option value="served">Served</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
             </select>
           </div>
         </div>
@@ -200,6 +209,27 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
             </div>
           </div>
         )}
+
+        <div className="form-row">
+          <div className="form-group">
+            <label>Customer Name</label>
+            <input
+              type="text"
+              value={formData.customerName}
+              onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+              placeholder="Enter customer name"
+            />
+          </div>
+          <div className="form-group">
+            <label>Customer Mobile</label>
+            <input
+              type="tel"
+              value={formData.customerMobile}
+              onChange={(e) => setFormData({ ...formData, customerMobile: e.target.value })}
+              placeholder="Enter mobile number"
+            />
+          </div>
+        </div>
 
         <div className="form-group">
           <label>Notes</label>

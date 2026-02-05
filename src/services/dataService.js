@@ -287,7 +287,25 @@ export const orderService = {
   
   async getOrders(restaurantId) {
     const orderData = await this.getByRestaurantId(restaurantId);
-    return orderData ? orderData.orders : [];
+    const orders = orderData ? orderData.orders : [];
+    // Sort by createdAt descending (latest first)
+    return orders.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+  },
+  
+  async getOrdersByCustomer(restaurantId, customerName, customerMobile) {
+    const orders = await this.getOrders(restaurantId);
+    // Case-insensitive name match and exact mobile match
+    return orders.filter(order => {
+      const nameMatch = order.customerName && 
+        order.customerName.toLowerCase().trim() === customerName.toLowerCase().trim();
+      const mobileMatch = order.customerMobile && 
+        order.customerMobile.trim() === customerMobile.trim();
+      return nameMatch && mobileMatch;
+    });
   },
   
   async createOrderData(restaurantId) {
@@ -391,6 +409,255 @@ export const settingsService = {
     };
     saveData('settings', allSettings);
     return allSettings[settingsIndex];
+  },
+};
+
+// Reviews Service
+export const reviewService = {
+  async getAll() {
+    return await getData('reviews');
+  },
+
+  async getByRestaurantId(restaurantId) {
+    const reviews = await this.getAll();
+    return reviews.find(r => r.restaurantId === restaurantId);
+  },
+
+  async getReviews(restaurantId) {
+    const reviewData = await this.getByRestaurantId(restaurantId);
+    const reviews = reviewData ? reviewData.reviews : [];
+    // Sort by createdAt descending (latest first)
+    return reviews.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+  },
+
+  async getReviewsByMenuItem(restaurantId, menuItemId) {
+    const reviews = await this.getReviews(restaurantId);
+    return reviews.filter(r => r.menuItemId === menuItemId);
+  },
+
+  async createReviewData(restaurantId) {
+    const allReviews = await this.getAll();
+    const newReviewData = {
+      restaurantId,
+      reviews: [],
+    };
+    allReviews.push(newReviewData);
+    saveData('reviews', allReviews);
+    return newReviewData;
+  },
+
+  async addReview(restaurantId, review) {
+    let reviewData = await this.getByRestaurantId(restaurantId);
+    if (!reviewData) {
+      reviewData = await this.createReviewData(restaurantId);
+    }
+
+    const allReviews = await this.getAll();
+    const reviewIndex = allReviews.findIndex(r => r.restaurantId === restaurantId);
+
+    const newReview = {
+      ...review,
+      id: `review-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    allReviews[reviewIndex].reviews.push(newReview);
+    saveData('reviews', allReviews);
+
+    // Update menu item rating
+    await this.updateMenuItemRating(restaurantId, review.menuItemId);
+
+    return newReview;
+  },
+
+  async updateMenuItemRating(restaurantId, menuItemId) {
+    const reviews = await this.getReviewsByMenuItem(restaurantId, menuItemId);
+    if (reviews.length === 0) return;
+
+    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+    // Update the menu item with new rating
+    const menus = await getData('menus');
+    const menuIndex = menus.findIndex(m => m.restaurantId === restaurantId);
+    if (menuIndex === -1) return;
+
+    const itemIndex = menus[menuIndex].items.findIndex(i => i.id === menuItemId);
+    if (itemIndex === -1) return;
+
+    menus[menuIndex].items[itemIndex].rating = Math.round(avgRating * 10) / 10;
+    menus[menuIndex].items[itemIndex].reviewCount = reviews.length;
+    saveData('menus', menus);
+  },
+
+  async deleteReview(restaurantId, reviewId) {
+    const allReviews = await this.getAll();
+    const reviewIndex = allReviews.findIndex(r => r.restaurantId === restaurantId);
+    if (reviewIndex === -1) throw new Error('Review data not found');
+
+    const review = allReviews[reviewIndex].reviews.find(r => r.id === reviewId);
+    const menuItemId = review?.menuItemId;
+
+    allReviews[reviewIndex].reviews = allReviews[reviewIndex].reviews.filter(r => r.id !== reviewId);
+    saveData('reviews', allReviews);
+
+    // Update menu item rating if we have the menuItemId
+    if (menuItemId) {
+      await this.updateMenuItemRating(restaurantId, menuItemId);
+    }
+  },
+};
+
+// Analytics Service
+export const analyticsService = {
+  async getAll() {
+    return await getData('analytics');
+  },
+
+  async getByRestaurantId(restaurantId) {
+    const analytics = await this.getAll();
+    return analytics.find(a => a.restaurantId === restaurantId);
+  },
+
+  async getAnalytics(restaurantId) {
+    // Try to get stored analytics first
+    let analyticsData = await this.getByRestaurantId(restaurantId);
+
+    // Calculate real-time stats from orders
+    const orders = await orderService.getOrders(restaurantId);
+    const today = new Date().toDateString();
+
+    const ordersToday = orders.filter(o => new Date(o.createdAt).toDateString() === today);
+    const completedOrders = orders.filter(o => o.status === 'completed' || o.status === 'served');
+
+    // Calculate order status distribution
+    const ordersByStatus = orders.reduce((acc, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Calculate revenue
+    const revenueToday = ordersToday.reduce((sum, o) => sum + (o.total || 0), 0);
+    const revenueTotal = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+    // Get popular items from orders
+    const itemCounts = {};
+    orders.forEach(order => {
+      order.items?.forEach(item => {
+        if (!itemCounts[item.menuItemId || item.name]) {
+          itemCounts[item.menuItemId || item.name] = {
+            name: item.name,
+            orders: 0,
+            revenue: 0,
+          };
+        }
+        itemCounts[item.menuItemId || item.name].orders += item.quantity;
+        itemCounts[item.menuItemId || item.name].revenue += item.price * item.quantity;
+      });
+    });
+
+    const popularItems = Object.entries(itemCounts)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.orders - a.orders)
+      .slice(0, 5);
+
+    return {
+      stats: {
+        ordersToday: ordersToday.length,
+        ordersTotal: orders.length,
+        revenueToday: Math.round(revenueToday * 100) / 100,
+        revenueTotal: Math.round(revenueTotal * 100) / 100,
+        averageOrderValue: orders.length > 0
+          ? Math.round((revenueTotal / orders.length) * 100) / 100
+          : 0,
+        ...(analyticsData?.stats || {}),
+      },
+      popularItems,
+      ordersByStatus,
+      recentActivity: analyticsData?.recentActivity || [],
+    };
+  },
+};
+
+// Staff Service
+export const staffService = {
+  async getAll() {
+    return await getData('staff');
+  },
+  
+  async getByRestaurantId(restaurantId) {
+    const allStaff = await this.getAll();
+    return allStaff.find(s => s.restaurantId === restaurantId);
+  },
+  
+  async getStaff(restaurantId) {
+    const staffData = await this.getByRestaurantId(restaurantId);
+    return staffData ? staffData.staff : [];
+  },
+  
+  async createStaffData(restaurantId) {
+    const allStaff = await this.getAll();
+    const newStaffData = {
+      restaurantId,
+      staff: [],
+    };
+    allStaff.push(newStaffData);
+    saveData('staff', allStaff);
+    return newStaffData;
+  },
+  
+  async addStaff(restaurantId, staffMember) {
+    let staffData = await this.getByRestaurantId(restaurantId);
+    if (!staffData) {
+      staffData = await this.createStaffData(restaurantId);
+    }
+    
+    const allStaff = await this.getAll();
+    const staffIndex = allStaff.findIndex(s => s.restaurantId === restaurantId);
+    
+    const now = new Date().toISOString();
+    const newStaffMember = {
+      ...staffMember,
+      id: `staff-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now,
+      status: staffMember.status || 'active',
+    };
+    
+    allStaff[staffIndex].staff.push(newStaffMember);
+    saveData('staff', allStaff);
+    return newStaffMember;
+  },
+  
+  async updateStaff(restaurantId, staffId, updates) {
+    const allStaff = await this.getAll();
+    const staffIndex = allStaff.findIndex(s => s.restaurantId === restaurantId);
+    if (staffIndex === -1) throw new Error('Staff data not found');
+    
+    const staffMemberIndex = allStaff[staffIndex].staff.findIndex(s => s.id === staffId);
+    if (staffMemberIndex === -1) throw new Error('Staff member not found');
+    
+    const existingStaff = allStaff[staffIndex].staff[staffMemberIndex];
+    allStaff[staffIndex].staff[staffMemberIndex] = {
+      ...existingStaff,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+      createdAt: existingStaff.createdAt || new Date().toISOString(),
+    };
+    saveData('staff', allStaff);
+    return allStaff[staffIndex].staff[staffMemberIndex];
+  },
+  
+  async deleteStaff(restaurantId, staffId) {
+    const allStaff = await this.getAll();
+    const staffIndex = allStaff.findIndex(s => s.restaurantId === restaurantId);
+    if (staffIndex === -1) throw new Error('Staff data not found');
+    
+    allStaff[staffIndex].staff = allStaff[staffIndex].staff.filter(s => s.id !== staffId);
+    saveData('staff', allStaff);
   },
 };
 

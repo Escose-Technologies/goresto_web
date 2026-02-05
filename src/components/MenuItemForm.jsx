@@ -11,9 +11,39 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     category: '',
     image: '',
     available: true,
+    dietary: {
+      type: 'veg',
+      spiceLevel: 0,
+      allergens: [],
+      labels: [],
+    },
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const allergenOptions = [
+    { id: 'nuts', label: 'Nuts' },
+    { id: 'dairy', label: 'Dairy' },
+    { id: 'gluten', label: 'Gluten' },
+    { id: 'shellfish', label: 'Shellfish' },
+    { id: 'soy', label: 'Soy' },
+    { id: 'eggs', label: 'Eggs' },
+    { id: 'fish', label: 'Fish' },
+    { id: 'sesame', label: 'Sesame' },
+  ];
+
+  const labelOptions = [
+    { id: 'vegan', label: 'Vegan' },
+    { id: 'gluten-free', label: 'Gluten Free' },
+    { id: 'organic', label: 'Organic' },
+    { id: 'sugar-free', label: 'Sugar Free' },
+    { id: 'keto', label: 'Keto' },
+    { id: 'low-calorie', label: 'Low Calorie' },
+    { id: 'spicy', label: 'Spicy' },
+    { id: 'chef-special', label: 'Chef Special' },
+    { id: 'popular', label: 'Popular' },
+    { id: 'new', label: 'New' },
+  ];
 
   useEffect(() => {
     if (item) {
@@ -24,8 +54,13 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
         category: item.category || '',
         image: item.image || '',
         available: item.available !== undefined ? item.available : true,
+        dietary: item.dietary || {
+          type: 'veg',
+          spiceLevel: 0,
+          allergens: [],
+          labels: [],
+        },
       });
-      // Set preview if image exists
       if (item.image) {
         setImagePreview(item.image);
       } else {
@@ -40,22 +75,19 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
     }
 
     setIsUploading(true);
-    
+
     try {
-      // Convert to base64
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result;
@@ -80,6 +112,44 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleDietaryTypeChange = (type) => {
+    setFormData({
+      ...formData,
+      dietary: { ...formData.dietary, type },
+    });
+  };
+
+  const handleSpiceLevelChange = (level) => {
+    setFormData({
+      ...formData,
+      dietary: { ...formData.dietary, spiceLevel: level },
+    });
+  };
+
+  const handleAllergenToggle = (allergenId) => {
+    const currentAllergens = formData.dietary.allergens || [];
+    const newAllergens = currentAllergens.includes(allergenId)
+      ? currentAllergens.filter(a => a !== allergenId)
+      : [...currentAllergens, allergenId];
+
+    setFormData({
+      ...formData,
+      dietary: { ...formData.dietary, allergens: newAllergens },
+    });
+  };
+
+  const handleLabelToggle = (labelId) => {
+    const currentLabels = formData.dietary.labels || [];
+    const newLabels = currentLabels.includes(labelId)
+      ? currentLabels.filter(l => l !== labelId)
+      : [...currentLabels, labelId];
+
+    setFormData({
+      ...formData,
+      dietary: { ...formData.dietary, labels: newLabels },
+    });
   };
 
   const handleSubmit = (e) => {
@@ -153,10 +223,10 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
             )}
           </div>
           {formData.category && !categories.includes(formData.category) && (
-            <p className="new-category-note">✨ New category will be created: {formData.category}</p>
+            <p className="new-category-note">New category will be created: {formData.category}</p>
           )}
           {formData.category && categories.includes(formData.category) && (
-            <p className="existing-category-note">✓ Using existing category</p>
+            <p className="existing-category-note">Using existing category</p>
           )}
         </div>
 
@@ -167,6 +237,93 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows="3"
           />
+        </div>
+
+        {/* Dietary Type Selection */}
+        <div className="form-group">
+          <label>Dietary Type *</label>
+          <div className="dietary-type-options">
+            <button
+              type="button"
+              className={`dietary-type-btn ${formData.dietary.type === 'veg' ? 'active' : ''}`}
+              onClick={() => handleDietaryTypeChange('veg')}
+            >
+              <span className="dietary-icon dietary-veg"></span>
+              Vegetarian
+            </button>
+            <button
+              type="button"
+              className={`dietary-type-btn ${formData.dietary.type === 'non-veg' ? 'active' : ''}`}
+              onClick={() => handleDietaryTypeChange('non-veg')}
+            >
+              <span className="dietary-icon dietary-non-veg"></span>
+              Non-Veg
+            </button>
+            <button
+              type="button"
+              className={`dietary-type-btn ${formData.dietary.type === 'egg' ? 'active' : ''}`}
+              onClick={() => handleDietaryTypeChange('egg')}
+            >
+              <span className="dietary-icon dietary-egg"></span>
+              Contains Egg
+            </button>
+          </div>
+        </div>
+
+        {/* Spice Level Selection */}
+        <div className="form-group">
+          <label>Spice Level</label>
+          <div className="spice-level-options">
+            {[0, 1, 2, 3].map((level) => (
+              <button
+                key={level}
+                type="button"
+                className={`spice-level-btn ${formData.dietary.spiceLevel === level ? 'active' : ''}`}
+                onClick={() => handleSpiceLevelChange(level)}
+              >
+                {level === 0 ? 'None' : '🌶️'.repeat(level)}
+                <span className="spice-label">
+                  {level === 0 ? 'Mild' : level === 1 ? 'Light' : level === 2 ? 'Medium' : 'Hot'}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Allergens */}
+        <div className="form-group">
+          <label>Allergens</label>
+          <p className="form-hint">Select any allergens present in this dish</p>
+          <div className="checkbox-group">
+            {allergenOptions.map((allergen) => (
+              <label key={allergen.id} className="checkbox-item">
+                <input
+                  type="checkbox"
+                  checked={formData.dietary.allergens?.includes(allergen.id) || false}
+                  onChange={() => handleAllergenToggle(allergen.id)}
+                />
+                <span>{allergen.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Optional Labels */}
+        <div className="form-group">
+          <label>Labels (Optional)</label>
+          <p className="form-hint">Add labels to highlight special attributes</p>
+          <div className="checkbox-group labels-group">
+            {labelOptions.map((labelOption) => (
+              <label key={labelOption.id} className="checkbox-item label-item">
+                <input
+                  type="checkbox"
+                  checked={formData.dietary.labels?.includes(labelOption.id) || false}
+                  onChange={() => handleLabelToggle(labelOption.id)}
+                />
+                <span>{labelOption.label}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <div className="form-group">
@@ -181,7 +338,7 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
                   className="remove-image-btn"
                   title="Remove image"
                 >
-                  ×
+                  x
                 </button>
               </div>
             ) : (
@@ -239,4 +396,3 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     </div>
   );
 };
-

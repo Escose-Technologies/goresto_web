@@ -1,0 +1,214 @@
+/* Dietary Badges */
+
+.dietary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+/* Badge Symbol (Square with dot/triangle) */
+.dietary-badge-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+  border-radius: 3px;
+}
+
+.dietary-badge-default .dietary-badge-symbol {
+  width: 18px;
+  height: 18px;
+}
+
+.dietary-badge-small .dietary-badge-symbol {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+}
+
+.dietary-badge-large .dietary-badge-symbol {
+  width: 22px;
+  height: 22px;
+  border-width: 2.5px;
+}
+
+/* Veg - Green Circle */
+.dietary-badge-veg .dietary-badge-symbol {
+  border-color: var(--color-veg);
+}
+
+.dietary-badge-veg .dietary-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-veg);
+  border-radius: 50%;
+}
+
+.dietary-badge-small.dietary-badge-veg .dietary-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.dietary-badge-large.dietary-badge-veg .dietary-dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* Non-Veg - Red Triangle */
+.dietary-badge-non-veg .dietary-badge-symbol {
+  border-color: var(--color-non-veg);
+}
+
+.dietary-badge-non-veg .dietary-dot {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid var(--color-non-veg);
+  border-radius: 0;
+}
+
+.dietary-badge-small.dietary-badge-non-veg .dietary-dot {
+  border-left-width: 3px;
+  border-right-width: 3px;
+  border-bottom-width: 6px;
+}
+
+.dietary-badge-large.dietary-badge-non-veg .dietary-dot {
+  border-left-width: 5px;
+  border-right-width: 5px;
+  border-bottom-width: 10px;
+}
+
+/* Egg - Yellow/Orange Circle */
+.dietary-badge-egg .dietary-badge-symbol {
+  border-color: var(--color-egg);
+}
+
+.dietary-badge-egg .dietary-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-egg);
+  border-radius: 50%;
+}
+
+.dietary-badge-small.dietary-badge-egg .dietary-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.dietary-badge-large.dietary-badge-egg .dietary-dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* Vegan - Dark Green Circle */
+.dietary-badge-vegan .dietary-badge-symbol {
+  border-color: var(--color-vegan);
+}
+
+.dietary-badge-vegan .dietary-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-vegan);
+  border-radius: 50%;
+}
+
+.dietary-badge-label {
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Allergen Labels */
+.allergen-labels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.allergen-title {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.allergen-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.allergen-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  color: #92400E;
+  font-weight: 500;
+}
+
+.allergen-icon {
+  font-size: 0.75rem;
+}
+
+.allergen-labels-small .allergen-tag {
+  padding: 1px 6px;
+  font-size: 0.625rem;
+}
+
+/* Dietary Labels (Organic, Gluten-Free, etc.) */
+.dietary-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.dietary-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  background: color-mix(in srgb, var(--label-color) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--label-color) 30%, white);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  color: var(--label-color);
+  font-weight: 500;
+}
+
+.dietary-label-icon {
+  font-size: 0.75rem;
+}
+
+.dietary-labels-small .dietary-label {
+  padding: 1px 6px;
+  font-size: 0.625rem;
+}
+
+/* Dietary Info Container */
+.dietary-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.dietary-info-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.dietary-info-warning {
+  font-size: var(--font-xs);
+  color: var(--color-warning);
+  font-weight: 500;
+}

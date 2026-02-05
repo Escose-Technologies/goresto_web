@@ -271,6 +271,181 @@
   margin: 0;
 }
 
+/* Dietary Type Selection */
+.dietary-type-options {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dietary-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary, #fff);
+  border: 2px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-md, 0.5rem);
+  font-size: var(--font-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--color-text-secondary, #6B7280);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+}
+
+.dietary-type-btn:hover {
+  border-color: var(--color-primary, #7C3AED);
+}
+
+.dietary-type-btn.active {
+  border-color: var(--color-primary, #7C3AED);
+  background: rgba(124, 58, 237, 0.05);
+  color: var(--color-text-primary, #1F2937);
+}
+
+.dietary-icon {
+  width: 16px;
+  height: 16px;
+  border: 2px solid;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.dietary-icon::after {
+  content: '';
+  position: absolute;
+}
+
+.dietary-veg {
+  border-color: #22C55E;
+}
+
+.dietary-veg::after {
+  width: 8px;
+  height: 8px;
+  background: #22C55E;
+  border-radius: 50%;
+}
+
+.dietary-non-veg {
+  border-color: #EF4444;
+}
+
+.dietary-non-veg::after {
+  width: 0;
+  height: 0;
+  background: transparent;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid #EF4444;
+  border-radius: 0;
+}
+
+.dietary-egg {
+  border-color: #F59E0B;
+}
+
+.dietary-egg::after {
+  width: 8px;
+  height: 8px;
+  background: #F59E0B;
+  border-radius: 50%;
+}
+
+/* Spice Level Selection */
+.spice-level-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.spice-level-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary, #fff);
+  border: 2px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-md, 0.5rem);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 60px;
+  min-width: 70px;
+}
+
+.spice-level-btn:hover {
+  border-color: var(--color-primary, #7C3AED);
+}
+
+.spice-level-btn.active {
+  border-color: #EF4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.spice-level-btn .spice-label {
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary, #6B7280);
+  font-weight: 500;
+}
+
+/* Checkbox Groups */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-secondary, #F9FAFB);
+  border: 1px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-sm, 0.375rem);
+  font-size: var(--font-sm, 0.875rem);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 36px;
+}
+
+.checkbox-item:hover {
+  border-color: var(--color-primary, #7C3AED);
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #7C3AED);
+}
+
+.checkbox-item input[type="checkbox"]:checked + span {
+  color: var(--color-primary, #7C3AED);
+  font-weight: 500;
+}
+
+.labels-group {
+  gap: 0.5rem;
+}
+
+.label-item {
+  background: var(--color-bg-primary, #fff);
+}
+
+.form-hint {
+  font-size: var(--font-xs, 0.75rem);
+  color: var(--color-text-light, #9CA3AF);
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 640px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -282,6 +457,34 @@
 
   .image-upload-label {
     max-width: 100%;
+  }
+
+  .dietary-type-options {
+    flex-direction: column;
+  }
+
+  .dietary-type-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .spice-level-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .spice-level-btn {
+    min-width: auto;
+    padding: 0.5rem;
+  }
+
+  .checkbox-group {
+    flex-direction: column;
+  }
+
+  .checkbox-item {
+    width: 100%;
   }
 }
 

@@ -1,0 +1,71 @@
+[
+  {
+    "restaurantId": "rest-1",
+    "stats": {
+      "ordersToday": 24,
+      "ordersTotal": 1248,
+      "revenueToday": 856.50,
+      "revenueTotal": 45230.00,
+      "averageOrderValue": 36.24,
+      "averageRating": 4.6,
+      "totalReviews": 165
+    },
+    "popularItems": [
+      {
+        "id": "item-3",
+        "name": "Chocolate Cake",
+        "orders": 342,
+        "revenue": 3074.58
+      },
+      {
+        "id": "item-2",
+        "name": "Grilled Chicken",
+        "orders": 287,
+        "revenue": 5449.13
+      },
+      {
+        "id": "item-4",
+        "name": "Spicy Paneer Tikka",
+        "orders": 256,
+        "revenue": 3837.44
+      },
+      {
+        "id": "item-7",
+        "name": "Fiery Chicken Wings",
+        "orders": 198,
+        "revenue": 2770.02
+      },
+      {
+        "id": "item-6",
+        "name": "Vegan Buddha Bowl",
+        "orders": 165,
+        "revenue": 2803.35
+      }
+    ],
+    "ordersByStatus": {
+      "pending": 3,
+      "accepted": 5,
+      "preparing": 4,
+      "ready": 2,
+      "completed": 1234,
+      "cancelled": 12
+    },
+    "recentActivity": [
+      {
+        "type": "order",
+        "message": "New order #1248 received",
+        "timestamp": "2024-12-20T14:30:00Z"
+      },
+      {
+        "type": "review",
+        "message": "New 5-star review for Chocolate Cake",
+        "timestamp": "2024-12-20T13:15:00Z"
+      },
+      {
+        "type": "order",
+        "message": "Order #1247 completed",
+        "timestamp": "2024-12-20T12:45:00Z"
+      }
+    ]
+  }
+]
