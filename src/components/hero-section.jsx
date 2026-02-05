@@ -3,14 +3,19 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { AuroraBackground } from "./ui/aurora-background";
 
+// Simple fade-in animation config
+const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+};
+
 export const HeroSection = () => {
     return (
         <AuroraBackground>
             <div className="relative z-10 flex flex-col items-center justify-center px-6 text-center min-h-screen">
                 {/* Badge */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    {...fadeIn}
                     transition={{ duration: 0.6 }}
                     className="mb-8"
                 >
@@ -21,8 +26,7 @@ export const HeroSection = () => {
 
                 {/* Main Heading */}
                 <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    {...fadeIn}
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-slate-900 mb-6 leading-tight max-w-5xl"
                 >
@@ -31,8 +35,7 @@ export const HeroSection = () => {
 
                 {/* Description */}
                 <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    {...fadeIn}
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="text-base md:text-lg text-slate-700 max-w-2xl mx-auto mb-12 leading-relaxed font-sans"
                 >
@@ -41,13 +44,12 @@ export const HeroSection = () => {
 
                 {/* CTA Button */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    {...fadeIn}
                     transition={{ duration: 0.8, delay: 0.6 }}
                     className="flex items-center justify-center"
                 >
                     <a
-                        href="#admissions"
+                        href="/admissions"
                         className="px-8 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 shadow-lg group"
                     >
                         Admission Open 2026

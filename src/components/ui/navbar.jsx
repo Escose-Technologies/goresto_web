@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Bell, Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 

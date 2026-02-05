@@ -17,8 +17,8 @@ import { AdmissionsCTA } from '../components/admissions-cta.jsx';
     <!-- Navbar needs client-side JS for scroll behavior and mobile menu -->
     <Navbar client:load />
     
-    <!-- Hero with Framer Motion animations -->
-    <HeroSection client:load />
+    <!-- Hero with Framer Motion animations - deferred loading -->
+    <HeroSection client:idle />
     
     <!-- Stats with counting animation - load when visible for better performance -->
     <StatsSection client:visible />
