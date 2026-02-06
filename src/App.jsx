@@ -13,7 +13,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to={isSuperAdmin ? '/super-admin' : '/dashboard'} replace />} />
+      <Route path="/goresto-admin" element={!isAuthenticated ? <Login /> : <Navigate to={isSuperAdmin ? '/super-admin' : '/dashboard'} replace />} />
       <Route
         path="/super-admin"
         element={

@@ -18,7 +18,7 @@ export const ProtectedRoute = ({ children, requireSuperAdmin = false }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (requireSuperAdmin && !isSuperAdmin) {

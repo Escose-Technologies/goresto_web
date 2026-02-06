@@ -231,14 +231,7 @@ export const LandingPage = () => {
           <div className="nav-links">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
-            <Link to="/login" className="nav-btn-login">Login</Link>
-            <Link to="/login" className="nav-btn-cta" style={{ background: theme.colors.background.gradient }}>
-              Get Started
-            </Link>
           </div>
-          <Link to="/login" className="mobile-cta" style={{ background: theme.colors.background.gradient }}>
-            Get Started
-          </Link>
         </div>
       </nav>
 
@@ -266,17 +259,17 @@ export const LandingPage = () => {
             real-time order tracking, and powerful analytics — all in one platform.
           </p>
           <div className="hero-cta">
-            <Link
-              to="/login"
+            <a
+              href="#features"
               className="btn-primary-large pulse-animation"
               style={{ background: theme.colors.background.gradient }}
             >
-              <span>Explore the App</span>
+              <span>Discover Features</span>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 10H15M15 10L10 5M15 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
-            <a href="#features" className="btn-secondary-large">
+            </a>
+            <a href="#how-it-works" className="btn-secondary-large">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="10" cy="10" r="8"/>
                 <polygon points="8,6 14,10 8,14" fill="currentColor" stroke="none"/>
@@ -471,13 +464,13 @@ export const LandingPage = () => {
           <p className="cta-subtitle">
             Join hundreds of restaurants already using GoResto to streamline their operations
           </p>
-          <Link to="/login" className="btn-cta-white">
-            Get Started Free
+          <a href="mailto:contact@goresto.com" className="btn-cta-white">
+            Contact Us
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 10H15M15 10L10 5M15 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </Link>
-          <p className="cta-note">No credit card required • Free 14-day trial</p>
+          </a>
+          <p className="cta-note">Get in touch to learn more about GoResto</p>
         </AnimatedSection>
       </section>
 
