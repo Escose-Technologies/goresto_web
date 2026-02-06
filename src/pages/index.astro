@@ -42,14 +42,14 @@ import { ImageScroller } from '../components/image-scroller.jsx';
       <div class="container mx-auto px-4 sm:px-6 py-10 sm:py-16 max-w-6xl">
         <div class="flex flex-col md:flex-row justify-between gap-8 sm:gap-12">
           <!-- Left: Tagline -->
-          <div class="md:max-w-xs">
+          <div class="md:max-w-xs" data-animate="fade-up">
             <p class="text-lg sm:text-xl md:text-2xl font-serif italic text-slate-900 leading-relaxed">
               Nurturing young minds for a brighter future
             </p>
           </div>
 
           <!-- Center & Right: Link Columns -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-16 text-sm">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 md:gap-16 text-sm" data-animate="fade-up" data-delay="150">
             <div class="flex flex-col gap-3">
               <a href="/about" class="text-slate-800 hover:text-primary transition-colors">About Us</a>
               <a href="/academics" class="text-slate-800 hover:text-primary transition-colors">Academics</a>
@@ -76,13 +76,13 @@ import { ImageScroller } from '../components/image-scroller.jsx';
 
       <!-- Large Text Section -->
       <div class="w-full px-4 pb-6 sm:pb-8 overflow-hidden">
-        <h2 class="text-[11vw] sm:text-[18vw] md:text-[16vw] lg:text-[14vw] font-bold text-primary leading-[0.85] tracking-tighter font-serif text-center whitespace-nowrap">
+        <h2 class="text-[11vw] sm:text-[18vw] md:text-[16vw] lg:text-[14vw] font-extrabold text-primary leading-[0.85] tracking-tight font-sans text-center whitespace-nowrap" data-animate="fade-up">
           The First Step
         </h2>
       </div>
 
       <!-- Bottom Bar -->
-      <div class="border-t border-slate-200">
+      <div class="border-t border-slate-200" data-animate="fade" data-delay="200">
         <div class="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-6xl flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500">
           <p class="text-center sm:text-left">© 2026 The First Step International School. All Rights Reserved.</p>
           <div class="flex gap-4 sm:gap-6">

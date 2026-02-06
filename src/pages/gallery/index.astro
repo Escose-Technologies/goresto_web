@@ -25,7 +25,7 @@ const photoCategories = [
   <!-- Gallery Type Selection -->
   <section class="mb-12">
     <div class="grid md:grid-cols-2 gap-6">
-      <a href="/gallery/photos" class="group relative bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 overflow-hidden">
+      <a href="/gallery/photos" class="group relative bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 overflow-hidden" data-animate="fade-up">
         <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
         <div class="relative text-white">
           <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -44,7 +44,7 @@ const photoCategories = [
         </div>
       </a>
       
-      <a href="/gallery/videos" class="group relative bg-gradient-to-br from-secondary to-secondary-dark rounded-3xl p-8 overflow-hidden">
+      <a href="/gallery/videos" class="group relative bg-gradient-to-br from-secondary to-secondary-dark rounded-3xl p-8 overflow-hidden" data-animate="fade-up" data-delay="200">
         <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
         <div class="relative text-slate-900">
           <div class="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -66,7 +66,7 @@ const photoCategories = [
   </section>
 
   <!-- Featured Photos Preview -->
-  <section class="mb-16">
+  <section class="mb-16" data-animate="fade-up">
     <div class="flex items-center justify-between mb-8">
       <h2 class="text-2xl font-serif font-bold text-slate-900">Featured Photos</h2>
       <a href="/gallery/photos" class="text-primary hover:text-primary-dark transition-colors flex items-center gap-1 text-sm font-medium">
@@ -77,9 +77,9 @@ const photoCategories = [
       </a>
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" data-stagger>
       {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-        <div class="group relative aspect-square rounded-xl overflow-hidden bg-slate-200 cursor-pointer">
+        <div class="group relative aspect-square rounded-xl overflow-hidden bg-slate-200 cursor-pointer" data-animate="fade-up">
           <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div class="absolute inset-0 flex items-center justify-center">
             <div class="text-center text-slate-400">
@@ -98,12 +98,12 @@ const photoCategories = [
   </section>
 
   <!-- Photo Categories -->
-  <section>
+  <section data-animate="fade-up">
     <h2 class="text-2xl font-serif font-bold text-slate-900 mb-8">Browse by Category</h2>
     
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" data-stagger>
       {photoCategories.map((category) => (
-        <a href="/gallery/photos" class="group bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all flex items-center gap-4">
+        <a href="/gallery/photos" class="group bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary/20 transition-all flex items-center gap-4" data-animate="fade-up">
           <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
             <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
