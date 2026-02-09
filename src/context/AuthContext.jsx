@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { userService } from '../services/dataService';
+import { authService, clearTokens } from '../services/apiService';
 
 const AuthContext = createContext(null);
 
@@ -16,46 +16,39 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored session
-    const storedUser = localStorage.getItem('goresto_user');
-    if (storedUser) {
+    // Try to restore session from refresh token
+    const restoreSession = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('goresto_user');
+        const restoredUser = await authService.restoreSession();
+        if (restoredUser) {
+          setUser(restoredUser);
+        }
+      } catch {
+        clearTokens();
+      } finally {
+        setLoading(false);
       }
+    };
+
+    // Quick check: if no refresh token, skip API call
+    const hasRefreshToken = localStorage.getItem('goresto_refreshToken');
+    if (!hasRefreshToken) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    restoreSession();
   }, []);
 
   const login = async (email, password, role) => {
-    try {
-      const users = await userService.getAll();
-      const foundUser = users.find(
-        u => u.email === email && 
-        u.password === password && 
-        (role === 'superadmin' ? u.role === 'superadmin' : u.role === 'restaurant_admin')
-      );
-
-      if (!foundUser) {
-        throw new Error('Invalid credentials');
-      }
-
-      const userData = { ...foundUser };
-      delete userData.password; // Don't store password in state
-      
-      setUser(userData);
-      localStorage.setItem('goresto_user', JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      throw error;
-    }
+    const userData = await authService.login(email, password, role);
+    setUser(userData);
+    return userData;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
-    localStorage.removeItem('goresto_user');
   };
 
   const value = {
@@ -70,5 +63,3 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-

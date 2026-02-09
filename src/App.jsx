@@ -6,6 +6,7 @@ import { Login } from './pages/Login';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { RestaurantAdminDashboard } from './pages/RestaurantAdminDashboard';
 import { PublicMenu } from './pages/PublicMenu';
+import { KitchenDisplay } from './pages/KitchenDisplay';
 import './styles/global.css';
 
 const AppRoutes = () => {
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         }
       />
       <Route path="/menu/:restaurantId" element={<PublicMenu />} />
+      <Route path="/kitchen/:restaurantId" element={<KitchenDisplay />} />
       <Route path="/" element={<LandingPage />} />
     </Routes>
   );

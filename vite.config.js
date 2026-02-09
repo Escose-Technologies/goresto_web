@@ -21,6 +21,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
   },
   define: {
     'import.meta.env.VITE_NETWORK_IP': JSON.stringify(networkIP),

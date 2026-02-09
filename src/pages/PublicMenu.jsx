@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/dataService';
+import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/apiService';
+import { useSocket } from '../hooks/useSocket';
 import { theme } from '../styles/theme';
 import { SearchBar, FilterPills } from '../components/ui';
 import { BottomSheet } from '../components/ui/BottomSheet';
@@ -37,6 +38,21 @@ export const PublicMenu = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
   const [itemReviews, setItemReviews] = useState({});
+
+  const { joinPublic, onOrderUpdated } = useSocket();
+
+  // Socket: join public room for real-time order status updates
+  useEffect(() => {
+    if (!restaurantId || customerOrders.length === 0) return;
+
+    joinPublic(restaurantId);
+
+    const cleanupUpdated = onOrderUpdated((order) => {
+      setCustomerOrders(prev => prev.map(o => o.id === order.id ? order : o));
+    });
+
+    return () => cleanupUpdated();
+  }, [restaurantId, customerOrders.length, joinPublic, onOrderUpdated]);
 
   // Currency symbol mapping
   const currencySymbols = {

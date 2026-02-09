@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, userService } from '../services/dataService';
+import { restaurantService, userService } from '../services/apiService';
 import { theme } from '../styles/theme';
 import './Dashboard.css';
 

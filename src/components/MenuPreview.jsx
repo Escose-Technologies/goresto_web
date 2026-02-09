@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { menuService, settingsService } from '../services/dataService';
+import { menuService, settingsService } from '../services/apiService';
 import '../pages/PublicMenu.css';
 
 export const MenuPreview = ({ restaurantId, restaurant }) => {

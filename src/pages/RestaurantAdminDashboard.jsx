@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService } from '../services/dataService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, getAccessToken } from '../services/apiService';
+import { useSocket } from '../hooks/useSocket';
 import { QRCodeGenerator } from '../components/QRCodeGenerator';
 import { MenuItemForm } from '../components/MenuItemForm';
 import { TableForm } from '../components/TableForm';
@@ -36,10 +37,36 @@ export const RestaurantAdminDashboard = () => {
   const [expandedItemDetails, setExpandedItemDetails] = useState({}); // Track which item details are expanded
   const [expandedStaffDetails, setExpandedStaffDetails] = useState({}); // Track which staff details are expanded
   const [showSettings, setShowSettings] = useState(false);
+  const { joinRestaurant, onOrderNew, onOrderUpdated } = useSocket();
 
   useEffect(() => {
     loadRestaurantData();
   }, [user]);
+
+  // Socket: join restaurant room and listen for real-time updates
+  useEffect(() => {
+    if (!restaurant) return;
+    const token = getAccessToken();
+    if (!token) return;
+
+    joinRestaurant(restaurant.id, token);
+
+    const cleanupNew = onOrderNew((order) => {
+      setOrders(prev => {
+        if (prev.find(o => o.id === order.id)) return prev;
+        return [order, ...prev];
+      });
+    });
+
+    const cleanupUpdated = onOrderUpdated((order) => {
+      setOrders(prev => prev.map(o => o.id === order.id ? order : o));
+    });
+
+    return () => {
+      cleanupNew();
+      cleanupUpdated();
+    };
+  }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated]);
 
   const loadRestaurantData = async () => {
     try {

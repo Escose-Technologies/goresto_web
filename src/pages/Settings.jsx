@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, settingsService } from '../services/dataService';
+import { restaurantService, settingsService } from '../services/apiService';
 import { theme } from '../styles/theme';
 import './Settings.css';
 
@@ -16,7 +16,9 @@ export const Settings = ({ onClose }) => {
     themeColors: false,
     features: false,
     promotions: false,
+    kitchenDisplay: false,
   });
+  const [kdsUrlCopied, setKdsUrlCopied] = useState(false);
   // Currency to symbol mapping
   const currencySymbols = {
     USD: '$',
@@ -44,6 +46,7 @@ export const Settings = ({ onClose }) => {
     allowTableReservations: true,
     notificationEmail: '',
     discountText: '',
+    kitchenPin: '',
   });
 
   useEffect(() => {
@@ -486,6 +489,87 @@ export const Settings = ({ onClose }) => {
               placeholder="Email for order notifications"
             />
           </div>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <button
+            type="button"
+            className="settings-section-header"
+            onClick={() => toggleSection('kitchenDisplay')}
+          >
+            <h2>Kitchen Display System</h2>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className={`section-chevron ${expandedSections.kitchenDisplay ? 'expanded' : ''}`}
+            >
+              <path
+                d="M5 7.5L10 12.5L15 7.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <div className={`settings-section-content ${expandedSections.kitchenDisplay ? 'expanded' : ''}`}>
+          <div className="form-group">
+            <label>Kitchen PIN (4 digits)</label>
+            <input
+              type="text"
+              name="kitchenPin"
+              value={formData.kitchenPin || ''}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                setFormData(prev => ({ ...prev, kitchenPin: val }));
+              }}
+              placeholder="e.g. 1234"
+              maxLength={4}
+              inputMode="numeric"
+              pattern="\d{4}"
+            />
+            <p className="form-hint">
+              Set a 4-digit PIN for kitchen staff to access the Kitchen Display System.
+            </p>
+          </div>
+          {formData.kitchenPin && formData.kitchenPin.length === 4 && restaurant && (
+            <div className="form-group">
+              <label>KDS URL</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={`${window.location.origin}/kitchen/${restaurant.id}`}
+                  readOnly
+                  style={{ flex: 1, background: '#f1f5f9', cursor: 'text' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/kitchen/${restaurant.id}`);
+                    setKdsUrlCopied(true);
+                    setTimeout(() => setKdsUrlCopied(false), 2000);
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: kdsUrlCopied ? '#22c55e' : '#7C3AED',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {kdsUrlCopied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <p className="form-hint">
+                Open this URL on a tablet in the kitchen and enter the PIN above.
+              </p>
+            </div>
+          )}
           </div>
         </div>
 
