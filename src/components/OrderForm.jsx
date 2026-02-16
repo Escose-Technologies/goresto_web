@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { theme } from '../styles/theme';
+import { TouchButton } from './ui/TouchButton';
+import { useToast } from './ui/Toast';
 import './OrderForm.css';
 
-export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
+export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete }) => {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     tableNumber: '',
     items: [],
@@ -84,7 +86,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.items.length === 0) {
-      alert('Please add at least one item to the order');
+      toast.warning('Please add at least one item to the order');
       return;
     }
     onSave({
@@ -147,7 +149,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
                 .filter(item => item.available)
                 .map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name} - ${item.price.toFixed(2)}
+                    {item.name} - ₹{item.price.toFixed(2)}
                   </option>
                 ))}
             </select>
@@ -158,14 +160,14 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
               onChange={(e) => setSelectedQuantity(parseInt(e.target.value) || 1)}
               className="quantity-input"
             />
-            <button
-              type="button"
+            <TouchButton
+              variant="primary"
+              size="small"
               onClick={handleAddItem}
               className="btn-add-item"
-              style={{ background: theme.colors.primary.main }}
             >
               Add
-            </button>
+            </TouchButton>
           </div>
         </div>
 
@@ -192,7 +194,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
                     +
                   </button>
                   <span className="item-price">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity).toFixed(2)}
                   </span>
                   <button
                     type="button"
@@ -205,7 +207,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
               </div>
             ))}
             <div className="order-total-row">
-              <strong>Total: ${calculateTotal().toFixed(2)}</strong>
+              <strong>Total: ₹{calculateTotal().toFixed(2)}</strong>
             </div>
           </div>
         )}
@@ -242,16 +244,15 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel }) => {
         </div>
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
-          >
+          <TouchButton type="submit" variant="primary">
             {order ? 'Update Order' : 'Create Order'}
-          </button>
-          <button type="button" onClick={onCancel} className="btn-secondary">
+          </TouchButton>
+          <TouchButton variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </TouchButton>
+          {order && onDelete && (
+            <TouchButton variant="danger" onClick={onDelete} type="button">Delete</TouchButton>
+          )}
         </div>
       </form>
     </div>

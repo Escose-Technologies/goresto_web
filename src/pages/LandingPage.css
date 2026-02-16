@@ -1087,6 +1087,50 @@ html {
 }
 
 /* =================================
+   WHY GORESTO SECTION
+   ================================= */
+
+.why-goresto-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.why-card {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 1.25rem;
+  border: 1px solid #F3F4F6;
+  text-align: center;
+}
+
+.why-card:hover {
+  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.1);
+  transform: translateY(-4px) !important;
+}
+
+.why-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.why-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.why-description {
+  font-size: 0.875rem;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+/* =================================
    CTA SECTION
    ================================= */
 
@@ -1365,6 +1409,11 @@ html {
 
   .steps-container {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .why-goresto-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
   }
 
   .cta-section {

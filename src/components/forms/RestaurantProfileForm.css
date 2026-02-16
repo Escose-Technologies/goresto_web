@@ -251,6 +251,53 @@
   border-color: #7C3AED;
 }
 
+/* Food Type Chips */
+.food-type-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.food-type-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  padding: 0.625rem 1rem;
+  background: #F3F4F6;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.food-type-chip:hover {
+  border-color: #7C3AED;
+}
+
+.food-type-chip.active {
+  background: rgba(124, 58, 237, 0.05);
+  border-color: #7C3AED;
+}
+
+.food-type-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.food-type-desc {
+  font-size: 0.6875rem;
+  color: #6B7280;
+}
+
+.food-type-chip.active .food-type-label {
+  color: #7C3AED;
+}
+
 /* Cuisine Chips */
 .cuisine-chips {
   display: flex;

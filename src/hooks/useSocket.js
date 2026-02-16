@@ -59,6 +59,33 @@ export const useSocket = () => {
     });
   }, []);
 
+  const callStaff = useCallback((restaurantId, tableNumber, customerName) => {
+    const socket = getSocket();
+    return new Promise((resolve) => {
+      socket.emit('staff:call', { restaurantId, tableNumber, customerName }, (response) => {
+        resolve(response);
+      });
+    });
+  }, []);
+
+  const onStaffCalled = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('staff:called', callback);
+    return () => socket.off('staff:called', callback);
+  }, []);
+
+  const onBillNew = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('bill:new', callback);
+    return () => socket.off('bill:new', callback);
+  }, []);
+
+  const onBillUpdated = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('bill:updated', callback);
+    return () => socket.off('bill:updated', callback);
+  }, []);
+
   const isConnected = useCallback(() => {
     const socket = getSocket();
     return socket.connected;
@@ -83,6 +110,10 @@ export const useSocket = () => {
     onOrderNew,
     onOrderUpdated,
     updateOrderStatus,
+    callStaff,
+    onStaffCalled,
+    onBillNew,
+    onBillUpdated,
     isConnected,
     onConnect,
     onDisconnect,

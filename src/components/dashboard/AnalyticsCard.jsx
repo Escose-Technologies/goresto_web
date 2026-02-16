@@ -41,7 +41,7 @@ export const PopularItemsList = ({ items = [], title = 'Popular Items' }) => {
               <span className="popular-item-name">{item.name}</span>
               <span className="popular-item-orders">{item.orders} orders</span>
             </div>
-            <span className="popular-item-revenue">${item.revenue?.toFixed(2) || '0.00'}</span>
+            <span className="popular-item-revenue">₹{item.revenue?.toFixed(2) || '0.00'}</span>
           </li>
         ))}
       </ul>
@@ -169,14 +169,14 @@ export const AnalyticsDashboard = ({ analytics }) => {
         />
         <StatCard
           title="Revenue Today"
-          value={`$${(stats.revenueToday || 0).toFixed(2)}`}
-          subtitle={`$${(stats.revenueTotal || 0).toFixed(2)} total`}
+          value={`₹${(stats.revenueToday || 0).toFixed(2)}`}
+          subtitle={`₹${(stats.revenueTotal || 0).toFixed(2)} total`}
           icon="💰"
           color="success"
         />
         <StatCard
           title="Avg Order Value"
-          value={`$${(stats.averageOrderValue || 0).toFixed(2)}`}
+          value={`₹${(stats.averageOrderValue || 0).toFixed(2)}`}
           icon="📊"
           color="info"
         />

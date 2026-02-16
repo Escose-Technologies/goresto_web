@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { theme } from '../../styles/theme';
+import { TouchButton } from '../ui/TouchButton';
+import { useToast } from '../ui/Toast';
 import './RestaurantProfileForm.css';
 
 const cuisineTypes = [
@@ -26,6 +27,7 @@ const cuisineTypes = [
 ];
 
 export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
+  const toast = useToast();
   const logoInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
@@ -35,6 +37,7 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
     logo: '',
     coverImage: '',
     cuisineTypes: [],
+    foodType: 'both',
     address: '',
     phone: '',
     email: '',
@@ -60,6 +63,7 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
         logo: restaurant.logo || '',
         coverImage: restaurant.coverImage || '',
         cuisineTypes: restaurant.cuisineTypes || [],
+        foodType: restaurant.foodType || 'both',
         address: restaurant.address || '',
         phone: restaurant.phone || '',
         email: restaurant.email || '',
@@ -82,12 +86,12 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.warning('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
+      toast.warning('Image size should be less than 5MB');
       return;
     }
 
@@ -107,12 +111,12 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
         setIsUploading(false);
       };
       reader.onerror = () => {
-        alert('Error reading image file');
+        toast.error('Error reading image file');
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      alert('Error processing image: ' + error.message);
+      toast.error('Error processing image: ' + error.message);
       setIsUploading(false);
     }
   };
@@ -258,6 +262,29 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
           />
         </div>
 
+        {/* Food Type */}
+        <div className="form-group">
+          <label>Food Type</label>
+          <p className="form-hint">What type of food does your restaurant serve?</p>
+          <div className="food-type-chips">
+            {[
+              { value: 'pure_veg', label: 'Pure Veg', desc: 'Vegetarian & egg items only' },
+              { value: 'non_veg', label: 'Non-Veg', desc: 'Primarily non-vegetarian' },
+              { value: 'both', label: 'Veg & Non-Veg', desc: 'Serves both' },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`food-type-chip ${formData.foodType === opt.value ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, foodType: opt.value })}
+              >
+                <span className="food-type-label">{opt.label}</span>
+                <span className="food-type-desc">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Cuisine Types */}
         <div className="form-group">
           <label>Cuisine Types</label>
@@ -374,17 +401,13 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
 
         {/* Form Actions */}
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
-          >
+          <TouchButton type="submit" variant="primary">
             Save Profile
-          </button>
+          </TouchButton>
           {onCancel && (
-            <button type="button" onClick={onCancel} className="btn-secondary">
+            <TouchButton variant="secondary" onClick={onCancel}>
               Cancel
-            </button>
+            </TouchButton>
           )}
         </div>
       </form>

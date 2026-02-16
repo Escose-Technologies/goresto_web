@@ -148,66 +148,66 @@ export const LandingPage = () => {
 
   const features = [
     {
+      icon: '📊',
+      title: 'Dashboard',
+      description: 'Track daily sales, popular items, order trends, and revenue from an intuitive dashboard with real-time insights.',
+      color: '#EF4444',
+    },
+    {
       icon: '📱',
-      title: 'QR Code Menus',
-      description: 'Generate unique QR codes for each table. Customers scan and browse your digital menu instantly.',
+      title: 'QR Code Ordering',
+      description: 'Generate unique QR codes for each table. Customers scan, browse your menu, and place orders directly from their phone.',
       color: '#7C3AED',
     },
     {
       icon: '🍽️',
       title: 'Menu Management',
-      description: 'Easily add, edit, and organize menu items with images, dietary labels, and pricing.',
+      description: 'Add, edit, and organize menu items with images, veg/non-veg labels, categories, and pricing — all from one dashboard.',
       color: '#EC4899',
     },
     {
-      icon: '📋',
-      title: 'Order Tracking',
-      description: 'Real-time order management from placement to serving. Never miss an order again.',
+      icon: '🖥️',
+      title: 'Kitchen Display System',
+      description: 'Real-time kitchen display for your staff. Orders appear instantly with live status updates via WebSocket.',
       color: '#F59E0B',
     },
     {
-      icon: '📊',
-      title: 'Analytics Dashboard',
-      description: 'Track sales, popular items, and revenue with intuitive analytics and reports.',
+      icon: '🧾',
+      title: 'GST-Compliant Billing',
+      description: 'Generate professional invoices with CGST, SGST, and IGST calculations. Supports discounts, round-off, and amount in words.',
       color: '#10B981',
     },
     {
       icon: '👥',
       title: 'Staff Management',
-      description: 'Onboard and manage your team with roles, schedules, and contact information.',
+      description: 'Manage your team with roles, attendance tracking, and contact details. Assign kitchen access with secure PINs.',
       color: '#3B82F6',
-    },
-    {
-      icon: '⭐',
-      title: 'Reviews & Ratings',
-      description: 'Collect customer feedback and ratings to improve your service quality.',
-      color: '#EF4444',
     },
   ];
 
   const howItWorks = [
     {
       step: '1',
-      title: 'Sign Up',
-      description: 'Create your restaurant account in minutes',
+      title: 'Register Your Restaurant',
+      description: 'Set up your restaurant profile with details, logo, and GST information',
       icon: '✨',
     },
     {
       step: '2',
-      title: 'Set Up Menu',
-      description: 'Add your menu items, categories, and pricing',
+      title: 'Build Your Menu',
+      description: 'Add items with images, veg/non-veg tags, categories, and pricing',
       icon: '📝',
     },
     {
       step: '3',
-      title: 'Generate QR Codes',
-      description: 'Create QR codes for each table in your restaurant',
+      title: 'Set Up Tables & QR',
+      description: 'Add tables and generate unique QR codes for each one',
       icon: '📲',
     },
     {
       step: '4',
-      title: 'Start Receiving Orders',
-      description: 'Customers scan, order, and you manage everything digitally',
+      title: 'Go Live',
+      description: 'Customers scan QR codes to browse and order. You manage everything from the dashboard.',
       icon: '🚀',
     },
   ];
@@ -248,15 +248,15 @@ export const LandingPage = () => {
         <AnimatedSection animation="fade-up" className="hero-content">
           <div className="hero-badge">
             <span className="badge-dot"></span>
-            #1 Restaurant Management Platform
+            Modern Restaurant Management Platform
           </div>
           <h1 className="hero-title">
-            Smart Restaurant Management,
-            <span className="hero-highlight"> Simplified</span>
+            Your Restaurant,
+            <span className="hero-highlight"> Digitally Empowered</span>
           </h1>
           <p className="hero-subtitle">
-            Transform your restaurant operations with digital menus, QR code ordering,
-            real-time order tracking, and powerful analytics — all in one platform.
+            Streamline your restaurant operations with digital menus, QR code ordering,
+            real-time kitchen display, and insightful analytics — all in one platform.
           </p>
           <div className="hero-cta">
             <a
@@ -271,10 +271,10 @@ export const LandingPage = () => {
             </a>
             <a href="#how-it-works" className="btn-secondary-large">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="10" cy="10" r="8"/>
-                <polygon points="8,6 14,10 8,14" fill="currentColor" stroke="none"/>
+                <path d="M10 2C5.582 2 2 5.582 2 10s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 14.4A6.4 6.4 0 1116.4 10 6.407 6.407 0 0110 16.4z"/>
+                <path d="M10 5.6V10l3.2 1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span>Watch Demo</span>
+              <span>How It Works</span>
             </a>
           </div>
         </AnimatedSection>
@@ -313,7 +313,7 @@ export const LandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="mockup-cart-btn">View Cart - $24.99</div>
+              <div className="mockup-cart-btn">View Cart</div>
             </div>
           </div>
 
@@ -322,7 +322,7 @@ export const LandingPage = () => {
             <span className="card-icon">🛒</span>
             <div className="card-content">
               <span className="card-title">New Order!</span>
-              <span className="card-subtitle">Table 5 - $45.00</span>
+              <span className="card-subtitle">Table 5 - 3 items</span>
             </div>
           </div>
 
@@ -336,33 +336,35 @@ export const LandingPage = () => {
         </AnimatedSection>
       </section>
 
-      {/* Stats Section */}
+      {/* Platform Highlights Section */}
       <section className="stats-section">
         <AnimatedSection animation="scale-up" className="stats-container">
           <div className="stat-item">
             <span className="stat-number">
-              <AnimatedCounter end={500} suffix="+" />
+              <AnimatedCounter end={6} suffix="+" />
             </span>
-            <span className="stat-label">Restaurants</span>
+            <span className="stat-label">Core Modules</span>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
             <span className="stat-number">
-              <AnimatedCounter end={50} suffix="K+" />
+              <span>Real-Time</span>
             </span>
-            <span className="stat-label">Orders Processed</span>
+            <span className="stat-label">Order Tracking</span>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
             <span className="stat-number">
-              <AnimatedCounter end={99} suffix="%" />
+              <span>GST</span>
             </span>
-            <span className="stat-label">Satisfaction</span>
+            <span className="stat-label">Compliant Billing</span>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
-            <span className="stat-number">4.9</span>
-            <span className="stat-label">Rating</span>
+            <span className="stat-number">
+              <span>QR</span>
+            </span>
+            <span className="stat-label">Based Ordering</span>
           </div>
         </AnimatedSection>
       </section>
@@ -392,7 +394,6 @@ export const LandingPage = () => {
                 <h3 className="feature-title">{feature.title}</h3>
                 <p className="feature-description">{feature.description}</p>
                 <div className="feature-link" style={{ color: feature.color }}>
-                  Learn more
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M4 8H12M12 8L8 4M12 8L8 12" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -436,23 +437,33 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Testimonial Section */}
+      {/* Why GoResto Section */}
       <section className="testimonial-section">
         <div className="section-container">
-          <AnimatedSection animation="scale-up" className="testimonial-card">
-            <div className="quote-icon">"</div>
-            <p className="testimonial-text">
-              GoResto transformed how we manage our restaurant. Orders are faster,
-              customers love the QR menus, and our revenue increased by 30%!
+          <AnimatedSection animation="fade-up" className="section-header">
+            <span className="section-badge">Why GoResto</span>
+            <h2 className="section-title">Built for Indian Restaurants</h2>
+            <p className="section-subtitle">
+              Designed from the ground up to handle the unique needs of Indian food service
             </p>
-            <div className="testimonial-author">
-              <div className="author-avatar">👨‍🍳</div>
-              <div className="author-info">
-                <span className="author-name">Chef Marco</span>
-                <span className="author-role">Owner, Bella Italia</span>
-              </div>
-            </div>
           </AnimatedSection>
+          <div className="why-goresto-grid">
+            <AnimatedSection animation="fade-up" delay={0} className="why-card">
+              <span className="why-icon">🇮🇳</span>
+              <h4 className="why-title">India-First Approach</h4>
+              <p className="why-description">GST-compliant billing, Indian state support, and workflows designed for how Indian restaurants actually operate.</p>
+            </AnimatedSection>
+            <AnimatedSection animation="fade-up" delay={100} className="why-card">
+              <span className="why-icon">⚡</span>
+              <h4 className="why-title">Real-Time Operations</h4>
+              <p className="why-description">Orders flow instantly from customer phone to kitchen display. No delays, no missed orders, no paper slips.</p>
+            </AnimatedSection>
+            <AnimatedSection animation="fade-up" delay={200} className="why-card">
+              <span className="why-icon">🔒</span>
+              <h4 className="why-title">Secure & Reliable</h4>
+              <p className="why-description">Role-based access control, secure kitchen PINs, and JWT authentication keep your data and operations safe.</p>
+            </AnimatedSection>
+          </div>
         </div>
       </section>
 
@@ -460,17 +471,17 @@ export const LandingPage = () => {
       <section className="cta-section">
         <AnimatedSection animation="blur-in" className="cta-container" style={{ background: theme.colors.background.gradient }}>
           <div className="cta-pattern"></div>
-          <h2 className="cta-title">Ready to Transform Your Restaurant?</h2>
+          <h2 className="cta-title">Ready to Go Digital?</h2>
           <p className="cta-subtitle">
-            Join hundreds of restaurants already using GoResto to streamline their operations
+            Take the first step towards smarter restaurant management. Get in touch with our team today.
           </p>
           <a href="mailto:contact@goresto.com" className="btn-cta-white">
-            Contact Us
+            Get in Touch
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 10H15M15 10L10 5M15 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </a>
-          <p className="cta-note">Get in touch to learn more about GoResto</p>
+          <p className="cta-note">We'd love to understand your restaurant's needs</p>
         </AnimatedSection>
       </section>
 
@@ -481,7 +492,7 @@ export const LandingPage = () => {
             <div className="footer-logo">
               <Logo size="large" variant="light" />
             </div>
-            <p className="footer-tagline">Smart Restaurant Management, Simplified</p>
+            <p className="footer-tagline">Your Restaurant, Digitally Empowered</p>
             <div className="footer-social">
               <a href="#" className="social-link" aria-label="Facebook">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -510,24 +521,20 @@ export const LandingPage = () => {
               <h4>Product</h4>
               <a href="#features">Features</a>
               <a href="#how-it-works">How It Works</a>
-              <a href="#pricing">Pricing</a>
             </div>
             <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#about">About Us</a>
-              <a href="#contact">Contact</a>
-              <a href="#careers">Careers</a>
+              <h4>Contact</h4>
+              <a href="mailto:contact@goresto.com">contact@goresto.com</a>
             </div>
             <div className="footer-column">
-              <h4>Legal</h4>
-              <a href="#privacy">Privacy Policy</a>
-              <a href="#terms">Terms of Service</a>
+              <h4>Quick Links</h4>
+              <a href="#features">Explore Platform</a>
             </div>
           </div>
         </AnimatedSection>
         <div className="footer-big-name">GoResto</div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} GoResto. All rights reserved. Made with ❤️ for restaurants.</p>
+          <p>&copy; {new Date().getFullYear()} GoResto. All rights reserved.</p>
         </div>
       </footer>
     </div>

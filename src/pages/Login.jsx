@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { TouchButton } from '../components/ui/TouchButton';
 import { theme } from '../styles/theme';
 import { Logo } from '../components/Logo';
 import './Login.css';
@@ -27,7 +28,7 @@ export const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -124,30 +125,37 @@ export const Login = () => {
             </div>
           </div>
 
-          <button
+          <TouchButton
             type="submit"
-            className="signin-btn"
+            variant="primary"
+            fullWidth
             disabled={loading}
-            style={{
-              background: theme.colors.background.gradient,
-              opacity: loading ? 0.7 : 1,
-            }}
+            loading={loading}
+            className="signin-btn"
           >
             {loading ? 'Signing In...' : 'Sign In'}
-          </button>
+          </TouchButton>
         </form>
 
         <div className="demo-credentials">
           <div className="divider"></div>
-          <p className="demo-label">Demo Credentials</p>
-          <p className="demo-text">
-            <strong>Super Admin:</strong>{' '}
-            <span className="demo-cred">superadmin@goresto.com / admin123</span>
-          </p>
-          <p className="demo-text">
-            <strong>Restaurant Admin:</strong>{' '}
-            <span className="demo-cred">owner@restaurant.com / owner123</span>
-          </p>
+          <p className="demo-label">Quick Login</p>
+          <button
+            type="button"
+            className="demo-fill-btn"
+            onClick={() => { setEmail('superadmin@goresto.com'); setPassword('admin123'); setRole('superadmin'); }}
+          >
+            <span className="demo-fill-role">Super Admin</span>
+            <span className="demo-fill-email">superadmin@goresto.com</span>
+          </button>
+          <button
+            type="button"
+            className="demo-fill-btn"
+            onClick={() => { setEmail('owner@restaurant.com'); setPassword('owner123'); setRole('restaurant_admin'); }}
+          >
+            <span className="demo-fill-role">Restaurant Admin</span>
+            <span className="demo-fill-email">owner@restaurant.com</span>
+          </button>
         </div>
 
         <Link to="/" className="back-to-home">

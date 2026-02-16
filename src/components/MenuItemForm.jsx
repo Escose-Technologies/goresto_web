@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { theme } from '../styles/theme';
+import { TouchButton } from './ui/TouchButton';
+import { useToast } from './ui/Toast';
+import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
 import './MenuItemForm.css';
 
-export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
+export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onDelete }) => {
+  const toast = useToast();
   const fileInputRef = useRef(null);
+  const nameInputRef = useRef(null);
+  const suggestionsRef = useRef(null);
+  const [nameSuggestions, setNameSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -76,12 +84,12 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.warning('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
+      toast.warning('Image size should be less than 5MB');
       return;
     }
 
@@ -96,12 +104,12 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
         setIsUploading(false);
       };
       reader.onerror = () => {
-        alert('Error reading image file');
+        toast.error('Error reading image file');
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      alert('Error processing image: ' + error.message);
+      toast.error('Error processing image: ' + error.message);
       setIsUploading(false);
     }
   };
@@ -152,6 +160,86 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
     });
   };
 
+  // ─── Autocomplete handlers ─────────────────────────────
+  const handleNameChange = (value) => {
+    setFormData({ ...formData, name: value });
+    const results = searchIndianFoods(value, foodType);
+    setNameSuggestions(results);
+    setShowSuggestions(results.length > 0);
+    setSelectedSuggestionIndex(-1);
+  };
+
+  const handleSuggestionSelect = (suggestion) => {
+    // Map dietary type: database uses 'non-veg' frontend format already
+    const dietaryType = suggestion.dietary === 'non_veg' ? 'non-veg' : suggestion.dietary;
+    // Merge labels: keep existing user labels, add suggestion's labels
+    const existingLabels = formData.dietary.labels || [];
+    const mergedLabels = [...new Set([...existingLabels, ...(suggestion.labels || [])])];
+
+    setFormData({
+      ...formData,
+      name: suggestion.name,
+      category: suggestion.category,
+      description: suggestion.description || '',
+      dietary: {
+        ...formData.dietary,
+        type: dietaryType,
+        spiceLevel: suggestion.spiceLevel ?? 0,
+        allergens: suggestion.allergens || [],
+        labels: mergedLabels,
+      },
+    });
+    setShowSuggestions(false);
+    setNameSuggestions([]);
+    setSelectedSuggestionIndex(-1);
+  };
+
+  const handleNameKeyDown = (e) => {
+    if (!showSuggestions || nameSuggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedSuggestionIndex(prev =>
+        prev < nameSuggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedSuggestionIndex(prev =>
+        prev > 0 ? prev - 1 : nameSuggestions.length - 1
+      );
+    } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
+      e.preventDefault();
+      handleSuggestionSelect(nameSuggestions[selectedSuggestionIndex]);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setSelectedSuggestionIndex(-1);
+    }
+  };
+
+  // Scroll selected suggestion into view
+  useEffect(() => {
+    if (selectedSuggestionIndex >= 0 && suggestionsRef.current) {
+      const items = suggestionsRef.current.querySelectorAll('.name-suggestion-item');
+      if (items[selectedSuggestionIndex]) {
+        items[selectedSuggestionIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [selectedSuggestionIndex]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        nameInputRef.current && !nameInputRef.current.contains(e.target) &&
+        suggestionsRef.current && !suggestionsRef.current.contains(e.target)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
@@ -167,12 +255,37 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
         <div className="form-row">
           <div className="form-group">
             <label>Item Name *</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
+            <div className="name-autocomplete-container">
+              <input
+                ref={nameInputRef}
+                type="text"
+                autoComplete="off"
+                value={formData.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                onKeyDown={handleNameKeyDown}
+                onFocus={() => {
+                  if (nameSuggestions.length > 0) setShowSuggestions(true);
+                }}
+                placeholder="Start typing a dish name..."
+                required
+              />
+              {showSuggestions && nameSuggestions.length > 0 && (
+                <ul className="name-suggestions-dropdown" ref={suggestionsRef}>
+                  {nameSuggestions.map((suggestion, i) => (
+                    <li
+                      key={suggestion.name}
+                      className={`name-suggestion-item ${i === selectedSuggestionIndex ? 'selected' : ''}`}
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                      onMouseEnter={() => setSelectedSuggestionIndex(i)}
+                    >
+                      <span className={`suggestion-dietary-dot dietary-${suggestion.dietary === 'non-veg' || suggestion.dietary === 'non_veg' ? 'non-veg' : suggestion.dietary}`} />
+                      <span className="suggestion-name">{suggestion.name}</span>
+                      <span className="suggestion-category">{suggestion.category}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
           <div className="form-group">
             <label>Price ($) *</label>
@@ -200,7 +313,7 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
               required
             />
             <datalist id="categories-list">
-              {categories.map((cat) => (
+              {[...new Set([...categories, ...INDIAN_FOOD_CATEGORIES])].map((cat) => (
                 <option key={cat} value={cat} />
               ))}
             </datalist>
@@ -381,16 +494,17 @@ export const MenuItemForm = ({ item, categories, onSave, onCancel }) => {
         </div>
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
-          >
+          <TouchButton type="submit" variant="primary">
             {item ? 'Update' : 'Create'}
-          </button>
-          <button type="button" onClick={onCancel} className="btn-secondary">
+          </TouchButton>
+          <TouchButton variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </TouchButton>
+          {item && onDelete && (
+            <TouchButton variant="danger" onClick={onDelete} type="button">
+              Delete
+            </TouchButton>
+          )}
         </div>
       </form>
     </div>

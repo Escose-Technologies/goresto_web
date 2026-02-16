@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { theme } from '../styles/theme';
+import { TouchButton } from './ui/TouchButton';
+import { useToast } from './ui/Toast';
 import './StaffForm.css';
 
 const STAFF_ROLES = ['Waiter', 'Chef', 'Manager', 'Bartender', 'Host/Hostess', 'Cashier', 'Kitchen Staff', 'Other'];
 
-export const StaffForm = ({ staff, onSave, onCancel }) => {
+export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
+  const toast = useToast();
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -50,17 +52,17 @@ export const StaffForm = ({ staff, onSave, onCancel }) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.warning('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
+      toast.warning('Image size should be less than 5MB');
       return;
     }
 
     setIsUploading(true);
-    
+
     try {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -70,12 +72,12 @@ export const StaffForm = ({ staff, onSave, onCancel }) => {
         setIsUploading(false);
       };
       reader.onerror = () => {
-        alert('Error reading image file');
+        toast.error('Error reading image file');
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
-      alert('Error processing image: ' + error.message);
+      toast.error('Error processing image: ' + error.message);
       setIsUploading(false);
     }
   };
@@ -242,16 +244,15 @@ export const StaffForm = ({ staff, onSave, onCancel }) => {
         </div>
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
-          >
+          <TouchButton type="submit" variant="primary">
             {staff ? 'Update' : 'Add Staff'}
-          </button>
-          <button type="button" onClick={onCancel} className="btn-secondary">
+          </TouchButton>
+          <TouchButton variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </TouchButton>
+          {staff && onDelete && (
+            <TouchButton variant="danger" onClick={onDelete} type="button">Delete</TouchButton>
+          )}
         </div>
       </form>
     </div>

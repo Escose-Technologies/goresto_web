@@ -9,6 +9,8 @@ import staffRoutes from './staff.routes.js';
 import settingsRoutes from './settings.routes.js';
 import reviewsRoutes from './reviews.routes.js';
 import analyticsRoutes from './analytics.routes.js';
+import billsRoutes from './bills.routes.js';
+import discountPresetsRoutes from './discountPresets.routes.js';
 import publicRoutes from './public.routes.js';
 
 const router = Router();
@@ -28,6 +30,8 @@ router.use('/restaurants/:restaurantId/staff', staffRoutes);
 router.use('/restaurants/:restaurantId/settings', settingsRoutes);
 router.use('/restaurants/:restaurantId/reviews', reviewsRoutes);
 router.use('/restaurants/:restaurantId/analytics', analyticsRoutes);
+router.use('/restaurants/:restaurantId/bills', billsRoutes);
+router.use('/restaurants/:restaurantId/discount-presets', discountPresetsRoutes);
 
 // Public endpoints (no auth)
 router.use('/public/restaurants', publicRoutes);

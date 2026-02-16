@@ -92,6 +92,27 @@ const patch = (path, body) => request(path, { method: 'PATCH', body: JSON.string
 const put = (path, body) => request(path, { method: 'PUT', body: JSON.stringify(body) });
 const del = (path) => request(path, { method: 'DELETE' });
 
+// Download a binary response (PDF, etc.) — returns a Blob
+const downloadBlob = async (path) => {
+  const url = `${API_BASE}${path}`;
+  const headers = {};
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+  let res = await fetch(url, { headers });
+
+  if (res.status === 401 && getRefreshToken()) {
+    await refreshTokens();
+    headers['Authorization'] = `Bearer ${accessToken}`;
+    res = await fetch(url, { headers });
+  }
+
+  if (!res.ok) {
+    throw new Error(`Download failed (${res.status})`);
+  }
+
+  return res.blob();
+};
+
 // ─── Auth Service ────────────────────────────────────────
 
 export const authService = {
@@ -432,5 +453,81 @@ export const analyticsService = {
 
   async getAnalytics(restaurantId) {
     return get(`/restaurants/${restaurantId}/analytics`);
+  },
+};
+
+// ─── Bill Service ───────────────────────────────────────
+
+export const billService = {
+  async getBills(restaurantId, query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
+    const qs = params.toString();
+    return get(`/restaurants/${restaurantId}/bills${qs ? '?' + qs : ''}`);
+  },
+
+  async getBillById(restaurantId, billId) {
+    return get(`/restaurants/${restaurantId}/bills/${billId}`);
+  },
+
+  async getUnbilledOrders(restaurantId, tableNumber) {
+    const qs = tableNumber ? `?tableNumber=${encodeURIComponent(tableNumber)}` : '';
+    return get(`/restaurants/${restaurantId}/bills/unbilled-orders${qs}`);
+  },
+
+  async getNextNumber(restaurantId) {
+    return get(`/restaurants/${restaurantId}/bills/next-number`);
+  },
+
+  async previewCalculation(restaurantId, data) {
+    return post(`/restaurants/${restaurantId}/bills/preview-calculation`, data);
+  },
+
+  async createBill(restaurantId, data) {
+    return post(`/restaurants/${restaurantId}/bills`, data);
+  },
+
+  async updatePayment(restaurantId, billId, data) {
+    return patch(`/restaurants/${restaurantId}/bills/${billId}/payment`, data);
+  },
+
+  async cancelBill(restaurantId, billId, data) {
+    return patch(`/restaurants/${restaurantId}/bills/${billId}/cancel`, data);
+  },
+
+  async getSummary(restaurantId, from, to) {
+    return get(`/restaurants/${restaurantId}/bills/summary?from=${from}&to=${to}`);
+  },
+
+  async downloadPdf(restaurantId, billId) {
+    return downloadBlob(`/restaurants/${restaurantId}/bills/${billId}/pdf`);
+  },
+};
+
+// ─── Discount Preset Service ────────────────────────────
+
+export const discountPresetService = {
+  async getAll(restaurantId) {
+    return get(`/restaurants/${restaurantId}/discount-presets`);
+  },
+
+  async getActive(restaurantId) {
+    return get(`/restaurants/${restaurantId}/discount-presets/active`);
+  },
+
+  async getById(restaurantId, presetId) {
+    return get(`/restaurants/${restaurantId}/discount-presets/${presetId}`);
+  },
+
+  async create(restaurantId, data) {
+    return post(`/restaurants/${restaurantId}/discount-presets`, data);
+  },
+
+  async update(restaurantId, presetId, data) {
+    return patch(`/restaurants/${restaurantId}/discount-presets/${presetId}`, data);
+  },
+
+  async remove(restaurantId, presetId) {
+    return del(`/restaurants/${restaurantId}/discount-presets/${presetId}`);
   },
 };

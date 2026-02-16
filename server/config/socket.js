@@ -13,6 +13,14 @@ const allowedOrigins = [
   'http://localhost:5175',
 ];
 
+// Support additional origins via env var (comma-separated)
+if (process.env.ADDITIONAL_CORS_ORIGINS) {
+  process.env.ADDITIONAL_CORS_ORIGINS.split(',').forEach(origin => {
+    const trimmed = origin.trim();
+    if (trimmed) allowedOrigins.push(trimmed);
+  });
+}
+
 export const initializeSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
@@ -92,6 +100,38 @@ export const initializeSocket = (httpServer) => {
       } catch (err) {
         console.error('order:updateStatus failed:', err.message);
         if (callback) callback({ success: false, error: err.message });
+      }
+    });
+
+    // Public customer calls staff (no auth, ephemeral)
+    socket.on('staff:call', async (data, callback) => {
+      try {
+        const { restaurantId, tableNumber, customerName } = data;
+        if (!restaurantId || !tableNumber) {
+          if (callback) callback({ success: false, error: 'Missing restaurantId or tableNumber' });
+          return;
+        }
+
+        const settings = await prisma.settings.findUnique({
+          where: { restaurantId },
+        });
+
+        if (!settings || !settings.allowCallStaff) {
+          if (callback) callback({ success: false, error: 'Call staff is not enabled' });
+          return;
+        }
+
+        io.to(`restaurant:${restaurantId}`).emit('staff:called', {
+          tableNumber,
+          customerName: customerName || null,
+          timestamp: new Date().toISOString(),
+        });
+
+        console.log(`Staff called for table ${tableNumber} at restaurant ${restaurantId}`);
+        if (callback) callback({ success: true });
+      } catch (err) {
+        console.error('staff:call failed:', err.message);
+        if (callback) callback({ success: false, error: 'Failed to call staff' });
       }
     });
 

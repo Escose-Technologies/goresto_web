@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { theme } from '../styles/theme';
+import { TouchButton } from './ui/TouchButton';
 import './TableForm.css';
 
-export const TableForm = ({ table, onSave, onCancel }) => {
+export const TableForm = ({ table, onSave, onCancel, onDelete }) => {
   const [formData, setFormData] = useState({
     number: '',
     capacity: '',
@@ -87,16 +87,15 @@ export const TableForm = ({ table, onSave, onCancel }) => {
         </div>
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
-          >
+          <TouchButton type="submit" variant="primary">
             {table ? 'Update' : 'Create'}
-          </button>
-          <button type="button" onClick={onCancel} className="btn-secondary">
+          </TouchButton>
+          <TouchButton variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </TouchButton>
+          {table && onDelete && (
+            <TouchButton variant="danger" onClick={onDelete} type="button">Delete</TouchButton>
+          )}
         </div>
       </form>
     </div>

@@ -103,3 +103,25 @@ export const formatReview = (review) => {
     createdAt: review.createdAt?.toISOString(),
   };
 };
+
+export const formatBill = (bill) => {
+  if (!bill) return null;
+  return {
+    ...bill,
+    orders: bill.orders?.map(formatOrder),
+    cancelledAt: bill.cancelledAt?.toISOString() || null,
+    createdAt: bill.createdAt?.toISOString(),
+    updatedAt: bill.updatedAt?.toISOString(),
+  };
+};
+
+export const formatDiscountPreset = (preset) => {
+  if (!preset) return null;
+  return {
+    ...preset,
+    startDate: preset.startDate?.toISOString() || null,
+    endDate: preset.endDate?.toISOString() || null,
+    createdAt: preset.createdAt?.toISOString(),
+    updatedAt: preset.updatedAt?.toISOString(),
+  };
+};

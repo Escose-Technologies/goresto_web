@@ -1,10 +1,16 @@
 import { z } from 'zod';
+import { existsSync } from 'fs';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: resolve(__dirname, '../../.env') });
+const envPath = resolve(__dirname, '../../.env');
+
+// Load .env file if it exists (Docker provides env vars directly)
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -18,7 +24,7 @@ const envSchema = z.object({
   BCRYPT_SALT_ROUNDS: z.coerce.number().min(8).max(16).default(12),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
-  AUTH_RATE_LIMIT_MAX: z.coerce.number().default(10),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().default(50),
 });
 
 const parsed = envSchema.safeParse(process.env);

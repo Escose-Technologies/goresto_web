@@ -1,7 +1,10 @@
 import rateLimit from 'express-rate-limit';
 import { env } from './env.js';
 
-export const generalLimiter = rateLimit({
+const isDev = env.NODE_ENV === 'development';
+const noop = (_req, _res, next) => next();
+
+export const generalLimiter = isDev ? noop : rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
   max: env.RATE_LIMIT_MAX_REQUESTS,
   standardHeaders: true,
@@ -9,7 +12,7 @@ export const generalLimiter = rateLimit({
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests, please try again later' } },
 });
 
-export const authLimiter = rateLimit({
+export const authLimiter = isDev ? noop : rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
   max: env.AUTH_RATE_LIMIT_MAX,
   standardHeaders: true,
@@ -17,7 +20,7 @@ export const authLimiter = rateLimit({
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts, please try again later' } },
 });
 
-export const publicOrderLimiter = rateLimit({
+export const publicOrderLimiter = isDev ? noop : rateLimit({
   windowMs: 60000,
   max: 5,
   standardHeaders: true,

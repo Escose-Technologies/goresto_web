@@ -66,6 +66,85 @@
   min-height: 80px;
 }
 
+/* Name Autocomplete */
+.name-autocomplete-container {
+  position: relative;
+}
+
+.name-suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 50;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.name-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  min-height: 44px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.name-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.name-suggestion-item:hover,
+.name-suggestion-item.selected {
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.suggestion-dietary-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.suggestion-dietary-dot.dietary-veg {
+  background: #22C55E;
+}
+
+.suggestion-dietary-dot.dietary-non-veg {
+  background: #EF4444;
+}
+
+.suggestion-dietary-dot.dietary-egg {
+  background: #F59E0B;
+}
+
+.suggestion-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1F2937;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-category {
+  font-size: 0.7rem;
+  color: #9CA3AF;
+  flex-shrink: 0;
+  text-align: right;
+}
+
 .category-input-wrapper {
   display: flex;
   flex-direction: column;
@@ -447,6 +526,19 @@
 }
 
 @media (max-width: 640px) {
+  .name-suggestions-dropdown {
+    max-height: 200px;
+  }
+
+  .name-suggestion-item {
+    min-height: 48px;
+    padding: 0.75rem;
+  }
+
+  .suggestion-category {
+    display: none;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }

@@ -8,6 +8,14 @@ const allowedOrigins = [
   'http://localhost:5175',
 ];
 
+// Support additional origins via env var (comma-separated)
+if (process.env.ADDITIONAL_CORS_ORIGINS) {
+  process.env.ADDITIONAL_CORS_ORIGINS.split(',').forEach(origin => {
+    const trimmed = origin.trim();
+    if (trimmed) allowedOrigins.push(trimmed);
+  });
+}
+
 export const corsOptions = cors({
   origin(origin, callback) {
     // Allow requests with no origin (mobile apps, Postman, server-to-server)

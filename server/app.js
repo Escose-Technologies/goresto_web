@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Rate limiting
 app.use('/api', generalLimiter);
 
-// Trust proxy (for Vercel)
+// Trust proxy (for Nginx reverse proxy)
 app.set('trust proxy', 1);
 
 // API routes

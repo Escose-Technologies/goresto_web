@@ -96,6 +96,25 @@
   --safe-area-inset-right: env(safe-area-inset-right, 0px);
 }
 
+/* Dark Theme */
+[data-theme="dark"] {
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-light: #64748B;
+  --color-bg-primary: #0F172A;
+  --color-bg-secondary: #1E293B;
+  --color-bg-tertiary: #334155;
+  --color-border: #334155;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] body {
+  background: #0F172A;
+  color: var(--color-text-primary);
+}
+
 /* Reset */
 * {
   margin: 0;
@@ -165,8 +184,25 @@ input, textarea, select {
   /* Touch-friendly minimum height */
   min-height: var(--touch-min);
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove native styling for text inputs and selects, but NOT radios/checkboxes */
+input:not([type="radio"]):not([type="checkbox"]):not([type="color"]):not([type="range"]),
+textarea,
+select {
   -webkit-appearance: none;
   appearance: none;
+}
+
+/* Native radio & checkbox — just accent-color, no custom drawing */
+input[type="radio"],
+input[type="checkbox"] {
+  width: auto;
+  min-height: auto;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  accent-color: #7C3AED;
 }
 
 input:focus, textarea:focus, select:focus {
@@ -174,18 +210,7 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* Fix for iOS input styling */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="password"],
-input[type="number"],
-input[type="search"],
-textarea {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
+/* Fix for iOS input styling — handled above via combined rule */
 
 /* Select arrow styling */
 select {

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { restaurantService, userService } from '../services/apiService';
-import { theme } from '../styles/theme';
+import { TouchButton } from '../components/ui/TouchButton';
+import { useToast } from '../components/ui/Toast';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import './Dashboard.css';
 
 export const SuperAdminDashboard = () => {
   const { logout } = useAuth();
+  const toast = useToast();
   const [restaurants, setRestaurants] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +20,7 @@ export const SuperAdminDashboard = () => {
     phone: '',
     adminId: '',
   });
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
   useEffect(() => {
     loadData();
@@ -37,6 +41,8 @@ export const SuperAdminDashboard = () => {
     }
   };
 
+  const closeConfirm = () => setConfirmModal({ open: false, title: '', message: '', onConfirm: null });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -48,7 +54,7 @@ export const SuperAdminDashboard = () => {
       await loadData();
       resetForm();
     } catch (error) {
-      alert('Error saving restaurant: ' + error.message);
+      toast.error('Error saving restaurant: ' + error.message);
     }
   };
 
@@ -63,15 +69,21 @@ export const SuperAdminDashboard = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this restaurant?')) {
-      try {
-        await restaurantService.delete(id);
-        await loadData();
-      } catch (error) {
-        alert('Error deleting restaurant: ' + error.message);
-      }
-    }
+  const handleDelete = (id) => {
+    setConfirmModal({
+      open: true,
+      title: 'Delete Restaurant',
+      message: 'Are you sure you want to delete this restaurant? This cannot be undone.',
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await restaurantService.delete(id);
+          await loadData();
+        } catch (error) {
+          toast.error('Error deleting restaurant: ' + error.message);
+        }
+      },
+    });
   };
 
   const resetForm = () => {
@@ -104,13 +116,12 @@ export const SuperAdminDashboard = () => {
       <div className="dashboard-content">
         <div className="section-header">
           <h2>Restaurants</h2>
-          <button
+          <TouchButton
+            variant="primary"
             onClick={() => setShowForm(true)}
-            className="btn-primary"
-            style={{ background: theme.colors.background.gradient }}
           >
             + Add Restaurant
-          </button>
+          </TouchButton>
         </div>
 
         {showForm && (
@@ -159,12 +170,12 @@ export const SuperAdminDashboard = () => {
                 </select>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn-primary" style={{ background: theme.colors.background.gradient }}>
+                <TouchButton type="submit" variant="primary">
                   {editingRestaurant ? 'Update' : 'Create'}
-                </button>
-                <button type="button" onClick={resetForm} className="btn-secondary">
+                </TouchButton>
+                <TouchButton variant="secondary" onClick={resetForm}>
                   Cancel
-                </button>
+                </TouchButton>
               </div>
             </form>
           </div>
@@ -223,6 +234,14 @@ export const SuperAdminDashboard = () => {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 };

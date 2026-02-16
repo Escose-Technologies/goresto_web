@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Rating } from './Rating';
+import { useToast } from '../ui/Toast';
 import './ReviewSection.css';
 
 export const ReviewSection = ({
@@ -8,6 +9,7 @@ export const ReviewSection = ({
   onSubmitReview,
   showForm = true,
 }) => {
+  const toast = useToast();
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -17,7 +19,7 @@ export const ReviewSection = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
-      alert('Please select a rating');
+      toast.warning('Please select a rating');
       return;
     }
 
@@ -34,7 +36,7 @@ export const ReviewSection = ({
       setCustomerName('');
       setShowReviewForm(false);
     } catch (error) {
-      alert('Failed to submit review. Please try again.');
+      toast.error('Failed to submit review. Please try again.');
     } finally {
       setSubmitting(false);
     }

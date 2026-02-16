@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
+import { useToast } from '../components/ui/Toast';
 import { theme } from '../styles/theme';
 import { SearchBar, FilterPills } from '../components/ui';
 import { BottomSheet } from '../components/ui/BottomSheet';
@@ -12,6 +13,7 @@ import { ReviewSection } from '../components/menu/ReviewSection';
 import './PublicMenu.css';
 
 export const PublicMenu = () => {
+  const toast = useToast();
   const { restaurantId } = useParams();
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
@@ -39,7 +41,10 @@ export const PublicMenu = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [itemReviews, setItemReviews] = useState({});
 
-  const { joinPublic, onOrderUpdated } = useSocket();
+  const { joinPublic, onOrderUpdated, callStaff } = useSocket();
+
+  // Call Staff state
+  const [callStaffSent, setCallStaffSent] = useState(false);
 
   // Socket: join public room for real-time order status updates
   useEffect(() => {
@@ -221,17 +226,17 @@ export const PublicMenu = () => {
 
   const handlePlaceOrder = async () => {
     if (cart.length === 0) {
-      alert('Your cart is empty. Please add items before placing an order.');
+      toast.warning('Your cart is empty. Please add items before placing an order.');
       return;
     }
 
     if (!tableNumber) {
-      alert('Table number is required. Please access this menu through a table QR code.');
+      toast.warning('Table number is required. Please access this menu through a table QR code.');
       return;
     }
 
     if (!customerName.trim() || !customerMobile.trim()) {
-      alert('Please enter your name and mobile number to place an order.');
+      toast.warning('Please enter your name and mobile number to place an order.');
       return;
     }
 
@@ -263,13 +268,13 @@ export const PublicMenu = () => {
       }, 5000);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      toast.error('Failed to place order. Please try again.');
     }
   };
 
   const handleCheckOrderStatus = async () => {
     if (!statusCheckName.trim() || !statusCheckMobile.trim()) {
-      alert('Please enter your name and mobile number to check order status.');
+      toast.warning('Please enter your name and mobile number to check order status.');
       return;
     }
 
@@ -282,11 +287,11 @@ export const PublicMenu = () => {
       );
       setCustomerOrders(orders);
       if (orders.length === 0) {
-        alert('No orders found with the provided name and mobile number.');
+        toast.info('No orders found with the provided name and mobile number.');
       }
     } catch (error) {
       console.error('Error checking order status:', error);
-      alert('Failed to check order status. Please try again.');
+      toast.error('Failed to check order status. Please try again.');
     } finally {
       setStatusCheckLoading(false);
     }
@@ -336,6 +341,17 @@ export const PublicMenu = () => {
       'ready': 'Ready',
     };
     return statusMap[status] || status;
+  };
+
+  const handleCallStaff = async () => {
+    if (callStaffSent) return;
+    setCallStaffSent(true);
+    try {
+      await callStaff(restaurantId, tableNumber, customerName || undefined);
+    } catch (err) {
+      console.error('Failed to call staff:', err);
+    }
+    setTimeout(() => setCallStaffSent(false), 5000);
   };
 
   const handleItemClick = (item) => {
@@ -402,6 +418,20 @@ export const PublicMenu = () => {
             </svg>
             Check Order Status
           </button>
+
+          {settings?.allowCallStaff && tableNumber && (
+            <button
+              className={`call-staff-btn ${callStaffSent ? 'call-staff-sent' : ''}`}
+              onClick={handleCallStaff}
+              disabled={callStaffSent}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {callStaffSent ? 'Staff Notified!' : 'Call Staff'}
+            </button>
+          )}
 
           {settings?.discountText && (
             <div className="discount-banner">
@@ -527,11 +557,15 @@ export const PublicMenu = () => {
                   className="public-menu-item"
                   onClick={() => handleItemClick(item)}
                 >
-                  {item.image && (
-                    <div className="public-menu-item-image">
+                  <div className="public-menu-item-image">
+                    {item.image ? (
                       <img src={item.image} alt={item.name} loading="lazy" />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="public-menu-item-image-placeholder">
+                        <span className="material-symbols-outlined">restaurant</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="public-menu-item-details">
                     <div className="public-menu-item-header">
                       <div className="item-title-row">
@@ -610,11 +644,15 @@ export const PublicMenu = () => {
       >
         {selectedItem && (
           <div className="item-detail-content">
-            {selectedItem.image && (
-              <div className="item-detail-image">
+            <div className="item-detail-image">
+              {selectedItem.image ? (
                 <img src={selectedItem.image} alt={selectedItem.name} />
-              </div>
-            )}
+              ) : (
+                <div className="item-detail-image-placeholder">
+                  <span className="material-symbols-outlined">restaurant</span>
+                </div>
+              )}
+            </div>
 
             <div className="item-detail-info">
               <div className="item-detail-header">

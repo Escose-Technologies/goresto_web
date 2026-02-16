@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { restaurantService, settingsService } from '../services/apiService';
-import { theme } from '../styles/theme';
+import { TouchButton } from '../components/ui/TouchButton';
+import { useToast } from '../components/ui/Toast';
+import { INDIAN_STATES } from '../utils/indianStates';
+import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 import './Settings.css';
 
 export const Settings = ({ onClose }) => {
   const { user } = useAuth();
+  const toast = useToast();
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -13,10 +17,12 @@ export const Settings = ({ onClose }) => {
     restaurantInfo: true,
     businessHours: false,
     currencyPricing: false,
+    billingTax: false,
+    discountPresets: false,
     themeColors: false,
     features: false,
-    promotions: false,
     kitchenDisplay: false,
+    promotions: false,
   });
   const [kdsUrlCopied, setKdsUrlCopied] = useState(false);
   // Currency to symbol mapping
@@ -44,16 +50,37 @@ export const Settings = ({ onClose }) => {
     serviceCharge: 0.1,
     allowOnlineOrders: true,
     allowTableReservations: true,
+    allowCallStaff: true,
     notificationEmail: '',
     discountText: '',
     kitchenPin: '',
+    // Billing & Tax
+    gstin: '',
+    gstScheme: 'regular',
+    gstRate: 5,
+    fssaiNumber: '',
+    placeOfSupply: '',
+    placeOfSupplyCode: '',
+    billPrefix: 'INV',
+    showServiceCharge: false,
+    serviceChargeLabel: 'Service Charge',
+    enableRoundOff: true,
+    enablePackagingCharge: false,
+    defaultPackagingCharge: 0,
+    billFooterText: 'Thank you for dining with us!',
+    showFeedbackQR: false,
+    autoPrintOnBill: false,
+    thermalPrinterWidth: 'eighty_mm',
   });
 
   useEffect(() => {
-    loadSettings();
+    if (user) {
+      loadSettings();
+    }
   }, [user]);
 
   const loadSettings = async () => {
+    setLoading(true);
     try {
       const restaurantData = await restaurantService.getByUserId(user?.id, user?.restaurantId);
       if (restaurantData) {
@@ -100,10 +127,10 @@ export const Settings = ({ onClose }) => {
         address: formData.address,
         phone: formData.phone,
       });
-      alert('Settings saved successfully!');
+      toast.success('Settings saved successfully!');
       if (onClose) onClose();
     } catch (error) {
-      alert('Error saving settings: ' + error.message);
+      toast.error('Error saving settings: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -374,6 +401,379 @@ export const Settings = ({ onClose }) => {
           <button
             type="button"
             className="settings-section-header"
+            onClick={() => toggleSection('billingTax')}
+          >
+            <h2>Billing & Tax</h2>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className={`section-chevron ${expandedSections.billingTax ? 'expanded' : ''}`}
+            >
+              <path
+                d="M5 7.5L10 12.5L15 7.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <div className={`settings-section-content ${expandedSections.billingTax ? 'expanded' : ''}`}>
+
+          {/* GST Registration */}
+          <div className="billing-subsection">
+            <h3 className="billing-subsection-title">GST Registration</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>GST Scheme</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="gstScheme"
+                      value="regular"
+                      checked={formData.gstScheme === 'regular'}
+                      onChange={handleChange}
+                    />
+                    <span>Regular</span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="gstScheme"
+                      value="composition"
+                      checked={formData.gstScheme === 'composition'}
+                      onChange={handleChange}
+                    />
+                    <span>Composition</span>
+                  </label>
+                </div>
+                {formData.gstScheme === 'composition' && (
+                  <p className="form-hint" style={{ color: '#B45309' }}>
+                    Composition scheme: Bills will be issued as "Bill of Supply" without tax breakdown.
+                  </p>
+                )}
+              </div>
+              <div className="form-group">
+                <label>GST Rate (%)</label>
+                <select
+                  name="gstRate"
+                  value={formData.gstRate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, gstRate: Number(e.target.value) }))}
+                  disabled={formData.gstScheme === 'composition'}
+                >
+                  <option value={5}>5% (Standard - Restaurants)</option>
+                  <option value={12}>12%</option>
+                  <option value={18}>18% (Hotel Restaurant)</option>
+                  <option value={28}>28%</option>
+                  <option value={0}>0% (Exempt)</option>
+                </select>
+              </div>
+            </div>
+
+            {formData.gstScheme === 'regular' && (
+              <div className="form-group">
+                <label>GSTIN (15-digit)</label>
+                <input
+                  type="text"
+                  name="gstin"
+                  value={formData.gstin || ''}
+                  onChange={(e) => {
+                    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+                    setFormData(prev => ({
+                      ...prev,
+                      gstin: val,
+                      // Auto-fill state code from GSTIN first 2 digits
+                      placeOfSupplyCode: val.length >= 2 ? val.substring(0, 2) : prev.placeOfSupplyCode,
+                      placeOfSupply: val.length >= 2
+                        ? (INDIAN_STATES.find(s => s.code === val.substring(0, 2))?.name || prev.placeOfSupply)
+                        : prev.placeOfSupply,
+                    }));
+                  }}
+                  placeholder="e.g. 29AADCB2230M1ZP"
+                  maxLength={15}
+                  style={{ textTransform: 'uppercase', fontFamily: 'monospace' }}
+                />
+                <p className="form-hint">Required for Tax Invoice. First 2 digits must match your state code.</p>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label>FSSAI License Number (14-digit)</label>
+              <input
+                type="text"
+                name="fssaiNumber"
+                value={formData.fssaiNumber || ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 14);
+                  setFormData(prev => ({ ...prev, fssaiNumber: val }));
+                }}
+                placeholder="e.g. 12345678901234"
+                maxLength={14}
+                inputMode="numeric"
+                style={{ fontFamily: 'monospace' }}
+              />
+              <p className="form-hint">Mandatory on all food business bills in India.</p>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Place of Supply (State)</label>
+                <select
+                  name="placeOfSupply"
+                  value={formData.placeOfSupply || ''}
+                  onChange={(e) => {
+                    const state = INDIAN_STATES.find(s => s.name === e.target.value);
+                    setFormData(prev => ({
+                      ...prev,
+                      placeOfSupply: e.target.value,
+                      placeOfSupplyCode: state?.code || '',
+                    }));
+                  }}
+                >
+                  <option value="">Select State</option>
+                  {INDIAN_STATES.map(s => (
+                    <option key={s.code} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>State Code</label>
+                <input
+                  type="text"
+                  name="placeOfSupplyCode"
+                  value={formData.placeOfSupplyCode || ''}
+                  readOnly
+                  style={{ background: '#F1F5F9', cursor: 'default' }}
+                />
+                <p className="form-hint">Auto-filled from state selection.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bill Preferences */}
+          <div className="billing-subsection">
+            <h3 className="billing-subsection-title">Bill Preferences</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Bill Number Prefix</label>
+                <input
+                  type="text"
+                  name="billPrefix"
+                  value={formData.billPrefix || 'INV'}
+                  onChange={(e) => {
+                    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+                    setFormData(prev => ({ ...prev, billPrefix: val }));
+                  }}
+                  placeholder="INV"
+                  maxLength={5}
+                  style={{ textTransform: 'uppercase' }}
+                />
+                <p className="form-hint">Preview: {formData.billPrefix || 'INV'}/2526/0001</p>
+              </div>
+              <div className="form-group">
+                <label>Printer Width</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="thermalPrinterWidth"
+                      value="eighty_mm"
+                      checked={formData.thermalPrinterWidth === 'eighty_mm'}
+                      onChange={handleChange}
+                    />
+                    <span>80mm</span>
+                  </label>
+                  <label className="radio-label">
+                    <input
+                      type="radio"
+                      name="thermalPrinterWidth"
+                      value="fifty_eight_mm"
+                      checked={formData.thermalPrinterWidth === 'fifty_eight_mm'}
+                      onChange={handleChange}
+                    />
+                    <span>58mm</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="showServiceCharge"
+                    checked={formData.showServiceCharge}
+                    onChange={handleChange}
+                  />
+                  <span>Enable Service Charge</span>
+                </label>
+                {formData.showServiceCharge && (
+                  <>
+                    <div style={{ marginTop: '0.5rem', paddingLeft: '2rem' }}>
+                      <div className="form-row" style={{ marginBottom: 0 }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label>Rate</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <input
+                              type="number"
+                              value={Math.round((formData.serviceCharge || 0) * 100)}
+                              onChange={(e) => setFormData(prev => ({
+                                ...prev,
+                                serviceCharge: Number(e.target.value) / 100,
+                              }))}
+                              min="0"
+                              max="30"
+                              step="1"
+                              style={{ width: '80px' }}
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label>Label</label>
+                          <input
+                            type="text"
+                            name="serviceChargeLabel"
+                            value={formData.serviceChargeLabel || ''}
+                            onChange={handleChange}
+                            placeholder="Service Charge"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <p className="form-hint" style={{ paddingLeft: '2rem', color: '#B45309' }}>
+                      Service charge is included in taxable value for GST (Section 15). Bill will show voluntary disclaimer.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="enablePackagingCharge"
+                    checked={formData.enablePackagingCharge}
+                    onChange={handleChange}
+                  />
+                  <span>Enable Packaging Charge</span>
+                </label>
+                {formData.enablePackagingCharge && (
+                  <div style={{ marginTop: '0.5rem', paddingLeft: '2rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label>Default Amount ({getCurrencySymbol()})</label>
+                      <input
+                        type="number"
+                        name="defaultPackagingCharge"
+                        value={formData.defaultPackagingCharge || 0}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          defaultPackagingCharge: Number(e.target.value),
+                        }))}
+                        min="0"
+                        max="500"
+                        step="5"
+                        style={{ width: '120px' }}
+                      />
+                      <p className="form-hint">Applied to takeaway/delivery orders. Can be overridden per bill.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="enableRoundOff"
+                    checked={formData.enableRoundOff}
+                    onChange={handleChange}
+                  />
+                  <span>Round Off to Nearest {getCurrencySymbol()}1</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="autoPrintOnBill"
+                    checked={formData.autoPrintOnBill}
+                    onChange={handleChange}
+                  />
+                  <span>Auto-print on Bill Generation</span>
+                </label>
+              </div>
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="showFeedbackQR"
+                    checked={formData.showFeedbackQR}
+                    onChange={handleChange}
+                  />
+                  <span>Show Feedback QR on Bill</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Bill Footer Text</label>
+              <input
+                type="text"
+                name="billFooterText"
+                value={formData.billFooterText || ''}
+                onChange={handleChange}
+                placeholder="Thank you for dining with us!"
+                maxLength={500}
+              />
+            </div>
+          </div>
+
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <button
+            type="button"
+            className="settings-section-header"
+            onClick={() => toggleSection('discountPresets')}
+          >
+            <h2>Discount Presets</h2>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className={`section-chevron ${expandedSections.discountPresets ? 'expanded' : ''}`}
+            >
+              <path
+                d="M5 7.5L10 12.5L15 7.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {expandedSections.discountPresets && restaurant && (
+            <div className="settings-section-content">
+              <DiscountPresetManager restaurantId={restaurant.id} toast={toast} />
+            </div>
+          )}
+        </div>
+
+        <div className="settings-section">
+          <button
+            type="button"
+            className="settings-section-header"
             onClick={() => toggleSection('themeColors')}
           >
             <h2>Theme & Colors</h2>
@@ -478,6 +878,18 @@ export const Settings = ({ onClose }) => {
               />
               <span>Allow Table Reservations</span>
             </label>
+          </div>
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                name="allowCallStaff"
+                checked={formData.allowCallStaff}
+                onChange={handleChange}
+              />
+              <span>Allow Call Staff</span>
+            </label>
+            <p className="form-hint">Customers can request staff assistance from the public menu</p>
           </div>
           <div className="form-group">
             <label>Notification Email</label>
@@ -615,22 +1027,21 @@ export const Settings = ({ onClose }) => {
         </div>
 
         <div className="settings-actions">
-          <button
+          <TouchButton
             type="submit"
-            className="btn-save"
+            variant="primary"
             disabled={saving}
-            style={{ background: theme.colors.background.gradient }}
+            loading={saving}
           >
             {saving ? 'Saving...' : 'Save Settings'}
-          </button>
+          </TouchButton>
           {onClose && (
-            <button
-              type="button"
+            <TouchButton
+              variant="secondary"
               onClick={onClose}
-              className="btn-cancel"
             >
               Cancel
-            </button>
+            </TouchButton>
           )}
         </div>
       </form>

@@ -23,3 +23,23 @@ export const emitOrderUpdated = (restaurantId, order) => {
     console.error('emitOrderUpdated error:', err.message);
   }
 };
+
+export const emitBillCreated = (restaurantId, bill) => {
+  try {
+    const io = getIO();
+    if (!io) return;
+    io.to(`restaurant:${restaurantId}`).emit('bill:new', bill);
+  } catch (err) {
+    console.error('emitBillCreated error:', err.message);
+  }
+};
+
+export const emitBillUpdated = (restaurantId, bill) => {
+  try {
+    const io = getIO();
+    if (!io) return;
+    io.to(`restaurant:${restaurantId}`).emit('bill:updated', bill);
+  } catch (err) {
+    console.error('emitBillUpdated error:', err.message);
+  }
+};

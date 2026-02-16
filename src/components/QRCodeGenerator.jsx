@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useToast } from './ui/Toast';
 import './QRCodeGenerator.css';
 
 // Function to get the appropriate base URL
@@ -49,6 +50,7 @@ const getNetworkIP = () => {
 };
 
 export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber = null, showDownload = true }) => {
+  const toast = useToast();
   const qrRef = useRef(null);
   const [baseUrl, setBaseUrl] = useState(() => getBaseUrl());
   
@@ -172,7 +174,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
           document.body.removeChild(downloadLink);
         } catch (error) {
           console.error('Error creating download:', error);
-          alert('Error downloading QR code. Please try again.');
+          toast.error('Error downloading QR code. Please try again.');
         }
       };
       
@@ -202,7 +204,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
       }
     } catch (error) {
       console.error('Error downloading QR code:', error);
-      alert('Error downloading QR code. Please try again.');
+      toast.error('Error downloading QR code. Please try again.');
     }
   };
 
