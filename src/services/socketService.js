@@ -4,7 +4,9 @@ let socket = null;
 
 export const getSocket = () => {
   if (!socket) {
-    const wsUrl = import.meta.env.VITE_WS_URL || '';
+    // Derive WebSocket URL from API URL if VITE_WS_URL not set
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const wsUrl = import.meta.env.VITE_WS_URL || apiUrl.replace(/\/api\/?$/, '') || '';
     socket = io(wsUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
