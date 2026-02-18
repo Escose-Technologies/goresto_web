@@ -3,30 +3,7 @@ import { TouchButton } from '../ui/TouchButton';
 import { useToast } from '../ui/Toast';
 import './RestaurantProfileForm.css';
 
-const cuisineTypes = [
-  'Indian',
-  'Chinese',
-  'Italian',
-  'Mexican',
-  'Thai',
-  'Japanese',
-  'Korean',
-  'American',
-  'Mediterranean',
-  'French',
-  'Middle Eastern',
-  'Vietnamese',
-  'Greek',
-  'Spanish',
-  'Continental',
-  'Fast Food',
-  'Cafe',
-  'Bakery',
-  'Seafood',
-  'BBQ',
-];
-
-export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
+export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }) => {
   const toast = useToast();
   const logoInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -36,19 +13,18 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
     description: '',
     logo: '',
     coverImage: '',
-    cuisineTypes: [],
     foodType: 'both',
     address: '',
     phone: '',
     email: '',
     website: '',
+    openingTime: '09:00',
+    closingTime: '22:00',
     socialLinks: {
       instagram: '',
       facebook: '',
       twitter: '',
     },
-    openingHours: '',
-    discount: null,
   });
 
   const [logoPreview, setLogoPreview] = useState(null);
@@ -62,19 +38,18 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
         description: restaurant.description || '',
         logo: restaurant.logo || '',
         coverImage: restaurant.coverImage || '',
-        cuisineTypes: restaurant.cuisineTypes || [],
         foodType: restaurant.foodType || 'both',
         address: restaurant.address || '',
         phone: restaurant.phone || '',
         email: restaurant.email || '',
         website: restaurant.website || '',
+        openingTime: settings?.openingTime || '09:00',
+        closingTime: settings?.closingTime || '22:00',
         socialLinks: restaurant.socialLinks || {
           instagram: '',
           facebook: '',
           twitter: '',
         },
-        openingHours: restaurant.openingHours || '',
-        discount: restaurant.discount || null,
       });
       if (restaurant.logo) setLogoPreview(restaurant.logo);
       if (restaurant.coverImage) setCoverPreview(restaurant.coverImage);
@@ -133,14 +108,6 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
     }
   };
 
-  const handleCuisineToggle = (cuisine) => {
-    const currentCuisines = formData.cuisineTypes;
-    const newCuisines = currentCuisines.includes(cuisine)
-      ? currentCuisines.filter((c) => c !== cuisine)
-      : [...currentCuisines, cuisine];
-    setFormData({ ...formData, cuisineTypes: newCuisines });
-  };
-
   const handleSocialLinkChange = (platform, value) => {
     setFormData({
       ...formData,
@@ -159,6 +126,9 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
   return (
     <div className="restaurant-profile-form">
       <h3>Restaurant Profile</h3>
+      <p className="form-hint" style={{ marginBottom: '1rem' }}>
+        Changes saved here will reflect on your public menu page.
+      </p>
       <form onSubmit={handleSubmit}>
         {/* Cover Image */}
         <div className="form-group">
@@ -268,9 +238,10 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
           <p className="form-hint">What type of food does your restaurant serve?</p>
           <div className="food-type-chips">
             {[
-              { value: 'pure_veg', label: 'Pure Veg', desc: 'Vegetarian & egg items only' },
-              { value: 'non_veg', label: 'Non-Veg', desc: 'Primarily non-vegetarian' },
-              { value: 'both', label: 'Veg & Non-Veg', desc: 'Serves both' },
+              { value: 'pure_veg', label: 'Pure Veg', desc: 'Strictly vegetarian, no egg' },
+              { value: 'egg', label: 'Egg', desc: 'Vegetarian & egg items' },
+              { value: 'non_veg', label: 'Non-Veg', desc: 'Includes non-veg, egg & veg' },
+              { value: 'both', label: 'Veg & Non-Veg', desc: 'Serves all types' },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -280,24 +251,6 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
               >
                 <span className="food-type-label">{opt.label}</span>
                 <span className="food-type-desc">{opt.desc}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cuisine Types */}
-        <div className="form-group">
-          <label>Cuisine Types</label>
-          <p className="form-hint">Select all that apply</p>
-          <div className="cuisine-chips">
-            {cuisineTypes.map((cuisine) => (
-              <button
-                key={cuisine}
-                type="button"
-                className={`cuisine-chip ${formData.cuisineTypes.includes(cuisine) ? 'active' : ''}`}
-                onClick={() => handleCuisineToggle(cuisine)}
-              >
-                {cuisine}
               </button>
             ))}
           </div>
@@ -389,14 +342,23 @@ export const RestaurantProfileForm = ({ restaurant, onSave, onCancel }) => {
         {/* Operating Hours */}
         <div className="form-section-title">Operating Hours</div>
 
-        <div className="form-group">
-          <label>Hours</label>
-          <input
-            type="text"
-            value={formData.openingHours}
-            onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })}
-            placeholder="Mon-Fri: 11am-10pm, Sat-Sun: 10am-11pm"
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label>Opening Time</label>
+            <input
+              type="time"
+              value={formData.openingTime}
+              onChange={(e) => setFormData({ ...formData, openingTime: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label>Closing Time</label>
+            <input
+              type="time"
+              value={formData.closingTime}
+              onChange={(e) => setFormData({ ...formData, closingTime: e.target.value })}
+            />
+          </div>
         </div>
 
         {/* Form Actions */}

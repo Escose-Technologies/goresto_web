@@ -189,6 +189,39 @@
   color: #10B981;
 }
 
+/* Social Links */
+.restaurant-social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.social-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #F3F4F6;
+  color: #4B5563;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.social-link-btn:hover,
+.social-link-btn:active {
+  background: #7C3AED;
+  color: white;
+  transform: scale(1.1);
+}
+
+.social-link-btn svg {
+  flex-shrink: 0;
+}
+
 .restaurant-address {
   font-size: 0.875rem;
   color: #6B7280;
@@ -257,12 +290,19 @@
   flex-shrink: 0;
 }
 
-.filter-dot.veg {
+.filter-dot.veg,
+.filter-dot-veg {
   background: #22C55E;
 }
 
-.filter-dot.non-veg {
+.filter-dot.non-veg,
+.filter-dot-nonveg {
   background: #EF4444;
+}
+
+.filter-dot.egg,
+.filter-dot-egg {
+  background: #EAB308;
 }
 
 .clear-filters-btn {

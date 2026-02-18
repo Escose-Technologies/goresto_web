@@ -10,7 +10,7 @@ export const createRestaurantSchema = z.object({
   logo: z.string().optional().nullable(),
   coverImage: z.string().optional().nullable(),
   cuisineTypes: z.array(z.string().max(50)).max(20).optional().default([]),
-  foodType: z.enum(['pure_veg', 'non_veg', 'both']).optional().default('both'),
+  foodType: z.enum(['pure_veg', 'egg', 'non_veg', 'both']).optional().default('both'),
   socialLinks: z.object({
     instagram: z.string().max(200).optional().default(''),
     facebook: z.string().max(200).optional().default(''),

@@ -485,7 +485,7 @@ export const INDIAN_FOOD_DATABASE = [
 /**
  * Search Indian food database with relevance scoring and food type filtering.
  * @param {string} query - Search text (min 2 chars)
- * @param {string} foodType - Restaurant food type: 'pure_veg' | 'non_veg' | 'both'
+ * @param {string} foodType - Restaurant food type: 'pure_veg' | 'egg' | 'non_veg' | 'both'
  * @param {number} limit - Max results to return (default 8)
  * @returns {Array} Matching food items sorted by relevance
  */
@@ -496,6 +496,8 @@ export function searchIndianFoods(query, foodType = 'both', limit = 8) {
   // Step 1: Filter by restaurant food type
   let pool = INDIAN_FOOD_DATABASE;
   if (foodType === 'pure_veg') {
+    pool = pool.filter(item => item.dietary === 'veg');
+  } else if (foodType === 'egg') {
     pool = pool.filter(item => item.dietary === 'veg' || item.dietary === 'egg');
   }
   // 'non_veg' and 'both' see everything

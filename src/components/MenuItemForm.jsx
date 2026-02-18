@@ -53,8 +53,20 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     { id: 'new', label: 'New' },
   ];
 
+  // Compute allowed dietary types based on restaurant food type
+  const allowedDietaryTypes = (() => {
+    switch (foodType) {
+      case 'pure_veg': return ['veg'];
+      case 'egg': return ['veg', 'egg'];
+      case 'non_veg':
+      case 'both':
+      default: return ['veg', 'egg', 'non-veg'];
+    }
+  })();
+
   useEffect(() => {
     if (item) {
+      const dietaryType = item.dietary?.type || 'veg';
       setFormData({
         name: item.name || '',
         price: item.price || '',
@@ -62,11 +74,10 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
         category: item.category || '',
         image: item.image || '',
         available: item.available !== undefined ? item.available : true,
-        dietary: item.dietary || {
-          type: 'veg',
-          spiceLevel: 0,
-          allergens: [],
-          labels: [],
+        dietary: {
+          ...(item.dietary || { type: 'veg', spiceLevel: 0, allergens: [], labels: [] }),
+          // Auto-reset dietary type if no longer allowed by restaurant food type
+          type: allowedDietaryTypes.includes(dietaryType) ? dietaryType : 'veg',
         },
       });
       if (item.image) {
@@ -356,30 +367,36 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
         <div className="form-group">
           <label>Dietary Type *</label>
           <div className="dietary-type-options">
-            <button
-              type="button"
-              className={`dietary-type-btn ${formData.dietary.type === 'veg' ? 'active' : ''}`}
-              onClick={() => handleDietaryTypeChange('veg')}
-            >
-              <span className="dietary-icon dietary-veg"></span>
-              Vegetarian
-            </button>
-            <button
-              type="button"
-              className={`dietary-type-btn ${formData.dietary.type === 'non-veg' ? 'active' : ''}`}
-              onClick={() => handleDietaryTypeChange('non-veg')}
-            >
-              <span className="dietary-icon dietary-non-veg"></span>
-              Non-Veg
-            </button>
-            <button
-              type="button"
-              className={`dietary-type-btn ${formData.dietary.type === 'egg' ? 'active' : ''}`}
-              onClick={() => handleDietaryTypeChange('egg')}
-            >
-              <span className="dietary-icon dietary-egg"></span>
-              Contains Egg
-            </button>
+            {allowedDietaryTypes.includes('veg') && (
+              <button
+                type="button"
+                className={`dietary-type-btn ${formData.dietary.type === 'veg' ? 'active' : ''}`}
+                onClick={() => handleDietaryTypeChange('veg')}
+              >
+                <span className="dietary-icon dietary-veg"></span>
+                Vegetarian
+              </button>
+            )}
+            {allowedDietaryTypes.includes('egg') && (
+              <button
+                type="button"
+                className={`dietary-type-btn ${formData.dietary.type === 'egg' ? 'active' : ''}`}
+                onClick={() => handleDietaryTypeChange('egg')}
+              >
+                <span className="dietary-icon dietary-egg"></span>
+                Contains Egg
+              </button>
+            )}
+            {allowedDietaryTypes.includes('non-veg') && (
+              <button
+                type="button"
+                className={`dietary-type-btn ${formData.dietary.type === 'non-veg' ? 'active' : ''}`}
+                onClick={() => handleDietaryTypeChange('non-veg')}
+              >
+                <span className="dietary-icon dietary-non-veg"></span>
+                Non-Veg
+              </button>
+            )}
           </div>
         </div>
 

@@ -15,8 +15,14 @@ export const getAll = async (restaurantId, query = {}) => {
 
   if (query.from || query.to) {
     where.createdAt = {};
-    if (query.from) where.createdAt.gte = new Date(query.from + 'T00:00:00.000Z');
-    if (query.to) where.createdAt.lte = new Date(query.to + 'T23:59:59.999Z');
+    if (query.from) {
+      const fromDate = new Date(query.from);
+      where.createdAt.gte = isNaN(fromDate) ? new Date(query.from + 'T00:00:00.000Z') : fromDate;
+    }
+    if (query.to) {
+      const toDate = new Date(query.to);
+      where.createdAt.lte = isNaN(toDate) ? new Date(query.to + 'T23:59:59.999Z') : toDate;
+    }
   }
 
   const page = query.page || 1;

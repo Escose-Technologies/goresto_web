@@ -89,13 +89,31 @@ export const PublicMenu = () => {
     }
   };
 
-  const filterOptions = [
-    { id: 'veg', label: 'Veg', icon: <span className="filter-dot filter-dot-veg" /> },
-    { id: 'non-veg', label: 'Non-Veg', icon: <span className="filter-dot filter-dot-nonveg" /> },
-    { id: 'spicy', label: 'Spicy', icon: '🌶️' },
-    { id: 'popular', label: 'Popular', icon: '⭐' },
-    { id: 'new', label: 'New', icon: '✨' },
-  ];
+  const filterOptions = useMemo(() => {
+    const options = [];
+    const ft = restaurant?.foodType;
+
+    // Dietary filters based on restaurant food type
+    if (ft !== 'pure_veg') {
+      // pure_veg only has veg items, so no dietary filter needed
+      options.push({ id: 'veg', label: 'Veg', icon: <span className="filter-dot filter-dot-veg" /> });
+    }
+    if (ft === 'egg' || ft === 'non_veg' || ft === 'both') {
+      options.push({ id: 'egg', label: 'Egg', icon: <span className="filter-dot filter-dot-egg" /> });
+    }
+    if (ft === 'non_veg' || ft === 'both') {
+      options.push({ id: 'non-veg', label: 'Non-Veg', icon: <span className="filter-dot filter-dot-nonveg" /> });
+    }
+
+    // Common filters always shown
+    options.push(
+      { id: 'spicy', label: 'Spicy', icon: '🌶️' },
+      { id: 'popular', label: 'Popular', icon: '⭐' },
+      { id: 'new', label: 'New', icon: '✨' },
+    );
+
+    return options;
+  }, [restaurant?.foodType]);
 
   useEffect(() => {
     loadMenuData();
@@ -154,6 +172,9 @@ export const PublicMenu = () => {
         return activeFilters.every(filter => {
           if (filter === 'veg') {
             return item.dietary?.type === 'veg';
+          }
+          if (filter === 'egg') {
+            return item.dietary?.type === 'egg';
           }
           if (filter === 'non-veg') {
             return item.dietary?.type === 'non-veg';
@@ -475,6 +496,44 @@ export const PublicMenu = () => {
               </div>
             )}
           </div>
+
+          {/* Social Links */}
+          {(restaurant.website || restaurant.socialLinks?.instagram || restaurant.socialLinks?.facebook || restaurant.socialLinks?.twitter) && (
+            <div className="restaurant-social-links">
+              {restaurant.website && (
+                <a href={restaurant.website.startsWith('http') ? restaurant.website : `https://${restaurant.website}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Website">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                </a>
+              )}
+              {restaurant.socialLinks?.instagram && (
+                <a href={restaurant.socialLinks.instagram.startsWith('http') ? restaurant.socialLinks.instagram : `https://instagram.com/${restaurant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Instagram">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                  </svg>
+                </a>
+              )}
+              {restaurant.socialLinks?.facebook && (
+                <a href={restaurant.socialLinks.facebook.startsWith('http') ? restaurant.socialLinks.facebook : `https://facebook.com/${restaurant.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Facebook">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                  </svg>
+                </a>
+              )}
+              {restaurant.socialLinks?.twitter && (
+                <a href={restaurant.socialLinks.twitter.startsWith('http') ? restaurant.socialLinks.twitter : `https://twitter.com/${restaurant.socialLinks.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Twitter / X">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

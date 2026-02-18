@@ -1,0 +1,29 @@
+name: Deploy Backend to OCI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'docker-compose.oci.yml'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy backend to OCI server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ubuntu
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            cd ~/goresto
+            git pull origin main
+            docker compose -f docker-compose.oci.yml build app
+            docker compose -f docker-compose.oci.yml run --rm app npx prisma migrate deploy --schema=prisma/schema.prisma
+            docker compose -f docker-compose.oci.yml up -d app
+            docker image prune -f
+            sleep 5
+            curl -sf https://api.goresto.in/api/health && echo "Deploy successful!" || echo "WARNING: Health check failed!"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, billService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, billService, settingsService, getAccessToken } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
 import { QRCodeGenerator } from '../components/QRCodeGenerator';
 import { MenuItemForm } from '../components/MenuItemForm';
@@ -24,6 +24,7 @@ export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
   const toast = useToast();
   const [restaurant, setRestaurant] = useState(null);
+  const [restaurantSettings, setRestaurantSettings] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [tables, setTables] = useState([]);
@@ -132,6 +133,8 @@ export const RestaurantAdminDashboard = () => {
         setStaff(staffData);
         const analyticsData = await analyticsService.getAnalytics(restaurantData.id);
         setAnalytics(analyticsData);
+        const settingsData = await settingsService.getSettings(restaurantData.id);
+        setRestaurantSettings(settingsData);
       }
     } catch (error) {
       console.error('Error loading restaurant data:', error);
@@ -151,8 +154,17 @@ export const RestaurantAdminDashboard = () => {
   const handleSaveProfile = async (profileData) => {
     try {
       await restaurantService.update(restaurant.id, profileData);
+      // Sync public-facing fields to settings so they reflect on the public menu
+      await settingsService.updateSettings(restaurant.id, {
+        restaurantName: profileData.name,
+        address: profileData.address,
+        phone: profileData.phone,
+        email: profileData.email,
+        openingTime: profileData.openingTime,
+        closingTime: profileData.closingTime,
+      });
       await loadRestaurantData();
-      toast.success('Profile updated successfully!');
+      toast.success('Profile updated! Changes will reflect on the public menu.');
     } catch (error) {
       toast.error('Error updating profile: ' + error.message);
     }
@@ -1065,6 +1077,7 @@ export const RestaurantAdminDashboard = () => {
             </div>
             <RestaurantProfileForm
               restaurant={restaurant}
+              settings={restaurantSettings}
               onSave={handleSaveProfile}
             />
           </>
