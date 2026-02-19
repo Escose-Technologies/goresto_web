@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 import { restaurantService, settingsService } from '../services/apiService';
 import { TouchButton } from '../components/ui/TouchButton';
 import { useToast } from '../components/ui/Toast';
@@ -7,11 +6,9 @@ import { INDIAN_STATES } from '../utils/indianStates';
 import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 import './Settings.css';
 
-export const Settings = ({ onClose }) => {
-  const { user } = useAuth();
+export const Settings = ({ onClose, restaurant: restaurantProp, settings: settingsProp }) => {
   const toast = useToast();
-  const [restaurant, setRestaurant] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [restaurant] = useState(restaurantProp);
   const [saving, setSaving] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     restaurantInfo: true,
@@ -35,7 +32,7 @@ export const Settings = ({ onClose }) => {
     AUD: 'A$',
   };
 
-  const [formData, setFormData] = useState({
+  const defaults = {
     restaurantName: '',
     address: '',
     phone: '',
@@ -54,7 +51,6 @@ export const Settings = ({ onClose }) => {
     notificationEmail: '',
     discountText: '',
     kitchenPin: '',
-    // Billing & Tax
     gstin: '',
     gstScheme: 'regular',
     gstRate: 5,
@@ -71,54 +67,41 @@ export const Settings = ({ onClose }) => {
     showFeedbackQR: false,
     autoPrintOnBill: false,
     thermalPrinterWidth: 'eighty_mm',
-  });
-
-  useEffect(() => {
-    if (user) {
-      loadSettings();
-    }
-  }, [user]);
-
-  const loadSettings = async () => {
-    setLoading(true);
-    try {
-      const restaurantData = await restaurantService.getByUserId(user?.id, user?.restaurantId);
-      if (restaurantData) {
-        setRestaurant(restaurantData);
-        const settings = await settingsService.getSettings(restaurantData.id);
-        if (settings) {
-          // Remove currencySymbol from loaded settings if present (it's now derived)
-          const { currencySymbol, ...settingsWithoutSymbol } = settings;
-          setFormData({
-            ...settingsWithoutSymbol,
-            currency: settings.currency || 'INR',
-          });
-        } else {
-          // Initialize with restaurant data
-          setFormData(prev => ({
-            ...prev,
-            restaurantName: restaurantData.name || '',
-            address: restaurantData.address || '',
-            phone: restaurantData.phone || '',
-            currency: 'INR',
-          }));
-        }
-      }
-    } catch (error) {
-      console.error('Error loading settings:', error);
-    } finally {
-      setLoading(false);
-    }
   };
+
+  const [formData, setFormData] = useState(() => {
+    if (settingsProp) {
+      const { currencySymbol, kitchenPin, ...rest } = settingsProp;
+      return {
+        ...defaults,
+        ...rest,
+        currency: settingsProp.currency || 'INR',
+        // Don't pre-fill the bcrypt hash — show empty so user can set a new PIN
+        kitchenPin: '',
+      };
+    }
+    // Fallback: populate from restaurant prop
+    return {
+      ...defaults,
+      restaurantName: restaurantProp?.name || '',
+      address: restaurantProp?.address || '',
+      phone: restaurantProp?.phone || '',
+    };
+  });
+  // Track whether a kitchen PIN already exists (for UI hint)
+  const [hasExistingPin] = useState(() => !!(settingsProp?.kitchenPin));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       // Add currency symbol to formData before saving
+      const { kitchenPin, ...restFormData } = formData;
       const dataToSave = {
-        ...formData,
+        ...restFormData,
         currencySymbol: getCurrencySymbol(),
+        // Only send kitchenPin if user entered a new 4-digit PIN
+        ...(kitchenPin && kitchenPin.length === 4 ? { kitchenPin } : {}),
       };
       await settingsService.updateSettings(restaurant.id, dataToSave);
       // Also update restaurant basic info
@@ -164,14 +147,6 @@ export const Settings = ({ onClose }) => {
       [section]: !prev[section],
     }));
   };
-
-  if (loading) {
-    return (
-      <div className="settings-container">
-        <div className="loading">Loading settings...</div>
-      </div>
-    );
-  }
 
   if (!restaurant) {
     return (
@@ -944,10 +919,12 @@ export const Settings = ({ onClose }) => {
               pattern="\d{4}"
             />
             <p className="form-hint">
-              Set a 4-digit PIN for kitchen staff to access the Kitchen Display System.
+              {hasExistingPin
+                ? 'A PIN is already set. Enter a new 4-digit PIN to change it, or leave empty to keep current.'
+                : 'Set a 4-digit PIN for kitchen staff to access the Kitchen Display System.'}
             </p>
           </div>
-          {formData.kitchenPin && formData.kitchenPin.length === 4 && restaurant && (
+          {(hasExistingPin || (formData.kitchenPin && formData.kitchenPin.length === 4)) && restaurant && (
             <div className="form-group">
               <label>KDS URL</label>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

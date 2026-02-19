@@ -2,6 +2,13 @@ import { prisma } from '../config/database.js';
 import { NotFoundError } from '../errors/index.js';
 import { formatStaff, toEnum } from '../utils/formatters.js';
 
+// Fields needed by formatStaff — excludes base64 `photo` for list queries
+const STAFF_LIST_SELECT = {
+  id: true, name: true, email: true, phone: true, role: true,
+  hireDate: true, status: true, address: true, emergencyContact: true,
+  notes: true, restaurantId: true, createdAt: true, updatedAt: true,
+};
+
 export const getAll = async (restaurantId, query = {}) => {
   const where = { restaurantId };
   if (query.status) where.status = toEnum(query.status);
@@ -9,6 +16,7 @@ export const getAll = async (restaurantId, query = {}) => {
   const staff = await prisma.staff.findMany({
     where,
     orderBy: { createdAt: 'desc' },
+    select: STAFF_LIST_SELECT,
   });
 
   return staff.map(formatStaff);

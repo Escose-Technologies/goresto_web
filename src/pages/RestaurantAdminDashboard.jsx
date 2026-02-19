@@ -1,23 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, billService, settingsService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, getAccessToken } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
-import { QRCodeGenerator } from '../components/QRCodeGenerator';
-import { MenuItemForm } from '../components/MenuItemForm';
-import { TableForm } from '../components/TableForm';
-import { OrderForm } from '../components/OrderForm';
-import { StaffForm } from '../components/StaffForm';
 import { Settings } from './Settings';
 import { MenuPreview } from '../components/MenuPreview';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsCard';
 import { RestaurantProfileForm } from '../components/forms/RestaurantProfileForm';
-import { TouchButton, IconButton } from '../components/ui/TouchButton';
+import { TouchButton } from '../components/ui/TouchButton';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { GenerateBillModal } from '../components/billing/GenerateBillModal';
 import { BillingTab } from '../components/billing/BillingTab';
+import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
 import { startStaffCallRing } from '../utils/sounds';
-import { getOrderStatusLabel } from '../utils/statusLabels';
+import DashboardLayout from '../layouts/DashboardLayout';
 import './Dashboard.css';
 
 export const RestaurantAdminDashboard = () => {
@@ -32,7 +28,7 @@ export const RestaurantAdminDashboard = () => {
   const [staff, setStaff] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('menu'); // 'menu', 'tables', 'orders', 'staff', 'analytics', 'profile', or 'preview'
+  const [activeTab, setActiveTab] = useState('orders');
   const [showForm, setShowForm] = useState(false); // For new items only
   const [editingItem, setEditingItem] = useState(null);
   const [editingTable, setEditingTable] = useState(null);
@@ -44,9 +40,7 @@ export const RestaurantAdminDashboard = () => {
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
   const [showSettings, setShowSettings] = useState(false);
-  const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => document.documentElement.getAttribute('data-theme') === 'dark');
-  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated } = useSocket();
+  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect } = useSocket();
   const [staffCallAlerts, setStaffCallAlerts] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [showBillModal, setShowBillModal] = useState(false);
@@ -54,14 +48,6 @@ export const RestaurantAdminDashboard = () => {
   const [billingRefreshKey, setBillingRefreshKey] = useState(0);
   const staffCallRingsRef = useRef({});
   const staffCallTablesRef = useRef(new Set());
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('goresto-theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      setDarkMode(savedTheme === 'dark');
-    }
-  }, []);
 
   useEffect(() => {
     loadRestaurantData();
@@ -106,40 +92,76 @@ export const RestaurantAdminDashboard = () => {
       setBillingRefreshKey(k => k + 1);
     });
 
+    // Re-join restaurant room on reconnect (e.g. after network drop)
+    const cleanupConnect = onConnect(() => {
+      const reconnectToken = getAccessToken();
+      if (reconnectToken && restaurant) {
+        joinRestaurant(restaurant.id, reconnectToken);
+      }
+    });
+
     return () => {
       cleanupNew();
       cleanupUpdated();
       cleanupStaffCalled();
       cleanupBillNew();
       cleanupBillUpdated();
+      cleanupConnect();
     };
-  }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated]);
+  }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect]);
 
   const loadRestaurantData = async () => {
     try {
-      // Try to get restaurant by adminId first, then by user's restaurantId
       const restaurantData = await restaurantService.getByUserId(user?.id, user?.restaurantId);
       if (restaurantData) {
         setRestaurant(restaurantData);
-        const items = await menuService.getMenuItems(restaurantData.id);
+        const [items, tablesData, ordersData, staffData, analyticsData, settingsData] = await Promise.all([
+          menuService.getMenuItems(restaurantData.id),
+          tableService.getTables(restaurantData.id),
+          orderService.getOrders(restaurantData.id),
+          staffService.getStaff(restaurantData.id),
+          analyticsService.getAnalytics(restaurantData.id),
+          settingsService.getSettings(restaurantData.id),
+        ]);
         setMenuItems(items);
-        const cats = await menuService.getCategories(restaurantData.id);
-        setCategories(cats);
-        const tablesData = await tableService.getTables(restaurantData.id);
+        // Derive categories client-side — saves 1 API call + DB query
+        setCategories([...new Set(items.map(i => i.category).filter(Boolean))].sort());
         setTables(tablesData);
-        const ordersData = await orderService.getOrders(restaurantData.id);
         setOrders(ordersData);
-        const staffData = await staffService.getStaff(restaurantData.id);
         setStaff(staffData);
-        const analyticsData = await analyticsService.getAnalytics(restaurantData.id);
         setAnalytics(analyticsData);
-        const settingsData = await settingsService.getSettings(restaurantData.id);
         setRestaurantSettings(settingsData);
       }
     } catch (error) {
       console.error('Error loading restaurant data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Scoped refresh helpers — avoid reloading all 7 endpoints when only one tab needs it
+  const refreshAnalytics = async () => {
+    if (!restaurant) return;
+    try {
+      const data = await analyticsService.getAnalytics(restaurant.id);
+      setAnalytics(data);
+    } catch (error) {
+      console.error('Error refreshing analytics:', error);
+    }
+  };
+
+  const refreshPreview = async () => {
+    if (!restaurant) return;
+    try {
+      const [items, settingsData] = await Promise.all([
+        menuService.getMenuItems(restaurant.id),
+        settingsService.getSettings(restaurant.id),
+      ]);
+      setMenuItems(items);
+      setCategories([...new Set(items.map(i => i.category).filter(Boolean))].sort());
+      setRestaurantSettings(settingsData);
+    } catch (error) {
+      console.error('Error refreshing preview:', error);
     }
   };
 
@@ -153,8 +175,7 @@ export const RestaurantAdminDashboard = () => {
 
   const handleSaveProfile = async (profileData) => {
     try {
-      await restaurantService.update(restaurant.id, profileData);
-      // Sync public-facing fields to settings so they reflect on the public menu
+      const updated = await restaurantService.update(restaurant.id, profileData);
       await settingsService.updateSettings(restaurant.id, {
         restaurantName: profileData.name,
         address: profileData.address,
@@ -163,7 +184,7 @@ export const RestaurantAdminDashboard = () => {
         openingTime: profileData.openingTime,
         closingTime: profileData.closingTime,
       });
-      await loadRestaurantData();
+      setRestaurant(updated);
       toast.success('Profile updated! Changes will reflect on the public menu.');
     } catch (error) {
       toast.error('Error updating profile: ' + error.message);
@@ -173,11 +194,16 @@ export const RestaurantAdminDashboard = () => {
   const handleSaveItem = async (itemData) => {
     try {
       if (editingItem) {
-        await menuService.updateMenuItem(restaurant.id, editingItem.id, itemData);
+        const updated = await menuService.updateMenuItem(restaurant.id, editingItem.id, itemData);
+        setMenuItems(prev => prev.map(i => i.id === editingItem.id ? updated : i));
       } else {
-        await menuService.addMenuItem(restaurant.id, itemData);
+        const created = await menuService.addMenuItem(restaurant.id, itemData);
+        setMenuItems(prev => [...prev, created]);
+        // New item may introduce a new category
+        if (itemData.category && !categories.includes(itemData.category)) {
+          setCategories(prev => [...prev, itemData.category]);
+        }
       }
-      await loadRestaurantData();
       handleCancelEdit();
     } catch (error) {
       toast.error('Error saving menu item: ' + error.message);
@@ -194,7 +220,8 @@ export const RestaurantAdminDashboard = () => {
       closeConfirm();
       try {
         await menuService.deleteMenuItem(restaurant.id, itemId);
-        await loadRestaurantData();
+        setMenuItems(prev => prev.filter(i => i.id !== itemId));
+        handleCancelEdit();
       } catch (error) {
         toast.error('Error deleting menu item: ' + error.message);
       }
@@ -204,11 +231,12 @@ export const RestaurantAdminDashboard = () => {
   const handleSaveTable = async (tableData) => {
     try {
       if (editingTable) {
-        await tableService.updateTable(restaurant.id, editingTable.id, tableData);
+        const updated = await tableService.updateTable(restaurant.id, editingTable.id, tableData);
+        setTables(prev => prev.map(t => t.id === editingTable.id ? updated : t));
       } else {
-        await tableService.addTable(restaurant.id, tableData);
+        const created = await tableService.addTable(restaurant.id, tableData);
+        setTables(prev => [...prev, created]);
       }
-      await loadRestaurantData();
       handleCancelEdit();
     } catch (error) {
       toast.error('Error saving table: ' + error.message);
@@ -225,23 +253,12 @@ export const RestaurantAdminDashboard = () => {
       closeConfirm();
       try {
         await tableService.deleteTable(restaurant.id, tableId);
-        await loadRestaurantData();
+        setTables(prev => prev.filter(t => t.id !== tableId));
+        handleCancelEdit();
       } catch (error) {
         toast.error('Error deleting table: ' + error.message);
       }
     });
-  };
-
-  const resetForm = () => {
-    setEditingItem(null);
-    setEditingTable(null);
-    setEditingStaff(null);
-    setShowForm(false);
-  };
-
-  const resetTableForm = () => {
-    setEditingTable(null);
-    setShowForm(false);
   };
 
   const handleCancelEdit = () => {
@@ -255,11 +272,12 @@ export const RestaurantAdminDashboard = () => {
   const handleSaveStaff = async (staffData) => {
     try {
       if (editingStaff) {
-        await staffService.updateStaff(restaurant.id, editingStaff.id, staffData);
+        const updated = await staffService.updateStaff(restaurant.id, editingStaff.id, staffData);
+        setStaff(prev => prev.map(s => s.id === editingStaff.id ? updated : s));
       } else {
-        await staffService.addStaff(restaurant.id, staffData);
+        const created = await staffService.addStaff(restaurant.id, staffData);
+        setStaff(prev => [...prev, created]);
       }
-      await loadRestaurantData();
       handleCancelEdit();
     } catch (error) {
       toast.error('Error saving staff member: ' + error.message);
@@ -276,7 +294,8 @@ export const RestaurantAdminDashboard = () => {
       closeConfirm();
       try {
         await staffService.deleteStaff(restaurant.id, staffId);
-        await loadRestaurantData();
+        setStaff(prev => prev.filter(s => s.id !== staffId));
+        handleCancelEdit();
       } catch (error) {
         toast.error('Error deleting staff member: ' + error.message);
       }
@@ -286,11 +305,12 @@ export const RestaurantAdminDashboard = () => {
   const handleSaveOrder = async (orderData) => {
     try {
       if (editingOrder) {
-        await orderService.updateOrder(restaurant.id, editingOrder.id, orderData);
+        const updated = await orderService.updateOrder(restaurant.id, editingOrder.id, orderData);
+        setOrders(prev => prev.map(o => o.id === editingOrder.id ? updated : o));
       } else {
-        await orderService.addOrder(restaurant.id, orderData);
+        const created = await orderService.addOrder(restaurant.id, orderData);
+        setOrders(prev => [created, ...prev]);
       }
-      await loadRestaurantData();
       handleCancelEdit();
     } catch (error) {
       toast.error('Error saving order: ' + error.message);
@@ -307,20 +327,24 @@ export const RestaurantAdminDashboard = () => {
       closeConfirm();
       try {
         await orderService.deleteOrder(restaurant.id, orderId);
-        await loadRestaurantData();
+        setOrders(prev => prev.filter(o => o.id !== orderId));
+        handleCancelEdit();
       } catch (error) {
         toast.error('Error deleting order: ' + error.message);
       }
     });
   };
 
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    try {
-      await orderService.updateOrder(restaurant.id, orderId, { status: newStatus });
-      await loadRestaurantData();
-    } catch (error) {
-      toast.error('Error updating order status: ' + error.message);
-    }
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    // Capture previous status for rollback
+    const prevStatus = orders.find(o => o.id === orderId)?.status;
+    // Optimistic update — UI changes instantly, API fires in background
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    orderService.updateOrder(restaurant.id, orderId, { status: newStatus }).catch((error) => {
+      // Revert on failure
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: prevStatus } : o));
+      toast.error('Failed to update order status: ' + error.message);
+    });
   };
 
   const handleGenerateBill = (order) => {
@@ -329,31 +353,26 @@ export const RestaurantAdminDashboard = () => {
   };
 
   const handleBillCreated = () => {
-    loadRestaurantData();
+    // Bill creation doesn't change order data in our state — just refresh billing tab
     setBillingRefreshKey(k => k + 1);
   };
 
-  const resetOrderForm = () => {
+  const pendingOrderCount = orders.filter(o => o.status === 'pending').length;
+  const orderCounts = pendingOrderCount > 0 ? { orders: pendingOrderCount } : {};
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'settings') {
+      setShowSettings(true);
+      return;
+    }
+    setShowSettings(false);
+    setShowForm(false);
+    setEditingItem(null);
+    setEditingTable(null);
     setEditingOrder(null);
     setEditingStaff(null);
-    setShowForm(false);
   };
-
-  const filteredOrders = orders.filter(order => {
-    if (orderStatusFilter !== 'All' && order.status !== orderStatusFilter) return false;
-    if (orderSearchQuery.trim()) {
-      const q = orderSearchQuery.trim().toLowerCase();
-      const matchesName = order.customerName?.toLowerCase().includes(q);
-      const matchesMobile = order.customerMobile?.toLowerCase().includes(q);
-      const matchesId = order.id.toLowerCase().includes(q);
-      if (!matchesName && !matchesMobile && !matchesId) return false;
-    }
-    return true;
-  });
-
-  const filteredItems = selectedCategory === 'All'
-    ? menuItems
-    : menuItems.filter(item => item.category === selectedCategory);
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -373,7 +392,17 @@ export const RestaurantAdminDashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
+    <DashboardLayout
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+      restaurantName={restaurant.name}
+      userName={user?.name}
+      onLogout={logout}
+      orderCounts={orderCounts}
+      notificationCount={staffCallAlerts.length}
+      connected={true}
+    >
+      {/* Staff call alerts overlay */}
       {staffCallAlerts.length > 0 && (
         <div className="staff-call-overlay">
           <div className="staff-call-overlay-inner">
@@ -436,508 +465,69 @@ export const RestaurantAdminDashboard = () => {
         </div>
       )}
 
-      <header className="dashboard-header">
-        <div>
-          <h1>{restaurant.name}</h1>
-          <p>Menu Management</p>
-        </div>
-      </header>
-
-
+      {/* Settings modal */}
       {showSettings && (
         <div className="settings-modal">
           <div className="settings-modal-content">
-            <Settings onClose={() => setShowSettings(false)} />
+            <Settings onClose={() => setShowSettings(false)} restaurant={restaurant} settings={restaurantSettings} />
           </div>
         </div>
       )}
 
-      <div className="dashboard-content">
-        <div className="tabs-container">
-          {[
-            { key: 'menu', label: 'Menu Items', icon: 'restaurant_menu' },
-            { key: 'tables', label: 'Tables', icon: 'table_restaurant' },
-            { key: 'orders', label: 'Orders', icon: 'receipt_long' },
-            { key: 'billing', label: 'Billing', icon: 'receipt' },
-            { key: 'staff', label: 'Staff', icon: 'groups' },
-            { key: 'analytics', label: 'Analytics', icon: 'bar_chart' },
-            { key: 'preview', label: 'User Preview', icon: 'visibility' },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab(tab.key);
-                setShowForm(false);
-                setEditingItem(null);
-                setEditingTable(null);
-                setEditingOrder(null);
-                setEditingStaff(null);
-              }}
-            >
-              <span className="material-symbols-outlined tab-icon">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-
-          <div className="tabs-bottom-actions">
-            <button
-              className={`tab-btn tab-btn-action ${settingsExpanded ? 'active' : ''}`}
-              onClick={() => setSettingsExpanded(prev => !prev)}
-              title="Settings"
-            >
-              <span className="material-symbols-outlined tab-icon">settings</span>
-              Settings
-              <span className={`material-symbols-outlined settings-chevron ${settingsExpanded ? 'expanded' : ''}`}>
-                expand_more
-              </span>
-            </button>
-
-            {settingsExpanded && (
-              <div className="settings-sub-options">
-                <button
-                  className="tab-btn tab-btn-sub"
-                  onClick={() => {
-                    const next = !darkMode;
-                    setDarkMode(next);
-                    document.documentElement.setAttribute('data-theme', next ? 'dark' : 'light');
-                    localStorage.setItem('goresto-theme', next ? 'dark' : 'light');
-                  }}
-                >
-                  <span className="material-symbols-outlined tab-icon">
-                    {darkMode ? 'light_mode' : 'dark_mode'}
-                  </span>
-                  Theme
-                  <span className="sub-option-value">{darkMode ? 'Dark' : 'Light'}</span>
-                </button>
-                <button
-                  className="tab-btn tab-btn-sub"
-                  onClick={() => {
-                    setActiveTab('profile');
-                    setSettingsExpanded(false);
-                    setShowForm(false);
-                    setEditingItem(null);
-                    setEditingTable(null);
-                    setEditingOrder(null);
-                    setEditingStaff(null);
-                  }}
-                >
-                  <span className="material-symbols-outlined tab-icon">person</span>
-                  Profile
-                </button>
-                <button
-                  className="tab-btn tab-btn-sub tab-btn-logout"
-                  onClick={logout}
-                >
-                  <span className="material-symbols-outlined tab-icon">logout</span>
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="tab-content">
-        {activeTab === 'menu' && (
-          <>
-            <div className="section-header">
-              <h2>Menu Items</h2>
-            </div>
-
-            <button
-              className="fab-add-btn"
-              onClick={() => {
-                setEditingItem(null);
-                setShowForm(true);
-              }}
-              title="Add Menu Item"
-            >
-              <span className="material-symbols-outlined">add</span>
-            </button>
-
-            <div className="category-filter">
-              <label>Filter by Category:</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="All">All Categories</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="menu-items-grid">
-              {filteredItems.length === 0 ? (
-                <div className="empty-state">No menu items found. Add your first item!</div>
-              ) : (
-                filteredItems.map((item) => (
-                  <div key={item.id} className="menu-item-card menu-compact-clickable" onClick={() => handleEdit(item)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleEdit(item)}>
-                    <div className="menu-compact">
-                      <div className="menu-compact-top">
-                        {item.image ? (
-                          <img className="menu-item-thumb" src={item.image} alt={item.name} />
-                        ) : (
-                          <div className="menu-item-thumb menu-item-thumb-placeholder">
-                            <span className="material-symbols-outlined">restaurant</span>
-                          </div>
-                        )}
-                        <div className="menu-compact-info">
-                          <div className="menu-compact-title-row">
-                            <h3>{item.name}</h3>
-                            <span className="menu-item-price">₹{item.price.toFixed(2)}</span>
-                          </div>
-                          <div className="menu-compact-meta">
-                            <span className="menu-item-category">{item.category}</span>
-                            {item.available ? (
-                              <span className="status-available">Available</span>
-                            ) : (
-                              <span className="status-unavailable">Unavailable</span>
-                            )}
-                          </div>
-                          <p className="menu-compact-desc">{item.description}</p>
-                        </div>
-                      </div>
-                      <div className="menu-item-image">
-                        {item.image ? (
-                          <img src={item.image} alt={item.name} />
-                        ) : (
-                          <div className="menu-item-image-placeholder">
-                            <span className="material-symbols-outlined">restaurant</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="menu-item-content">
-                        <p className="menu-item-description">{item.description}</p>
-                        {(item.createdAt || item.updatedAt) && (
-                          <div className="menu-item-footer-meta">
-                            {item.updatedAt && (
-                              <span className="meta-date">Updated {new Date(item.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            )}
-                            {item.createdAt && !item.updatedAt && (
-                              <span className="meta-date">Added {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Menu Item Form Modal */}
-            {(showForm || editingItem) && (
-              <div className="form-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { resetForm(); setEditingItem(null); } }}>
-                <div className="form-modal-content">
-                  <button className="form-modal-close" onClick={() => { resetForm(); setEditingItem(null); }}>
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-                  <MenuItemForm
-                    item={editingItem}
-                    categories={categories}
-                    foodType={restaurant?.foodType || 'both'}
-                    onSave={handleSaveItem}
-                    onCancel={() => { resetForm(); setEditingItem(null); }}
-                    onDelete={editingItem ? () => handleDelete(editingItem.id) : undefined}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+      {activeTab === 'menu' && (
+          <MenuSection
+            menuItems={menuItems}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            restaurantFoodType={restaurant?.foodType}
+            showForm={showForm}
+            editingItem={editingItem}
+            onAdd={() => { setEditingItem(null); setShowForm(true); }}
+            onEdit={handleEdit}
+            onSave={handleSaveItem}
+            onCancel={handleCancelEdit}
+            onDelete={handleDelete}
+          />
         )}
 
         {activeTab === 'tables' && (
-          <>
-            <div className="section-header">
-              <h2>Tables</h2>
-            </div>
-
-            <button
-              className="fab-add-btn"
-              onClick={() => {
-                setEditingTable(null);
-                setShowForm(true);
-              }}
-              title="Add Table"
-            >
-              <span className="material-symbols-outlined">add</span>
-            </button>
-
-            <div className="tables-grid">
-              {tables.length === 0 ? (
-                <div className="empty-state">No tables found. Add your first table!</div>
-              ) : (
-                tables.map((table) => (
-                  <div key={table.id} className="table-card table-card-clickable" onClick={() => handleEditTable(table)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleEditTable(table)}>
-                    <div className="table-header">
-                      <h3>Table {table.number}</h3>
-                      <span className={`table-status table-status-${table.status}`}>
-                        {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
-                      </span>
-                    </div>
-                    <div className="table-details">
-                      <p><strong>Capacity:</strong> {table.capacity} guests</p>
-                      <p><strong>Location:</strong> {table.location}</p>
-                    </div>
-                    <div className="table-qr-section">
-                      <button
-                        className="qr-toggle-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedQRCodes(prev => ({
-                            ...prev,
-                            [table.id]: !prev[table.id]
-                          }));
-                        }}
-                      >
-                        <span>QR Code</span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          style={{
-                            transform: expandedQRCodes[table.id] ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.3s ease'
-                          }}
-                        >
-                          <path
-                            d="M4 6L8 10L12 6"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                      {expandedQRCodes[table.id] && (
-                        <div className="qr-content" onClick={(e) => e.stopPropagation()}>
-                          <QRCodeGenerator
-                            restaurantId={restaurant.id}
-                            restaurantName={restaurant.name}
-                            tableNumber={table.number}
-                            showDownload={true}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {(showForm || editingTable) && (
-              <div className="form-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { resetTableForm(); setEditingTable(null); } }}>
-                <div className="form-modal-content">
-                  <button className="form-modal-close" onClick={() => { resetTableForm(); setEditingTable(null); }}>
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-                  <TableForm
-                    table={editingTable}
-                    onSave={handleSaveTable}
-                    onCancel={() => { resetTableForm(); setEditingTable(null); }}
-                    onDelete={editingTable ? () => handleDeleteTable(editingTable.id) : undefined}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+          <TablesSection
+            tables={tables}
+            expandedQRCodes={expandedQRCodes}
+            setExpandedQRCodes={setExpandedQRCodes}
+            restaurantId={restaurant.id}
+            restaurantName={restaurant.name}
+            showForm={showForm}
+            editingTable={editingTable}
+            onAdd={() => { setEditingTable(null); setShowForm(true); }}
+            onEdit={handleEditTable}
+            onSave={handleSaveTable}
+            onCancel={handleCancelEdit}
+            onDelete={handleDeleteTable}
+          />
         )}
 
         {activeTab === 'orders' && (
-          <>
-            <div className="section-header">
-              <h2>Orders</h2>
-            </div>
-
-            <button
-              className="fab-add-btn"
-              onClick={() => {
-                setEditingOrder(null);
-                setShowForm(true);
-              }}
-              title="Create Order"
-            >
-              <span className="material-symbols-outlined">add</span>
-            </button>
-
-            <div className="kitchen-display-link-wrapper">
-              <a
-                href={`/kitchen/${restaurant.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="kitchen-display-link"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-                Open Kitchen Display
-              </a>
-            </div>
-
-            <div className="order-filters-row">
-              <div className="order-search-box">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9CA3AF" strokeWidth="2">
-                  <circle cx="7" cy="7" r="5"/>
-                  <path d="M13 13L10.5 10.5" strokeLinecap="round"/>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search by name, mobile, or order ID..."
-                  value={orderSearchQuery}
-                  onChange={(e) => setOrderSearchQuery(e.target.value)}
-                />
-                {orderSearchQuery && (
-                  <button className="order-search-clear" onClick={() => setOrderSearchQuery('')}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M10 4L4 10M4 4L10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </button>
-                )}
-              </div>
-              <div className="order-status-filter">
-                <label>Status:</label>
-                <select
-                  value={orderStatusFilter}
-                  onChange={(e) => setOrderStatusFilter(e.target.value)}
-                >
-                  <option value="All">All Orders</option>
-                  <option value="pending">Pending</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="on-hold">On Hold</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="prepared">Prepared</option>
-                  <option value="served">Served</option>
-                  <option value="ready">Ready</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="orders-list">
-              {filteredOrders.length === 0 ? (
-                <div className="empty-state">No orders found. Create your first order!</div>
-              ) : (
-                filteredOrders.map((order) => {
-                  const isOldFinished = ['completed', 'cancelled'].includes(order.status) &&
-                    (Date.now() - new Date(order.updatedAt).getTime()) > 3600000;
-                  return (
-                    <div
-                      key={order.id}
-                      className={`order-card${!isOldFinished ? ' order-card-clickable' : ''}`}
-                      onClick={() => { if (!isOldFinished) handleEditOrder(order); }}
-                      role={!isOldFinished ? 'button' : undefined}
-                      tabIndex={!isOldFinished ? 0 : undefined}
-                      onKeyDown={(e) => { if (!isOldFinished && e.key === 'Enter') handleEditOrder(order); }}
-                    >
-                      <div className="order-compact">
-                        <div className="order-compact-top">
-                          <div className="order-compact-info">
-                            <div className="order-compact-title-row">
-                              <h3>#{order.id.slice(-8)}</h3>
-                              <span className={`order-status-badge order-status-${order.status}`}>
-                                {getOrderStatusLabel(order.status)}
-                              </span>
-                              <span className="order-compact-total">₹{order.total.toFixed(2)}</span>
-                            </div>
-                            <div className="order-compact-meta">
-                              <span>Table {order.tableNumber}</span>
-                              {order.customerName && <span className="order-compact-customer">{order.customerName}</span>}
-                              {order.customerMobile && <span>{order.customerMobile}</span>}
-                              <span className="order-compact-date">{new Date(order.createdAt).toLocaleString()}</span>
-                            </div>
-                            <p className="order-id-full">{order.id}</p>
-                          </div>
-                        </div>
-                        <div className="order-compact-items">
-                          {order.items.map((item, index) => (
-                            <span key={index} className="order-compact-item">
-                              {item.quantity}x {item.name}
-                            </span>
-                          ))}
-                        </div>
-                        {order.notes && (
-                          <div className="order-compact-notes">
-                            {order.notes}
-                          </div>
-                        )}
-                        {order.status === 'pending' && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'accepted')} className="btn-order-sm btn-accept">Accept</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'rejected')} className="btn-order-sm btn-reject">Reject</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'on-hold')} className="btn-order-sm btn-hold">Hold</button>
-                          </div>
-                        )}
-                        {(order.status === 'accepted' || order.status === 'on-hold') && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'preparing')} className="btn-order-sm btn-preparing">Start Preparing</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'rejected')} className="btn-order-sm btn-reject">Reject</button>
-                          </div>
-                        )}
-                        {order.status === 'preparing' && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'prepared')} className="btn-order-sm btn-prepared">Prepared</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'ready')} className="btn-order-sm btn-ready">Ready</button>
-                          </div>
-                        )}
-                        {order.status === 'prepared' && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'served')} className="btn-order-sm btn-served">Served</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'ready')} className="btn-order-sm btn-ready">Ready</button>
-                          </div>
-                        )}
-                        {order.status === 'served' && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'completed')} className="btn-order-sm btn-complete">Complete</button>
-                            {!order.billId && (
-                              <button onClick={() => handleGenerateBill(order)} className="btn-order-sm btn-bill">Generate Bill</button>
-                            )}
-                          </div>
-                        )}
-                        {order.status === 'ready' && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'served')} className="btn-order-sm btn-served">Served</button>
-                            <button onClick={() => handleUpdateOrderStatus(order.id, 'completed')} className="btn-order-sm btn-complete">Complete</button>
-                          </div>
-                        )}
-                        {order.status === 'completed' && !order.billId && (
-                          <div className="order-compact-actions" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => handleGenerateBill(order)} className="btn-order-sm btn-bill">Generate Bill</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {(showForm || editingOrder) && (
-              <div className="form-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { resetOrderForm(); setEditingOrder(null); } }}>
-                <div className="form-modal-content">
-                  <button className="form-modal-close" onClick={() => { resetOrderForm(); setEditingOrder(null); }}>
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-                  <OrderForm
-                    order={editingOrder}
-                    tables={tables}
-                    menuItems={menuItems}
-                    onSave={handleSaveOrder}
-                    onCancel={() => { resetOrderForm(); setEditingOrder(null); }}
-                    onDelete={editingOrder ? () => handleDeleteOrder(editingOrder.id) : undefined}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+          <OrdersSection
+            orders={orders}
+            orderStatusFilter={orderStatusFilter}
+            setOrderStatusFilter={setOrderStatusFilter}
+            orderSearchQuery={orderSearchQuery}
+            setOrderSearchQuery={setOrderSearchQuery}
+            restaurantId={restaurant.id}
+            tables={tables}
+            menuItems={menuItems}
+            showForm={showForm}
+            editingOrder={editingOrder}
+            onAdd={() => { setEditingOrder(null); setShowForm(true); }}
+            onEdit={handleEditOrder}
+            onSave={handleSaveOrder}
+            onCancel={handleCancelEdit}
+            onDelete={handleDeleteOrder}
+            onUpdateStatus={handleUpdateOrderStatus}
+            onGenerateBill={handleGenerateBill}
+          />
         )}
 
         {activeTab === 'billing' && (
@@ -946,112 +536,23 @@ export const RestaurantAdminDashboard = () => {
             restaurant={restaurant}
             toast={toast}
             refreshTrigger={billingRefreshKey}
+            settings={restaurantSettings}
           />
         )}
 
         {activeTab === 'staff' && (
-          <>
-            <div className="section-header">
-              <h2>Staff Management</h2>
-            </div>
-
-            <button
-              className="fab-add-btn"
-              onClick={() => {
-                setEditingStaff(null);
-                setShowForm(true);
-              }}
-              title="Onboard New Staff"
-            >
-              <span className="material-symbols-outlined">add</span>
-            </button>
-
-            <div className="staff-status-filter">
-              <label>Filter by Status:</label>
-              <select
-                value={staffStatusFilter}
-                onChange={(e) => setStaffStatusFilter(e.target.value)}
-              >
-                <option value="All">All Staff</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="on-leave">On Leave</option>
-              </select>
-            </div>
-
-            <div className="staff-grid">
-              {staff.filter(s => staffStatusFilter === 'All' || s.status === staffStatusFilter).length === 0 ? (
-                <div className="empty-state">No staff members found. Onboard your first staff member!</div>
-              ) : (
-                staff.filter(s => staffStatusFilter === 'All' || s.status === staffStatusFilter).map((staffMember) => (
-                  <div key={staffMember.id} className="staff-card staff-card-clickable" onClick={() => handleEditStaff(staffMember)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleEditStaff(staffMember)}>
-                    <div className="staff-photo-section">
-                      {staffMember.photo ? (
-                        <img src={staffMember.photo} alt={staffMember.name} className="staff-photo" />
-                      ) : (
-                        <div className="staff-photo-placeholder">
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                          </svg>
-                        </div>
-                      )}
-                      <span className={`staff-status-badge staff-status-${staffMember.status}`}>
-                        {staffMember.status === 'active' ? 'Active' : staffMember.status === 'inactive' ? 'Inactive' : 'On Leave'}
-                      </span>
-                    </div>
-                    <div className="staff-content">
-                      <div className="staff-header">
-                        <h3>{staffMember.name}</h3>
-                        <span className="staff-role">{staffMember.role}</span>
-                      </div>
-                      <div className="staff-info">
-                        <div className="staff-info-item">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 3L8 8L14 3M2 3H14M2 3V13H14V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          <span>{staffMember.email}</span>
-                        </div>
-                        {staffMember.phone && (
-                          <div className="staff-info-item">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                              <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122L9.65 11.5a.678.678 0 0 1-.64-.468l-.267-1.12a.678.678 0 0 0-.58-.49l-2.307-.402a.678.678 0 0 0-.58.122L3.654 1.328Z" stroke="currentColor" strokeWidth="1.2"/>
-                            </svg>
-                            <span>{staffMember.phone}</span>
-                          </div>
-                        )}
-                        {staffMember.hireDate && (
-                          <div className="staff-info-item">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                              <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                              <path d="M8 4V8L10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                            </svg>
-                            <span>Hired: {new Date(staffMember.hireDate).toLocaleDateString()}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {(showForm || editingStaff) && (
-              <div className="form-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { handleCancelEdit(); setEditingStaff(null); } }}>
-                <div className="form-modal-content">
-                  <button className="form-modal-close" onClick={() => { handleCancelEdit(); setEditingStaff(null); }}>
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-                  <StaffForm
-                    staff={editingStaff}
-                    onSave={handleSaveStaff}
-                    onCancel={() => { handleCancelEdit(); setEditingStaff(null); }}
-                    onDelete={editingStaff ? () => handleDeleteStaff(editingStaff.id) : undefined}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+          <StaffSection
+            staff={staff}
+            staffStatusFilter={staffStatusFilter}
+            setStaffStatusFilter={setStaffStatusFilter}
+            showForm={showForm}
+            editingStaff={editingStaff}
+            onAdd={() => { setEditingStaff(null); setShowForm(true); }}
+            onEdit={handleEditStaff}
+            onSave={handleSaveStaff}
+            onCancel={handleCancelEdit}
+            onDelete={handleDeleteStaff}
+          />
         )}
 
         {activeTab === 'analytics' && (
@@ -1059,7 +560,7 @@ export const RestaurantAdminDashboard = () => {
             <div className="section-header">
               <h2>Analytics</h2>
               <button
-                onClick={loadRestaurantData}
+                onClick={refreshAnalytics}
                 className="btn-secondary"
                 title="Refresh Analytics"
               >
@@ -1093,7 +594,7 @@ export const RestaurantAdminDashboard = () => {
                 </p>
               </div>
               <button
-                onClick={loadRestaurantData}
+                onClick={refreshPreview}
                 className="btn-secondary"
                 title="Refresh Preview"
               >
@@ -1101,12 +602,10 @@ export const RestaurantAdminDashboard = () => {
               </button>
             </div>
             <div className="preview-container">
-              <MenuPreview restaurantId={restaurant.id} restaurant={restaurant} />
+              <MenuPreview restaurant={restaurant} settings={restaurantSettings} menuItems={menuItems} categories={categories} />
             </div>
           </>
         )}
-        </div>
-      </div>
 
       {showBillModal && restaurant && billTriggerOrder && (
         <GenerateBillModal
@@ -1115,6 +614,7 @@ export const RestaurantAdminDashboard = () => {
           onClose={() => { setShowBillModal(false); setBillTriggerOrder(null); }}
           onBillCreated={handleBillCreated}
           toast={toast}
+          settings={restaurantSettings}
         />
       )}
 
@@ -1125,7 +625,7 @@ export const RestaurantAdminDashboard = () => {
         onConfirm={confirmModal.onConfirm}
         onCancel={closeConfirm}
       />
-    </div>
+    </DashboardLayout>
   );
 };
 

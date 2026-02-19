@@ -2,8 +2,21 @@ import { prisma } from '../config/database.js';
 import { NotFoundError } from '../errors/index.js';
 import { formatRestaurant } from '../utils/formatters.js';
 
+// Excludes large base64 columns from list/summary queries
+const RESTAURANT_LIST_SELECT = {
+  id: true, name: true, description: true, address: true,
+  phone: true, email: true, website: true, cuisineTypes: true,
+  foodType: true, socialLinks: true, openingHours: true,
+  discount: true, qrCode: true, adminId: true,
+  createdAt: true, updatedAt: true,
+  // logo, coverImage: EXCLUDED — fetch via getById when needed
+};
+
 export const getAll = async () => {
-  const restaurants = await prisma.restaurant.findMany({ orderBy: { createdAt: 'desc' } });
+  const restaurants = await prisma.restaurant.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: RESTAURANT_LIST_SELECT,
+  });
   return restaurants.map(formatRestaurant);
 };
 
@@ -14,15 +27,13 @@ export const getById = async (id) => {
 };
 
 export const getByUser = async (user) => {
-  let restaurant = null;
+  // Single query with OR instead of 2 sequential queries
+  const conditions = [{ adminId: user.id }];
+  if (user.restaurantId) conditions.unshift({ id: user.restaurantId });
 
-  if (user.restaurantId) {
-    restaurant = await prisma.restaurant.findUnique({ where: { id: user.restaurantId } });
-  }
-
-  if (!restaurant) {
-    restaurant = await prisma.restaurant.findFirst({ where: { adminId: user.id } });
-  }
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { OR: conditions },
+  });
 
   if (!restaurant) throw new NotFoundError('Restaurant');
   return formatRestaurant(restaurant);
