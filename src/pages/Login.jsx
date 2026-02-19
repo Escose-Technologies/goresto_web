@@ -137,26 +137,28 @@ export const Login = () => {
           </TouchButton>
         </form>
 
-        <div className="demo-credentials">
-          <div className="divider"></div>
-          <p className="demo-label">Quick Login</p>
-          <button
-            type="button"
-            className="demo-fill-btn"
-            onClick={() => { setEmail('superadmin@goresto.com'); setPassword('admin123'); setRole('superadmin'); }}
-          >
-            <span className="demo-fill-role">Super Admin</span>
-            <span className="demo-fill-email">superadmin@goresto.com</span>
-          </button>
-          <button
-            type="button"
-            className="demo-fill-btn"
-            onClick={() => { setEmail('owner@restaurant.com'); setPassword('owner123'); setRole('restaurant_admin'); }}
-          >
-            <span className="demo-fill-role">Restaurant Admin</span>
-            <span className="demo-fill-email">owner@restaurant.com</span>
-          </button>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="demo-credentials">
+            <div className="divider"></div>
+            <p className="demo-label">Quick Login</p>
+            <button
+              type="button"
+              className="demo-fill-btn"
+              onClick={() => { setEmail('superadmin@goresto.com'); setPassword('admin123'); setRole('superadmin'); }}
+            >
+              <span className="demo-fill-role">Super Admin</span>
+              <span className="demo-fill-email">superadmin@goresto.com</span>
+            </button>
+            <button
+              type="button"
+              className="demo-fill-btn"
+              onClick={() => { setEmail('owner@restaurant.com'); setPassword('owner123'); setRole('restaurant_admin'); }}
+            >
+              <span className="demo-fill-role">Restaurant Admin</span>
+              <span className="demo-fill-email">owner@restaurant.com</span>
+            </button>
+          </div>
+        )}
 
         <Link to="/" className="back-to-home">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">

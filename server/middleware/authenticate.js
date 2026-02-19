@@ -1,5 +1,4 @@
 import { verifyAccessToken } from '../utils/jwt.js';
-import { prisma } from '../config/database.js';
 import { AuthenticationError } from '../errors/index.js';
 
 export const authenticate = async (req, res, next) => {
@@ -12,16 +11,15 @@ export const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decoded = verifyAccessToken(token);
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, email: true, role: true, restaurantId: true },
-    });
+    // Use JWT claims directly — token is short-lived (15min) and contains all needed fields.
+    // This avoids a DB query on every authenticated request.
+    req.user = {
+      id: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      restaurantId: decoded.restaurantId,
+    };
 
-    if (!user) {
-      throw new AuthenticationError('User no longer exists');
-    }
-
-    req.user = user;
     next();
   } catch (err) {
     if (err instanceof AuthenticationError) {

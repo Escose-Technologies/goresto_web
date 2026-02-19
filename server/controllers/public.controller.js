@@ -5,6 +5,7 @@ import * as settingsService from '../services/settings.service.js';
 import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
+import { comparePassword } from '../utils/password.js';
 import { prisma } from '../config/database.js';
 
 export const getRestaurant = asyncHandler(async (req, res) => {
@@ -25,16 +26,55 @@ export const getSettings = asyncHandler(async (req, res) => {
     return res.json({ success: true, data: null });
   }
   // Return only public-safe fields
-  const { notificationEmail, ...publicSettings } = settings;
+  const { notificationEmail, kitchenPin, ...publicSettings } = settings;
   res.json({ success: true, data: publicSettings });
 });
 
 export const placeOrder = asyncHandler(async (req, res) => {
-  const order = await ordersService.create(req.params.restaurantId, {
-    ...req.body,
+  const { restaurantId } = req.params;
+  const { items, ...rest } = req.body;
+
+  // Server-side price lookup — never trust client-submitted prices
+  const menuItemIds = items.map(i => i.menuItemId);
+  const menuItems = await prisma.menuItem.findMany({
+    where: { id: { in: menuItemIds }, restaurantId },
+    select: { id: true, price: true, name: true, available: true },
+  });
+
+  const menuItemMap = new Map(menuItems.map(m => [m.id, m]));
+  const verifiedItems = [];
+
+  for (const item of items) {
+    const dbItem = menuItemMap.get(item.menuItemId);
+    if (!dbItem) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: `Menu item not found: ${item.name}` },
+      });
+    }
+    if (!dbItem.available) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: `Item unavailable: ${dbItem.name}` },
+      });
+    }
+    verifiedItems.push({
+      menuItemId: item.menuItemId,
+      name: dbItem.name,
+      quantity: item.quantity,
+      price: dbItem.price,
+    });
+  }
+
+  const total = verifiedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const order = await ordersService.create(restaurantId, {
+    ...rest,
+    items: verifiedItems,
+    total: Math.round(total * 100) / 100,
     status: 'pending',
   });
-  emitOrderCreated(req.params.restaurantId, order);
+  emitOrderCreated(restaurantId, order);
   res.status(201).json({ success: true, data: order });
 });
 
@@ -80,7 +120,15 @@ export const verifyKitchenPin = asyncHandler(async (req, res) => {
     where: { restaurantId },
   });
 
-  if (!settings || !settings.kitchenPin || settings.kitchenPin !== pin) {
+  if (!settings || !settings.kitchenPin) {
+    return res.status(401).json({
+      success: false,
+      error: { code: 'INVALID_PIN', message: 'Invalid kitchen PIN' },
+    });
+  }
+
+  const pinValid = await comparePassword(pin, settings.kitchenPin);
+  if (!pinValid) {
     return res.status(401).json({
       success: false,
       error: { code: 'INVALID_PIN', message: 'Invalid kitchen PIN' },

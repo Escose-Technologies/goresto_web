@@ -5,15 +5,18 @@ on:
     branches: [main]
     paths:
       - 'server/**'
-      - 'docker-compose.oci.yml'
       - '.github/workflows/deploy.yml'
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy backend to OCI server
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.OCI_HOST }}
           username: ubuntu

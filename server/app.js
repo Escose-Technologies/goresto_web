@@ -20,15 +20,17 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
 
+// Trust proxy (for Nginx reverse proxy) — must be before rate limiter
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Rate limiting
 app.use('/api', generalLimiter);
-
-// Trust proxy (for Nginx reverse proxy)
-app.set('trust proxy', 1);
 
 // API routes
 app.use('/api', routes);

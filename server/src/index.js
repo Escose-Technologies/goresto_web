@@ -15,9 +15,28 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`WebSocket server running on port ${PORT}`);
 });
 
+// Cleanup expired refresh tokens every 6 hours
+const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000;
+const cleanupExpiredTokens = async () => {
+  try {
+    const result = await prisma.refreshToken.deleteMany({
+      where: { expiresAt: { lt: new Date() } },
+    });
+    if (result.count > 0) {
+      console.log(`Cleaned up ${result.count} expired refresh tokens`);
+    }
+  } catch (err) {
+    console.error('Token cleanup failed:', err.message);
+  }
+};
+const cleanupTimer = setInterval(cleanupExpiredTokens, CLEANUP_INTERVAL);
+// Run once on startup after a short delay
+setTimeout(cleanupExpiredTokens, 10000);
+
 // Graceful shutdown for Docker
 const shutdown = async (signal) => {
   console.log(`${signal} received. Shutting down gracefully...`);
+  clearInterval(cleanupTimer);
   server.close(async () => {
     await prisma.$disconnect();
     console.log('Database disconnected. Exiting.');

@@ -297,7 +297,7 @@ model Settings {
   allowCallStaff         Boolean  @default(true)
   notificationEmail      String?
   discountText           String?
-  kitchenPin             String?  @db.VarChar(4)
+  kitchenPin             String?  @db.VarChar(72)
 
   // GST Configuration
   gstin             String?       // 15-digit GSTIN

@@ -4,22 +4,50 @@ export const getAnalytics = async (restaurantId) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Get all orders for this restaurant
-  const allOrders = await prisma.order.findMany({
-    where: { restaurantId },
-  });
+  // Use DB aggregations instead of loading all orders into memory
+  const [totalAgg, todayAgg, ordersByStatus, recentOrders, reviewAgg] = await Promise.all([
+    // Total order stats
+    prisma.order.aggregate({
+      where: { restaurantId },
+      _count: { id: true },
+      _sum: { total: true },
+    }),
+    // Today's order stats
+    prisma.order.aggregate({
+      where: { restaurantId, createdAt: { gte: today } },
+      _count: { id: true },
+      _sum: { total: true },
+    }),
+    // Orders grouped by status
+    prisma.order.groupBy({
+      by: ['status'],
+      where: { restaurantId },
+      _count: { status: true },
+    }),
+    // Recent orders (last 10) + last 500 for popular items calculation
+    prisma.order.findMany({
+      where: { restaurantId },
+      orderBy: { createdAt: 'desc' },
+      take: 500,
+      select: { items: true, tableNumber: true, customerName: true, total: true, createdAt: true },
+    }),
+    // Review stats
+    prisma.review.aggregate({
+      where: { restaurantId },
+      _avg: { rating: true },
+      _count: { rating: true },
+    }),
+  ]);
 
-  const todayOrders = allOrders.filter((o) => o.createdAt >= today);
-
-  const ordersToday = todayOrders.length;
-  const ordersTotal = allOrders.length;
-  const revenueToday = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-  const revenueTotal = allOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const ordersTotal = totalAgg._count.id;
+  const revenueTotal = totalAgg._sum.total || 0;
+  const ordersToday = todayAgg._count.id;
+  const revenueToday = todayAgg._sum.total || 0;
   const averageOrderValue = ordersTotal > 0 ? Math.round((revenueTotal / ordersTotal) * 100) / 100 : 0;
 
-  // Popular items (top 5 by quantity)
+  // Popular items (top 5 by quantity from recent 500 orders)
   const itemCounts = {};
-  for (const order of allOrders) {
+  for (const order of recentOrders) {
     const items = Array.isArray(order.items) ? order.items : [];
     for (const item of items) {
       const key = item.menuItemId || item.name;
@@ -35,29 +63,20 @@ export const getAnalytics = async (restaurantId) => {
     .slice(0, 5)
     .map((i) => ({ ...i, revenue: Math.round(i.revenue * 100) / 100 }));
 
-  // Orders by status
-  const ordersByStatus = {};
-  for (const order of allOrders) {
-    const status = order.status;
-    ordersByStatus[status] = (ordersByStatus[status] || 0) + 1;
+  // Format status counts
+  const statusMap = {};
+  for (const row of ordersByStatus) {
+    statusMap[row.status] = row._count.status;
   }
 
-  // Recent activity (last 10 orders)
-  const recentActivity = allOrders
-    .sort((a, b) => b.createdAt - a.createdAt)
+  // Recent activity (last 10 from the already-fetched orders)
+  const recentActivity = recentOrders
     .slice(0, 10)
     .map((o) => ({
       type: 'order',
       message: `Order from ${o.customerName || `Table ${o.tableNumber}`} - $${o.total}`,
       timestamp: o.createdAt.toISOString(),
     }));
-
-  // Get review stats
-  const reviewAgg = await prisma.review.aggregate({
-    where: { restaurantId },
-    _avg: { rating: true },
-    _count: { rating: true },
-  });
 
   return {
     stats: {
@@ -70,7 +89,7 @@ export const getAnalytics = async (restaurantId) => {
       totalReviews: reviewAgg._count.rating || 0,
     },
     popularItems,
-    ordersByStatus,
+    ordersByStatus: statusMap,
     recentActivity,
   };
 };

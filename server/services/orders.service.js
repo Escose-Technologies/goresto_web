@@ -6,9 +6,14 @@ export const getAll = async (restaurantId, query = {}) => {
   const where = { restaurantId };
   if (query.status) where.status = toEnum(query.status);
 
+  const take = Math.min(parseInt(query.limit) || 200, 500);
+  const skip = parseInt(query.offset) || 0;
+
   const orders = await prisma.order.findMany({
     where,
     orderBy: { createdAt: 'desc' },
+    take,
+    skip,
   });
 
   return orders.map(formatOrder);

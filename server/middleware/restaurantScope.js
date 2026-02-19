@@ -9,8 +9,10 @@ export const restaurantScope = async (req, res, next) => {
       return next(new NotFoundError('Restaurant'));
     }
 
+    // Select only fields needed for authorization — skip large base64 image columns
     const restaurant = await prisma.restaurant.findUnique({
       where: { id: restaurantId },
+      select: { id: true, adminId: true, name: true },
     });
 
     if (!restaurant) {

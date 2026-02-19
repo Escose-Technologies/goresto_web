@@ -1,17 +1,17 @@
 import { Server } from 'socket.io';
 import { env } from './env.js';
 import { verifyAccessToken } from '../utils/jwt.js';
+import { comparePassword } from '../utils/password.js';
 import { prisma } from './database.js';
 import * as ordersService from '../services/orders.service.js';
 
 let io = null;
 
-const allowedOrigins = [
-  env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175',
-];
+const allowedOrigins = [env.FRONTEND_URL];
+
+if (env.NODE_ENV !== 'production') {
+  allowedOrigins.push('http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175');
+}
 
 // Support additional origins via env var (comma-separated)
 if (process.env.ADDITIONAL_CORS_ORIGINS) {
@@ -34,11 +34,18 @@ export const initializeSocket = (httpServer) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
 
-    // Admin dashboard joins restaurant room (JWT auth)
+    // Admin dashboard joins restaurant room (JWT auth + ownership check)
     socket.on('join:restaurant', (data, callback) => {
       try {
         const { restaurantId, token } = data;
         const decoded = verifyAccessToken(token);
+
+        // Verify the user owns this restaurant (superadmin can access any)
+        if (decoded.role !== 'superadmin' && decoded.restaurantId !== restaurantId) {
+          if (callback) callback({ success: false, error: 'Not authorized for this restaurant' });
+          return;
+        }
+
         socket.join(`restaurant:${restaurantId}`);
         console.log(`Admin joined restaurant:${restaurantId}`);
         if (callback) callback({ success: true });
@@ -56,7 +63,13 @@ export const initializeSocket = (httpServer) => {
           where: { restaurantId },
         });
 
-        if (!settings || !settings.kitchenPin || settings.kitchenPin !== pin) {
+        if (!settings || !settings.kitchenPin) {
+          if (callback) callback({ success: false, error: 'Invalid PIN' });
+          return;
+        }
+
+        const pinValid = await comparePassword(pin, settings.kitchenPin);
+        if (!pinValid) {
           if (callback) callback({ success: false, error: 'Invalid PIN' });
           return;
         }
@@ -85,10 +98,20 @@ export const initializeSocket = (httpServer) => {
       if (callback) callback({ success: true });
     });
 
-    // KDS status update via socket
+    // KDS status update via socket (requires kitchen or restaurant room membership)
     socket.on('order:updateStatus', async (data, callback) => {
       try {
         const { restaurantId, orderId, status } = data;
+
+        // Verify the socket is in an authorized room for this restaurant
+        const rooms = socket.rooms;
+        const isInKitchen = rooms.has(`kitchen:${restaurantId}`);
+        const isInRestaurant = rooms.has(`restaurant:${restaurantId}`);
+        if (!isInKitchen && !isInRestaurant) {
+          if (callback) callback({ success: false, error: 'Not authorized for this restaurant' });
+          return;
+        }
+
         const order = await ordersService.updateStatus(restaurantId, orderId, status);
 
         // Broadcast to all rooms

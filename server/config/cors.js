@@ -1,12 +1,11 @@
 import cors from 'cors';
 import { env } from './env.js';
 
-const allowedOrigins = [
-  env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175',
-];
+const allowedOrigins = [env.FRONTEND_URL];
+
+if (env.NODE_ENV !== 'production') {
+  allowedOrigins.push('http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175');
+}
 
 // Support additional origins via env var (comma-separated)
 if (process.env.ADDITIONAL_CORS_ORIGINS) {
