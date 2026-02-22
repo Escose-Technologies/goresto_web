@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { billService, settingsService } from '../../services/apiService';
+import { billService } from '../../services/apiService';
 import { ThermalBill } from './ThermalBill';
 import { A4Invoice } from './A4Invoice';
 import { TouchButton } from '../ui/TouchButton';
@@ -7,24 +7,23 @@ import './ThermalBill.css';
 import './A4Invoice.css';
 import './BillPreview.css';
 
-export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClose, toast }) => {
+export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClose, toast, settings }) => {
   const [bill, setBill] = useState(initialBill);
-  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(!initialBill?.billItems);
   const [downloading, setDownloading] = useState(false);
   const [viewMode, setViewMode] = useState('thermal'); // 'thermal' | 'a4'
   const printRef = useRef(null);
 
   useEffect(() => {
+    // Only fetch full bill if we have summary data without items
+    if (initialBill?.billItems) {
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       try {
-        // Fetch full bill if we only have summary data (no billItems)
-        if (!initialBill?.billItems) {
-          const fullBill = await billService.getBillById(restaurantId, initialBill.id);
-          setBill(fullBill);
-        }
-        const s = await settingsService.getSettings(restaurantId);
-        setSettings(s);
+        const fullBill = await billService.getBillById(restaurantId, initialBill.id);
+        setBill(fullBill);
       } catch (err) {
         toast?.error('Failed to load bill details: ' + err.message);
       } finally {

@@ -2,10 +2,10 @@
 
 /* CSS Custom Properties */
 :root {
-  /* Colors */
-  --color-primary: #7C3AED;
-  --color-primary-light: #9333EA;
-  --color-primary-dark: #6D28D9;
+  /* Colors — Aurora palette (synced with MUI theme) */
+  --color-primary: #3385F0;
+  --color-primary-light: #589BF3;
+  --color-primary-dark: #2B71CC;
   --color-text-primary: #1F2937;
   --color-text-secondary: #6B7280;
   --color-text-light: #9CA3AF;
@@ -25,7 +25,7 @@
   --color-vegan: #10B981;
 
   /* Gradient */
-  --gradient-primary: linear-gradient(180deg, #9333EA 0%, #7C3AED 100%);
+  --gradient-primary: linear-gradient(180deg, #589BF3 0%, #3385F0 100%);
 
   /* Touch Targets (min 44px for accessibility) */
   --touch-min: 44px;
@@ -202,12 +202,12 @@ input[type="checkbox"] {
   padding: 0;
   border: none;
   cursor: pointer;
-  accent-color: #7C3AED;
+  accent-color: #3385F0;
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(51, 133, 240, 0.15);
 }
 
 /* Fix for iOS input styling — handled above via combined rule */

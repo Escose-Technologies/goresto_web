@@ -33,7 +33,7 @@
 
 .summary-range-btn.active {
   background: white;
-  color: #7C3AED;
+  color: #3385F0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -112,7 +112,7 @@
 }
 
 .summary-card-tax .summary-card-value {
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .summary-card-discount .summary-card-value {

@@ -1,17 +1,80 @@
 import { useState, useEffect, useRef } from 'react';
-import { TouchButton } from './ui/TouchButton';
+import Autocomplete from '@mui/material/Autocomplete';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
 import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
-import './MenuItemForm.css';
+
+const allergenOptions = [
+  { id: 'nuts', label: 'Nuts' },
+  { id: 'dairy', label: 'Dairy' },
+  { id: 'gluten', label: 'Gluten' },
+  { id: 'shellfish', label: 'Shellfish' },
+  { id: 'soy', label: 'Soy' },
+  { id: 'eggs', label: 'Eggs' },
+  { id: 'fish', label: 'Fish' },
+  { id: 'sesame', label: 'Sesame' },
+];
+
+const labelOptions = [
+  { id: 'vegan', label: 'Vegan' },
+  { id: 'gluten-free', label: 'Gluten Free' },
+  { id: 'organic', label: 'Organic' },
+  { id: 'sugar-free', label: 'Sugar Free' },
+  { id: 'keto', label: 'Keto' },
+  { id: 'low-calorie', label: 'Low Calorie' },
+  { id: 'spicy', label: 'Spicy' },
+  { id: 'chef-special', label: 'Chef Special' },
+  { id: 'popular', label: 'Popular' },
+  { id: 'new', label: 'New' },
+];
+
+const DIETARY_COLORS = { veg: '#22C55E', egg: '#F59E0B', 'non-veg': '#EF4444' };
+const DIETARY_LABELS = { veg: 'Vegetarian', egg: 'Contains Egg', 'non-veg': 'Non-Veg' };
+
+const DietaryIcon = ({ type, size = 14 }) => (
+  <Box
+    sx={{
+      width: size,
+      height: size,
+      border: `2px solid ${DIETARY_COLORS[type] || '#ccc'}`,
+      borderRadius: '2px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    <Box
+      sx={{
+        width: size * 0.5,
+        height: size * 0.5,
+        bgcolor: DIETARY_COLORS[type] || '#ccc',
+        borderRadius: type === 'non-veg' ? 0 : '50%',
+        ...(type === 'non-veg' && {
+          width: 0,
+          height: 0,
+          bgcolor: 'transparent',
+          borderLeft: `${size * 0.25}px solid transparent`,
+          borderRight: `${size * 0.25}px solid transparent`,
+          borderBottom: `${size * 0.5}px solid ${DIETARY_COLORS[type]}`,
+        }),
+      }}
+    />
+  </Box>
+);
 
 export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onDelete }) => {
   const toast = useToast();
   const fileInputRef = useRef(null);
-  const nameInputRef = useRef(null);
-  const suggestionsRef = useRef(null);
   const [nameSuggestions, setNameSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -19,41 +82,21 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     category: '',
     image: '',
     available: true,
-    dietary: {
-      type: 'veg',
-      spiceLevel: 0,
-      allergens: [],
-      labels: [],
-    },
+    dietary: { type: 'veg', spiceLevel: 0, allergens: [], labels: [] },
   });
+  const [saving, setSaving] = useState(false);
+  const [touched, setTouched] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const allergenOptions = [
-    { id: 'nuts', label: 'Nuts' },
-    { id: 'dairy', label: 'Dairy' },
-    { id: 'gluten', label: 'Gluten' },
-    { id: 'shellfish', label: 'Shellfish' },
-    { id: 'soy', label: 'Soy' },
-    { id: 'eggs', label: 'Eggs' },
-    { id: 'fish', label: 'Fish' },
-    { id: 'sesame', label: 'Sesame' },
-  ];
+  const errors = {
+    name: !formData.name ? 'Item name is required' : '',
+    price: !formData.price ? 'Price is required' : Number(formData.price) <= 0 ? 'Price must be greater than 0' : '',
+    category: !formData.category ? 'Category is required' : '',
+  };
 
-  const labelOptions = [
-    { id: 'vegan', label: 'Vegan' },
-    { id: 'gluten-free', label: 'Gluten Free' },
-    { id: 'organic', label: 'Organic' },
-    { id: 'sugar-free', label: 'Sugar Free' },
-    { id: 'keto', label: 'Keto' },
-    { id: 'low-calorie', label: 'Low Calorie' },
-    { id: 'spicy', label: 'Spicy' },
-    { id: 'chef-special', label: 'Chef Special' },
-    { id: 'popular', label: 'Popular' },
-    { id: 'new', label: 'New' },
-  ];
+  const handleBlur = (field) => () => setTouched((prev) => ({ ...prev, [field]: true }));
 
-  // Compute allowed dietary types based on restaurant food type
   const allowedDietaryTypes = (() => {
     switch (foodType) {
       case 'pure_veg': return ['veg'];
@@ -76,15 +119,10 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
         available: item.available !== undefined ? item.available : true,
         dietary: {
           ...(item.dietary || { type: 'veg', spiceLevel: 0, allergens: [], labels: [] }),
-          // Auto-reset dietary type if no longer allowed by restaurant food type
           type: allowedDietaryTypes.includes(dietaryType) ? dietaryType : 'veg',
         },
       });
-      if (item.image) {
-        setImagePreview(item.image);
-      } else {
-        setImagePreview(null);
-      }
+      setImagePreview(item.image || null);
     } else {
       setImagePreview(null);
     }
@@ -93,31 +131,17 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
   const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.warning('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.warning('Image size should be less than 5MB');
-      return;
-    }
-
+    if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
     setIsUploading(true);
-
     try {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result;
-        setFormData({ ...formData, image: base64String });
-        setImagePreview(base64String);
+        setFormData((prev) => ({ ...prev, image: reader.result }));
+        setImagePreview(reader.result);
         setIsUploading(false);
       };
-      reader.onerror = () => {
-        toast.error('Error reading image file');
-        setIsUploading(false);
-      };
+      reader.onerror = () => { toast.error('Error reading image file'); setIsUploading(false); };
       reader.readAsDataURL(file);
     } catch (error) {
       toast.error('Error processing image: ' + error.message);
@@ -126,404 +150,344 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
   };
 
   const handleRemoveImage = () => {
-    setFormData({ ...formData, image: '' });
+    setFormData((prev) => ({ ...prev, image: '' }));
     setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleDietaryTypeChange = (type) => {
-    setFormData({
-      ...formData,
-      dietary: { ...formData.dietary, type },
-    });
-  };
-
-  const handleSpiceLevelChange = (level) => {
-    setFormData({
-      ...formData,
-      dietary: { ...formData.dietary, spiceLevel: level },
-    });
-  };
-
-  const handleAllergenToggle = (allergenId) => {
-    const currentAllergens = formData.dietary.allergens || [];
-    const newAllergens = currentAllergens.includes(allergenId)
-      ? currentAllergens.filter(a => a !== allergenId)
-      : [...currentAllergens, allergenId];
-
-    setFormData({
-      ...formData,
-      dietary: { ...formData.dietary, allergens: newAllergens },
-    });
-  };
-
-  const handleLabelToggle = (labelId) => {
-    const currentLabels = formData.dietary.labels || [];
-    const newLabels = currentLabels.includes(labelId)
-      ? currentLabels.filter(l => l !== labelId)
-      : [...currentLabels, labelId];
-
-    setFormData({
-      ...formData,
-      dietary: { ...formData.dietary, labels: newLabels },
-    });
-  };
-
-  // ─── Autocomplete handlers ─────────────────────────────
-  const handleNameChange = (value) => {
-    setFormData({ ...formData, name: value });
-    const results = searchIndianFoods(value, foodType);
-    setNameSuggestions(results);
-    setShowSuggestions(results.length > 0);
-    setSelectedSuggestionIndex(-1);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSuggestionSelect = (suggestion) => {
-    // Map dietary type: database uses 'non-veg' frontend format already
+    if (!suggestion) return;
     const dietaryType = suggestion.dietary === 'non_veg' ? 'non-veg' : suggestion.dietary;
-    // Merge labels: keep existing user labels, add suggestion's labels
     const existingLabels = formData.dietary.labels || [];
     const mergedLabels = [...new Set([...existingLabels, ...(suggestion.labels || [])])];
-
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       name: suggestion.name,
       category: suggestion.category,
       description: suggestion.description || '',
       dietary: {
-        ...formData.dietary,
+        ...prev.dietary,
         type: dietaryType,
         spiceLevel: suggestion.spiceLevel ?? 0,
         allergens: suggestion.allergens || [],
         labels: mergedLabels,
       },
-    });
-    setShowSuggestions(false);
-    setNameSuggestions([]);
-    setSelectedSuggestionIndex(-1);
+    }));
   };
 
-  const handleNameKeyDown = (e) => {
-    if (!showSuggestions || nameSuggestions.length === 0) return;
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedSuggestionIndex(prev =>
-        prev < nameSuggestions.length - 1 ? prev + 1 : 0
-      );
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedSuggestionIndex(prev =>
-        prev > 0 ? prev - 1 : nameSuggestions.length - 1
-      );
-    } else if (e.key === 'Enter' && selectedSuggestionIndex >= 0) {
-      e.preventDefault();
-      handleSuggestionSelect(nameSuggestions[selectedSuggestionIndex]);
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
-      setSelectedSuggestionIndex(-1);
-    }
-  };
-
-  // Scroll selected suggestion into view
-  useEffect(() => {
-    if (selectedSuggestionIndex >= 0 && suggestionsRef.current) {
-      const items = suggestionsRef.current.querySelectorAll('.name-suggestion-item');
-      if (items[selectedSuggestionIndex]) {
-        items[selectedSuggestionIndex].scrollIntoView({ block: 'nearest' });
-      }
-    }
-  }, [selectedSuggestionIndex]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        nameInputRef.current && !nameInputRef.current.contains(e.target) &&
-        suggestionsRef.current && !suggestionsRef.current.contains(e.target)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...formData,
-      price: parseFloat(formData.price),
-    });
+    setSaving(true);
+    try {
+      await onSave({ ...formData, price: parseFloat(formData.price) });
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const allCategories = [...new Set([...categories, ...INDIAN_FOOD_CATEGORIES])];
 
   return (
-    <div className="menu-item-form-card">
-      <h3>{item ? 'Edit Menu Item' : 'Add New Menu Item'}</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Item Name *</label>
-            <div className="name-autocomplete-container">
-              <input
-                ref={nameInputRef}
-                type="text"
-                autoComplete="off"
-                value={formData.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                onKeyDown={handleNameKeyDown}
-                onFocus={() => {
-                  if (nameSuggestions.length > 0) setShowSuggestions(true);
-                }}
-                placeholder="Start typing a dish name..."
-                required
-              />
-              {showSuggestions && nameSuggestions.length > 0 && (
-                <ul className="name-suggestions-dropdown" ref={suggestionsRef}>
-                  {nameSuggestions.map((suggestion, i) => (
-                    <li
-                      key={suggestion.name}
-                      className={`name-suggestion-item ${i === selectedSuggestionIndex ? 'selected' : ''}`}
-                      onClick={() => handleSuggestionSelect(suggestion)}
-                      onMouseEnter={() => setSelectedSuggestionIndex(i)}
-                    >
-                      <span className={`suggestion-dietary-dot dietary-${suggestion.dietary === 'non-veg' || suggestion.dietary === 'non_veg' ? 'non-veg' : suggestion.dietary}`} />
-                      <span className="suggestion-name">{suggestion.name}</span>
-                      <span className="suggestion-category">{suggestion.category}</span>
-                    </li>
-                  ))}
-                </ul>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" fontWeight={700} mb={2.5}>
+        {item ? 'Edit Menu Item' : 'Add New Menu Item'}
+      </Typography>
+
+      <Box component="form" onSubmit={handleSubmit}>
+        {/* Name + Price */}
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 7 }}>
+            <Autocomplete
+              freeSolo
+              options={nameSuggestions}
+              getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.name)}
+              inputValue={formData.name}
+              onInputChange={(_, value) => {
+                setFormData((prev) => ({ ...prev, name: value }));
+                setNameSuggestions(searchIndianFoods(value, foodType));
+              }}
+              onChange={(_, value) => {
+                if (value && typeof value !== 'string') handleSuggestionSelect(value);
+              }}
+              renderOption={(props, option) => {
+                const { key, ...rest } = props;
+                return (
+                  <li key={key} {...rest} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <DietaryIcon type={option.dietary === 'non_veg' ? 'non-veg' : option.dietary} size={12} />
+                    <span style={{ flex: 1 }}>{option.name}</span>
+                    <Typography variant="caption" color="text.secondary">{option.category}</Typography>
+                  </li>
+                );
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Item Name" required placeholder="Start typing a dish name..." onBlur={handleBlur('name')} error={touched.name && !!errors.name} helperText={touched.name && errors.name} />
               )}
-            </div>
-          </div>
-          <div className="form-group">
-            <label>Price ($) *</label>
-            <input
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <TextField
+              label="Price (₹)"
               type="number"
-              step="0.01"
-              min="0"
               value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+              onBlur={handleBlur('price')}
+              error={touched.price && !!errors.price}
+              helperText={touched.price && errors.price}
               required
+              fullWidth
+              slotProps={{ htmlInput: { step: '0.01', min: '0' } }}
             />
-          </div>
-        </div>
+          </Grid>
+        </Grid>
 
-        <div className="form-group">
-          <label>Category *</label>
-          <div className="category-input-wrapper">
-            <input
-              type="text"
-              list="categories-list"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              placeholder="Type category name (e.g., Appetizers, Main Course, Desserts)"
-              className="category-input"
-              required
-            />
-            <datalist id="categories-list">
-              {[...new Set([...categories, ...INDIAN_FOOD_CATEGORIES])].map((cat) => (
-                <option key={cat} value={cat} />
-              ))}
-            </datalist>
-            {categories.length > 0 && (
-              <div className="category-suggestions">
-                <span className="suggestions-label">Suggestions:</span>
-                <div className="suggestion-tags">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      className="suggestion-tag"
-                      onClick={() => setFormData({ ...formData, category: cat })}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Category */}
+        <Box mb={2}>
+          <Autocomplete
+            freeSolo
+            options={allCategories}
+            value={formData.category}
+            onInputChange={(_, value) => setFormData((prev) => ({ ...prev, category: value }))}
+            renderInput={(params) => (
+              <TextField {...params} label="Category" required placeholder="Type or select category" onBlur={handleBlur('category')} error={touched.category && !!errors.category} helperText={touched.category && errors.category} />
             )}
-          </div>
-          {formData.category && !categories.includes(formData.category) && (
-            <p className="new-category-note">New category will be created: {formData.category}</p>
-          )}
-          {formData.category && categories.includes(formData.category) && (
-            <p className="existing-category-note">Using existing category</p>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label>Description</label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows="3"
           />
-        </div>
-
-        {/* Dietary Type Selection */}
-        <div className="form-group">
-          <label>Dietary Type *</label>
-          <div className="dietary-type-options">
-            {allowedDietaryTypes.includes('veg') && (
-              <button
-                type="button"
-                className={`dietary-type-btn ${formData.dietary.type === 'veg' ? 'active' : ''}`}
-                onClick={() => handleDietaryTypeChange('veg')}
-              >
-                <span className="dietary-icon dietary-veg"></span>
-                Vegetarian
-              </button>
-            )}
-            {allowedDietaryTypes.includes('egg') && (
-              <button
-                type="button"
-                className={`dietary-type-btn ${formData.dietary.type === 'egg' ? 'active' : ''}`}
-                onClick={() => handleDietaryTypeChange('egg')}
-              >
-                <span className="dietary-icon dietary-egg"></span>
-                Contains Egg
-              </button>
-            )}
-            {allowedDietaryTypes.includes('non-veg') && (
-              <button
-                type="button"
-                className={`dietary-type-btn ${formData.dietary.type === 'non-veg' ? 'active' : ''}`}
-                onClick={() => handleDietaryTypeChange('non-veg')}
-              >
-                <span className="dietary-icon dietary-non-veg"></span>
-                Non-Veg
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Spice Level Selection */}
-        <div className="form-group">
-          <label>Spice Level</label>
-          <div className="spice-level-options">
-            {[0, 1, 2, 3].map((level) => (
-              <button
-                key={level}
-                type="button"
-                className={`spice-level-btn ${formData.dietary.spiceLevel === level ? 'active' : ''}`}
-                onClick={() => handleSpiceLevelChange(level)}
-              >
-                {level === 0 ? 'None' : '🌶️'.repeat(level)}
-                <span className="spice-label">
-                  {level === 0 ? 'Mild' : level === 1 ? 'Light' : level === 2 ? 'Medium' : 'Hot'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Allergens */}
-        <div className="form-group">
-          <label>Allergens</label>
-          <p className="form-hint">Select any allergens present in this dish</p>
-          <div className="checkbox-group">
-            {allergenOptions.map((allergen) => (
-              <label key={allergen.id} className="checkbox-item">
-                <input
-                  type="checkbox"
-                  checked={formData.dietary.allergens?.includes(allergen.id) || false}
-                  onChange={() => handleAllergenToggle(allergen.id)}
+          {categories.length > 0 && (
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap mt={1}>
+              <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5, alignSelf: 'center' }}>
+                Quick:
+              </Typography>
+              {categories.map((cat) => (
+                <Chip
+                  key={cat}
+                  label={cat}
+                  size="small"
+                  variant={formData.category === cat ? 'filled' : 'outlined'}
+                  color={formData.category === cat ? 'primary' : 'default'}
+                  onClick={() => setFormData((prev) => ({ ...prev, category: cat }))}
+                  sx={{ cursor: 'pointer' }}
                 />
-                <span>{allergen.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Optional Labels */}
-        <div className="form-group">
-          <label>Labels (Optional)</label>
-          <p className="form-hint">Add labels to highlight special attributes</p>
-          <div className="checkbox-group labels-group">
-            {labelOptions.map((labelOption) => (
-              <label key={labelOption.id} className="checkbox-item label-item">
-                <input
-                  type="checkbox"
-                  checked={formData.dietary.labels?.includes(labelOption.id) || false}
-                  onChange={() => handleLabelToggle(labelOption.id)}
-                />
-                <span>{labelOption.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Item Image</label>
-          <div className="image-upload-container">
-            {imagePreview ? (
-              <div className="image-preview-wrapper">
-                <img src={imagePreview} alt="Preview" className="image-preview" />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="remove-image-btn"
-                  title="Remove image"
-                >
-                  x
-                </button>
-              </div>
-            ) : (
-              <div className="image-upload-placeholder">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <polyline points="21 15 16 10 5 21"/>
-                </svg>
-                <p>No image selected</p>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="image-file-input"
-              id="image-upload"
-              disabled={isUploading}
-            />
-            <label htmlFor="image-upload" className="image-upload-label">
-              {isUploading ? 'Uploading...' : imagePreview ? 'Change Image' : 'Choose Image from Device'}
-            </label>
-            <p className="image-upload-hint">
-              Supports JPG, PNG, GIF. Max size: 5MB
-            </p>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={formData.available}
-              onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
-            />
-            <span>Available</span>
-          </label>
-        </div>
-
-        <div className="form-actions">
-          <TouchButton type="submit" variant="primary">
-            {item ? 'Update' : 'Create'}
-          </TouchButton>
-          <TouchButton variant="secondary" onClick={onCancel}>
-            Cancel
-          </TouchButton>
-          {item && onDelete && (
-            <TouchButton variant="danger" onClick={onDelete} type="button">
-              Delete
-            </TouchButton>
+              ))}
+            </Stack>
           )}
-        </div>
-      </form>
-    </div>
+          {formData.category && !categories.includes(formData.category) && (
+            <Typography variant="caption" color="primary" mt={0.5}>
+              New category will be created: {formData.category}
+            </Typography>
+          )}
+        </Box>
+
+        {/* Description */}
+        <TextField
+          label="Description"
+          value={formData.description}
+          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+          fullWidth
+          multiline
+          rows={3}
+          sx={{ mb: 2 }}
+        />
+
+        {/* Dietary Type */}
+        <Typography variant="subtitle2" fontWeight={600} mb={1}>
+          Dietary Type *
+        </Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} mb={2}>
+          {allowedDietaryTypes.map((type) => (
+            <Button
+              key={type}
+              variant={formData.dietary.type === type ? 'contained' : 'outlined'}
+              onClick={() => setFormData((prev) => ({ ...prev, dietary: { ...prev.dietary, type } }))}
+              startIcon={<DietaryIcon type={type} size={14} />}
+              sx={{
+                justifyContent: 'flex-start',
+                ...(formData.dietary.type !== type && { color: 'text.secondary', borderColor: 'divider' }),
+              }}
+            >
+              {DIETARY_LABELS[type]}
+            </Button>
+          ))}
+        </Stack>
+
+        {/* Spice Level */}
+        <Typography variant="subtitle2" fontWeight={600} mb={1}>
+          Spice Level
+        </Typography>
+        <Stack direction="row" spacing={1} mb={2} flexWrap="wrap" useFlexGap>
+          {[0, 1, 2, 3].map((level) => (
+            <Button
+              key={level}
+              variant={formData.dietary.spiceLevel === level ? 'contained' : 'outlined'}
+              color={formData.dietary.spiceLevel === level ? 'error' : 'inherit'}
+              onClick={() => setFormData((prev) => ({ ...prev, dietary: { ...prev.dietary, spiceLevel: level } }))}
+              sx={{
+                flexDirection: 'column',
+                minWidth: 70,
+                py: 1,
+                ...(formData.dietary.spiceLevel !== level && { borderColor: 'divider', color: 'text.secondary' }),
+              }}
+            >
+              <span>{level === 0 ? '🚫' : '🌶️'.repeat(level)}</span>
+              <Typography variant="caption">
+                {level === 0 ? 'None' : level === 1 ? 'Light' : level === 2 ? 'Medium' : 'Hot'}
+              </Typography>
+            </Button>
+          ))}
+        </Stack>
+
+        {/* Allergens — native checkboxes */}
+        <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
+          Allergens
+        </Typography>
+        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+          Select any allergens present in this dish
+        </Typography>
+        <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} mb={2}>
+          {allergenOptions.map((allergen) => (
+            <Box
+              key={allergen.id}
+              component="label"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                px: 1.5,
+                py: 0.75,
+                bgcolor: 'grey.50',
+                border: 1,
+                borderColor: formData.dietary.allergens?.includes(allergen.id) ? 'primary.main' : 'divider',
+                borderRadius: 1,
+                cursor: 'pointer',
+                fontSize: 14,
+                minHeight: 36,
+                '&:hover': { borderColor: 'primary.main' },
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={formData.dietary.allergens?.includes(allergen.id) || false}
+                onChange={() => {
+                  const curr = formData.dietary.allergens || [];
+                  const next = curr.includes(allergen.id) ? curr.filter((a) => a !== allergen.id) : [...curr, allergen.id];
+                  setFormData((prev) => ({ ...prev, dietary: { ...prev.dietary, allergens: next } }));
+                }}
+                style={{ accentColor: '#3385F0' }}
+              />
+              <span>{allergen.label}</span>
+            </Box>
+          ))}
+        </Stack>
+
+        {/* Labels — native checkboxes */}
+        <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
+          Labels (Optional)
+        </Typography>
+        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+          Add labels to highlight special attributes
+        </Typography>
+        <Stack direction="row" flexWrap="wrap" useFlexGap spacing={1} mb={2}>
+          {labelOptions.map((labelOpt) => (
+            <Box
+              key={labelOpt.id}
+              component="label"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                px: 1.5,
+                py: 0.75,
+                bgcolor: 'background.paper',
+                border: 1,
+                borderColor: formData.dietary.labels?.includes(labelOpt.id) ? 'primary.main' : 'divider',
+                borderRadius: 1,
+                cursor: 'pointer',
+                fontSize: 14,
+                minHeight: 36,
+                '&:hover': { borderColor: 'primary.main' },
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={formData.dietary.labels?.includes(labelOpt.id) || false}
+                onChange={() => {
+                  const curr = formData.dietary.labels || [];
+                  const next = curr.includes(labelOpt.id) ? curr.filter((l) => l !== labelOpt.id) : [...curr, labelOpt.id];
+                  setFormData((prev) => ({ ...prev, dietary: { ...prev.dietary, labels: next } }));
+                }}
+                style={{ accentColor: '#3385F0' }}
+              />
+              <span>{labelOpt.label}</span>
+            </Box>
+          ))}
+        </Stack>
+
+        {/* Image Upload */}
+        <Typography variant="subtitle2" fontWeight={600} mb={1}>
+          Item Image
+        </Typography>
+        <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
+          <Box sx={{ position: 'relative' }}>
+            {imagePreview ? (
+              <Box sx={{ position: 'relative', width: 120, height: 120, borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider' }}>
+                <Box component="img" src={imagePreview} alt="Preview" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <IconButton
+                  size="small"
+                  onClick={handleRemoveImage}
+                  sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', width: 28, height: 28, p: 0, '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+                >
+                  <Icon icon="mdi:close" width={16} />
+                </IconButton>
+              </Box>
+            ) : (
+              <Box sx={{ width: 120, height: 120, border: '2px dashed', borderColor: 'divider', borderRadius: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.secondary' }}>
+                <Icon icon="mdi:image-outline" width={32} />
+                <Typography variant="caption">No image</Typography>
+              </Box>
+            )}
+          </Box>
+          <Box>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="menu-image-upload" disabled={isUploading} />
+            <label htmlFor="menu-image-upload">
+              <Button variant="outlined" size="small" component="span" disabled={isUploading}>
+                {isUploading ? 'Uploading...' : imagePreview ? 'Change Image' : 'Choose Image'}
+              </Button>
+            </label>
+            <Typography variant="caption" display="block" color="text.secondary" mt={0.5}>
+              JPG, PNG, GIF. Max 5MB
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* Available checkbox */}
+        <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', mb: 2 }}>
+          <input
+            type="checkbox"
+            checked={formData.available}
+            onChange={(e) => setFormData((prev) => ({ ...prev, available: e.target.checked }))}
+            style={{ accentColor: '#3385F0' }}
+          />
+          <Typography variant="body2" fontWeight={500}>Available</Typography>
+        </Box>
+
+        {/* Actions */}
+        <Stack direction="row" spacing={1.5} mt={1}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : undefined}
+          >
+            {item ? 'Update' : 'Create'}
+          </Button>
+          <Button variant="outlined" onClick={onCancel} disabled={saving}>
+            Cancel
+          </Button>
+          {item && onDelete && (
+            <Button variant="outlined" color="error" onClick={onDelete} type="button" sx={{ ml: 'auto' }}>
+              Delete
+            </Button>
+          )}
+        </Stack>
+      </Box>
+    </Box>
   );
 };

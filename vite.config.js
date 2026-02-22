@@ -36,6 +36,9 @@ export default defineConfig({
   define: {
     'import.meta.env.VITE_NETWORK_IP': JSON.stringify(networkIP),
   },
+  optimizeDeps: {
+    include: ['@emotion/styled', '@mui/material', '@mui/x-data-grid'],
+  },
   build: {
     outDir: 'dist',
   },

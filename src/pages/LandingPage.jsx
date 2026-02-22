@@ -157,7 +157,7 @@ export const LandingPage = () => {
       icon: '📱',
       title: 'QR Code Ordering',
       description: 'Generate unique QR codes for each table. Customers scan, browse your menu, and place orders directly from their phone.',
-      color: '#7C3AED',
+      color: '#3385F0',
     },
     {
       icon: '🍽️',

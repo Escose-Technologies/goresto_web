@@ -40,7 +40,7 @@ function getDateRange(preset) {
   }
 }
 
-export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger }) => {
+export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, settings }) => {
   const [billingView, setBillingView] = useState('bills'); // 'bills' | 'reports'
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -327,6 +327,7 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger }) 
           bill={previewBill}
           onClose={() => setPreviewBill(null)}
           toast={toast}
+          settings={settings}
         />
       )}
 

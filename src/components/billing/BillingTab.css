@@ -25,7 +25,7 @@
 
 .billing-view-btn.active {
   background: white;
-  color: #7C3AED;
+  color: #3385F0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -64,7 +64,7 @@
 }
 
 .billing-stat-value.tax {
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .billing-stat-value.pending {
@@ -141,8 +141,8 @@
 }
 
 .bill-card:hover {
-  border-color: #7C3AED;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.1);
+  border-color: #3385F0;
+  box-shadow: 0 1px 4px rgba(51, 133, 240, 0.1);
 }
 
 .bill-card-top {
@@ -228,7 +228,7 @@
 
 .bill-card-discount {
   font-size: 0.6875rem;
-  color: #7C3AED;
+  color: #3385F0;
   background: #F5F3FF;
   padding: 0.2rem 0.5rem;
   border-radius: 0.25rem;
@@ -269,12 +269,12 @@
 }
 
 .bill-action-pay {
-  background: #7C3AED;
+  background: #3385F0;
   color: white;
 }
 
 .bill-action-pay:hover {
-  background: #6D28D9;
+  background: #2B71CC;
 }
 
 .bill-action-cancel {
@@ -306,13 +306,13 @@
   border-radius: 0.5rem;
   padding: 0.5rem 1.5rem;
   font-size: 0.8125rem;
-  color: #7C3AED;
+  color: #3385F0;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .billing-load-more button:hover {
-  border-color: #7C3AED;
+  border-color: #3385F0;
   background: #F5F3FF;
 }
 
@@ -348,7 +348,7 @@
 .pay-modal-total {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #7C3AED;
+  color: #3385F0;
   text-align: center;
   margin-bottom: 1rem;
 }

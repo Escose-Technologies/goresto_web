@@ -48,7 +48,7 @@
 }
 
 .write-review-btn:hover {
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(51, 133, 240, 0.3);
 }
 
 /* Review Form */
@@ -97,7 +97,7 @@
 .review-form-field input:focus,
 .review-form-field textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(51, 133, 240, 0.1);
 }
 
 .review-form-actions {
@@ -134,7 +134,7 @@
 }
 
 .review-form-submit:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(51, 133, 240, 0.3);
 }
 
 .review-form-submit:disabled {

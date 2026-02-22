@@ -39,7 +39,7 @@
 
 .search-bar-input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(51, 133, 240, 0.15);
 }
 
 .search-bar-input::placeholder {
@@ -56,8 +56,8 @@
 .search-bar-clear {
   position: absolute;
   right: var(--spacing-sm);
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,7 +94,7 @@
 
 .search-bar-filter-btn.has-filters {
   border-color: var(--color-primary);
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(51, 133, 240, 0.08);
   color: var(--color-primary);
 }
 
@@ -224,7 +224,7 @@
   background: var(--color-primary);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 6px rgba(51, 133, 240, 0.3);
 }
 
 .price-range-slider::-moz-range-thumb {
@@ -234,7 +234,7 @@
   border-radius: 50%;
   cursor: pointer;
   border: none;
-  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 6px rgba(51, 133, 240, 0.3);
 }
 
 .price-range-labels {

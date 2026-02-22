@@ -1,15 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Typography from '@mui/material/Typography';
+import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { TouchButton } from '../components/ui/TouchButton';
-import { theme } from '../styles/theme';
 import { Logo } from '../components/Logo';
-import './Login.css';
 
 export const Login = () => {
   const [role, setRole] = useState('restaurant_admin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -19,14 +30,9 @@ export const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       await login(email, password, role);
-      if (role === 'superadmin') {
-        navigate('/super-admin');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(role === 'superadmin' ? '/super-admin' : '/dashboard');
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {
@@ -35,139 +41,150 @@ export const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-header">
-        <Link to="/" className="login-logo-link">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2,
+        bgcolor: 'grey.50',
+      }}
+    >
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Link to="/" style={{ textDecoration: 'none' }}>
           <Logo size="xlarge" />
         </Link>
-        <p className="brand-subtitle">Smart Restaurant Management, Simplified</p>
-      </div>
+        <Typography variant="body2" color="text.secondary" mt={1}>
+          Smart Restaurant Management, Simplified
+        </Typography>
+      </Box>
 
-      <div className="login-card">
-        <h2 className="welcome-text">Welcome Back</h2>
-        <p className="welcome-subtitle">Sign in to access your dashboard</p>
+      <Card sx={{ maxWidth: 420, width: '100%', p: { xs: 3, sm: 4 } }}>
+        <Typography variant="h5" fontWeight={700} textAlign="center" mb={0.5}>
+          Welcome Back
+        </Typography>
+        <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
+          Sign in to access your dashboard
+        </Typography>
 
-        <div className="role-selector">
-          <button
-            type="button"
-            className={`role-btn ${role === 'restaurant_admin' ? 'active' : ''}`}
-            onClick={() => setRole('restaurant_admin')}
-          >
-            Admin
-          </button>
-          <button
-            type="button"
-            className={`role-btn ${role === 'superadmin' ? 'active' : ''}`}
-            onClick={() => setRole('superadmin')}
-          >
-            Super Admin
-          </button>
-        </div>
+        <ToggleButtonGroup
+          value={role}
+          exclusive
+          onChange={(_, val) => val && setRole(val)}
+          fullWidth
+          size="small"
+          sx={{ mb: 3 }}
+        >
+          <ToggleButton value="restaurant_admin">Admin</ToggleButton>
+          <ToggleButton value="superadmin">Super Admin</ToggleButton>
+        </ToggleButtonGroup>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && <div className="error-message">{error}</div>}
+        <Box component="form" onSubmit={handleSubmit}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <div className="input-wrapper">
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-wrapper">
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => {
-                  const input = document.getElementById('password');
-                  input.type = input.type === 'password' ? 'text' : 'password';
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                >
-                  <path
-                    d="M1.66667 10C1.66667 10 4.16667 5 10 5C15.8333 5 18.3333 10 18.3333 10C18.3333 10 15.8333 15 10 15C4.16667 15 1.66667 10 1.66667 10Z"
-                    stroke={theme.colors.text.secondary}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z"
-                    stroke={theme.colors.text.secondary}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <TouchButton
-            type="submit"
-            variant="primary"
+          <TextField
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             fullWidth
+            sx={{ mb: 2 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Icon icon="mdi:email-outline" width={20} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          <TextField
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            fullWidth
+            sx={{ mb: 3 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Icon icon="mdi:lock-outline" width={20} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                      <Icon icon={showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} width={20} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
             disabled={loading}
-            loading={loading}
-            className="signin-btn"
+            startIcon={loading ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
             {loading ? 'Signing In...' : 'Sign In'}
-          </TouchButton>
-        </form>
+          </Button>
+        </Box>
 
         {import.meta.env.DEV && (
-          <div className="demo-credentials">
-            <div className="divider"></div>
-            <p className="demo-label">Quick Login</p>
-            <button
-              type="button"
-              className="demo-fill-btn"
-              onClick={() => { setEmail('superadmin@goresto.com'); setPassword('admin123'); setRole('superadmin'); }}
-            >
-              <span className="demo-fill-role">Super Admin</span>
-              <span className="demo-fill-email">superadmin@goresto.com</span>
-            </button>
-            <button
-              type="button"
-              className="demo-fill-btn"
-              onClick={() => { setEmail('owner@restaurant.com'); setPassword('owner123'); setRole('restaurant_admin'); }}
-            >
-              <span className="demo-fill-role">Restaurant Admin</span>
-              <span className="demo-fill-email">owner@restaurant.com</span>
-            </button>
-          </div>
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mb={1}>
+              Quick Login
+            </Typography>
+            <Stack spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                fullWidth
+                onClick={() => { setEmail('superadmin@goresto.com'); setPassword('admin123'); setRole('superadmin'); }}
+                sx={{ justifyContent: 'space-between', textTransform: 'none' }}
+              >
+                <span>Super Admin</span>
+                <Typography variant="caption" color="text.secondary">superadmin@goresto.com</Typography>
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                fullWidth
+                onClick={() => { setEmail('owner@restaurant.com'); setPassword('owner123'); setRole('restaurant_admin'); }}
+                sx={{ justifyContent: 'space-between', textTransform: 'none' }}
+              >
+                <span>Restaurant Admin</span>
+                <Typography variant="caption" color="text.secondary">owner@restaurant.com</Typography>
+              </Button>
+            </Stack>
+          </Box>
         )}
 
-        <Link to="/" className="back-to-home">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M10 12L6 8L10 4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back to Home
-        </Link>
-      </div>
-    </div>
+        <Box sx={{ textAlign: 'center', mt: 3 }}>
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<Icon icon="mdi:arrow-left" width={16} />}
+            size="small"
+            color="inherit"
+          >
+            Back to Home
+          </Button>
+        </Box>
+      </Card>
+    </Box>
   );
 };
-

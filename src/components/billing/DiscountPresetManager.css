@@ -40,8 +40,8 @@
 }
 
 .preset-card:hover {
-  border-color: #7C3AED;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.08);
+  border-color: #3385F0;
+  box-shadow: 0 1px 4px rgba(51, 133, 240, 0.08);
 }
 
 .preset-inactive {
@@ -102,7 +102,7 @@
 
 .preset-card-value {
   font-weight: 600;
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .preset-card-scope {
@@ -143,7 +143,7 @@
 
 .preset-action-toggle:hover {
   background: #F3F4F6;
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .preset-action-delete:hover {
@@ -272,9 +272,9 @@
 }
 
 .preset-day-btn.active {
-  background: #7C3AED;
+  background: #3385F0;
   color: white;
-  border-color: #7C3AED;
+  border-color: #3385F0;
 }
 
 .preset-form-footer {

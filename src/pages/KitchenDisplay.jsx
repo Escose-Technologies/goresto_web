@@ -61,7 +61,7 @@ export const KitchenDisplay = () => {
   // Timer for elapsed time updates
   useEffect(() => {
     if (authenticated) {
-      timerRef.current = setInterval(() => setTick(t => t + 1), 30000);
+      timerRef.current = setInterval(() => setTick(t => t + 1), 10000);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);

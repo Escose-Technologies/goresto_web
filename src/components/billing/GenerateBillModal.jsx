@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { billService, discountPresetService, settingsService } from '../../services/apiService';
+import { billService, discountPresetService } from '../../services/apiService';
 import { OrderSelector } from './OrderSelector';
 import { BillItemsEditor } from './BillItemsEditor';
 import { BillDiscountSection } from './BillDiscountSection';
@@ -15,6 +15,7 @@ export const GenerateBillModal = ({
   onClose,
   onBillCreated,
   toast,
+  settings: settingsProp,
 }) => {
   // The table number comes from the order that triggered the modal
   const tableNumber = triggerOrder?.tableNumber;
@@ -60,13 +61,12 @@ export const GenerateBillModal = ({
   const loadData = async () => {
     try {
       setLoading(true);
-      const [ordersData, settingsData, presetsData] = await Promise.all([
+      const [ordersData, presetsData] = await Promise.all([
         billService.getUnbilledOrders(restaurantId, tableNumber),
-        settingsService.getSettings(restaurantId),
         discountPresetService.getActive(restaurantId).catch(() => []),
       ]);
       setTableOrders(ordersData || []);
-      setSettings(settingsData);
+      setSettings(settingsProp);
       setActivePresets(presetsData || []);
 
       // Pre-select the trigger order

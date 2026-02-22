@@ -1,13 +1,13 @@
 export const theme = {
   colors: {
     primary: {
-      light: '#9333EA',
-      main: '#7C3AED',
-      dark: '#6D28D9',
+      light: '#589BF3',
+      main: '#3385F0',
+      dark: '#2B71CC',
     },
     gradient: {
-      from: '#9333EA',
-      to: '#7C3AED',
+      from: '#589BF3',
+      to: '#3385F0',
     },
     text: {
       primary: '#1F2937',
@@ -18,7 +18,7 @@ export const theme = {
       primary: '#FFFFFF',
       secondary: '#F9FAFB',
       tertiary: '#F3F4F6',
-      gradient: 'linear-gradient(180deg, #9333EA 0%, #7C3AED 100%)',
+      gradient: 'linear-gradient(180deg, #589BF3 0%, #3385F0 100%)',
     },
     border: '#E5E7EB',
     error: '#EF4444',

@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react';
-import { TouchButton } from './ui/TouchButton';
-import './TableForm.css';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export const TableForm = ({ table, onSave, onCancel, onDelete }) => {
+  const [saving, setSaving] = useState(false);
+  const [touched, setTouched] = useState({});
   const [formData, setFormData] = useState({
     number: '',
     capacity: '',
     status: 'available',
     location: 'Indoor',
   });
+
+  const errors = {
+    number: !formData.number ? 'Table number is required' : '',
+    capacity: !formData.capacity ? 'Capacity is required' : Number(formData.capacity) < 1 ? 'Must be at least 1' : '',
+  };
+
+  const handleBlur = (field) => () => setTouched((prev) => ({ ...prev, [field]: true }));
 
   useEffect(() => {
     if (table) {
@@ -21,85 +36,112 @@ export const TableForm = ({ table, onSave, onCancel, onDelete }) => {
     }
   }, [table]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
-      ...formData,
-      capacity: parseInt(formData.capacity),
-    });
+    setSaving(true);
+    try {
+      await onSave({
+        ...formData,
+        capacity: parseInt(formData.capacity),
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   return (
-    <div className="table-form-card">
-      <h3>{table ? 'Edit Table' : 'Add New Table'}</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Table Number *</label>
-            <input
-              type="text"
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" fontWeight={700} mb={2.5}>
+        {table ? 'Edit Table' : 'Add New Table'}
+      </Typography>
+
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Table Number"
               value={formData.number}
-              onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+              onChange={handleChange('number')}
+              onBlur={handleBlur('number')}
+              error={touched.number && !!errors.number}
+              helperText={touched.number && errors.number}
               required
+              fullWidth
               placeholder="e.g., 1, 2, A1"
             />
-          </div>
-          <div className="form-group">
-            <label>Capacity *</label>
-            <input
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Capacity"
               type="number"
-              min="1"
-              max="20"
               value={formData.capacity}
-              onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+              onChange={handleChange('capacity')}
+              onBlur={handleBlur('capacity')}
+              error={touched.capacity && !!errors.capacity}
+              helperText={touched.capacity && errors.capacity}
               required
+              fullWidth
+              slotProps={{ htmlInput: { min: 1, max: 20 } }}
             />
-          </div>
-        </div>
+          </Grid>
+        </Grid>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Status *</label>
-            <select
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Status"
+              select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={handleChange('status')}
               required
+              fullWidth
             >
-              <option value="available">Available</option>
-              <option value="occupied">Occupied</option>
-              <option value="reserved">Reserved</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Location *</label>
-            <select
+              <MenuItem value="available">Available</MenuItem>
+              <MenuItem value="occupied">Occupied</MenuItem>
+              <MenuItem value="reserved">Reserved</MenuItem>
+              <MenuItem value="maintenance">Maintenance</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Location"
+              select
               value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={handleChange('location')}
               required
+              fullWidth
             >
-              <option value="Indoor">Indoor</option>
-              <option value="Outdoor">Outdoor</option>
-              <option value="VIP">VIP</option>
-              <option value="Bar">Bar</option>
-            </select>
-          </div>
-        </div>
+              <MenuItem value="Indoor">Indoor</MenuItem>
+              <MenuItem value="Outdoor">Outdoor</MenuItem>
+              <MenuItem value="VIP">VIP</MenuItem>
+              <MenuItem value="Bar">Bar</MenuItem>
+            </TextField>
+          </Grid>
+        </Grid>
 
-        <div className="form-actions">
-          <TouchButton type="submit" variant="primary">
+        <Stack direction="row" spacing={1.5} mt={3}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : undefined}
+          >
             {table ? 'Update' : 'Create'}
-          </TouchButton>
-          <TouchButton variant="secondary" onClick={onCancel}>
+          </Button>
+          <Button variant="outlined" onClick={onCancel} disabled={saving}>
             Cancel
-          </TouchButton>
+          </Button>
           {table && onDelete && (
-            <TouchButton variant="danger" onClick={onDelete} type="button">Delete</TouchButton>
+            <Button variant="outlined" color="error" onClick={onDelete} type="button" sx={{ ml: 'auto' }}>
+              Delete
+            </Button>
           )}
-        </div>
-      </form>
-    </div>
+        </Stack>
+      </Box>
+    </Box>
   );
 };
-
-

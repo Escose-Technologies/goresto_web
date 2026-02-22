@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react';
-import { menuService, settingsService } from '../services/apiService';
+import { useState, useMemo } from 'react';
 import '../pages/PublicMenu.css';
 
-export const MenuPreview = ({ restaurantId, restaurant }) => {
-  const [settings, setSettings] = useState(null);
-  const [menuItems, setMenuItems] = useState([]);
-  const [categories, setCategories] = useState([]);
+export const MenuPreview = ({ restaurant, settings, menuItems: allMenuItems, categories }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  // Only show available items in preview
+  const menuItems = useMemo(() => (allMenuItems || []).filter(item => item.available), [allMenuItems]);
 
   // Currency symbol mapping
   const currencySymbols = {
@@ -40,40 +38,9 @@ export const MenuPreview = ({ restaurantId, restaurant }) => {
     }
   };
 
-  useEffect(() => {
-    loadMenuData();
-  }, [restaurantId]);
-
-  const loadMenuData = async () => {
-    try {
-      // Load settings for restaurant details
-      const restaurantSettings = await settingsService.getSettings(restaurantId);
-      setSettings(restaurantSettings);
-      
-      const items = await menuService.getMenuItems(restaurantId);
-      const availableItems = items.filter(item => item.available);
-      setMenuItems(availableItems);
-      const cats = await menuService.getCategories(restaurantId);
-      setCategories(cats);
-    } catch (error) {
-      console.error('Error loading menu data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const filteredItems = selectedCategory === 'All'
     ? menuItems
     : menuItems.filter(item => item.category === selectedCategory);
-
-  if (loading) {
-    return (
-      <div className="public-menu-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading preview...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="public-menu-container preview-mode">

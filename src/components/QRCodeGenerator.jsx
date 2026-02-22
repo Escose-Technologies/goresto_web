@@ -119,7 +119,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
           // Draw table number if available (below QR code)
           let brandingY = qrY + qrSize + 20;
           if (tableNumber) {
-            ctx.fillStyle = '#7C3AED';
+            ctx.fillStyle = '#3385F0';
             ctx.font = 'bold 20px Arial, sans-serif';
             const tableText = `Table ${tableNumber}`;
             ctx.fillText(tableText, canvas.width / 2, brandingY);
@@ -156,7 +156,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
           ctx.fillText(poweredByText, startX, brandingY);
           
           // Draw "GoResto" (larger font, purple)
-          ctx.fillStyle = '#7C3AED';
+          ctx.fillStyle = '#3385F0';
           ctx.font = 'bold 22px Arial, sans-serif';
           ctx.fillText(gorestoText, startX + poweredByWidth + spacing, brandingY);
           
@@ -226,7 +226,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
         <button
           onClick={handleDownload}
           className="qr-download-btn"
-          style={{ background: 'linear-gradient(180deg, #9333EA 0%, #7C3AED 100%)' }}
+          style={{ background: 'linear-gradient(180deg, #589BF3 0%, #3385F0 100%)' }}
         >
           Download QR Code
         </button>

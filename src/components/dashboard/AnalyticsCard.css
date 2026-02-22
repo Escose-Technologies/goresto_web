@@ -87,7 +87,7 @@
 
 /* Stat Card Colors */
 .stat-card-primary {
-  border-left: 3px solid #7C3AED;
+  border-left: 3px solid #3385F0;
 }
 
 .stat-card-success {
@@ -149,7 +149,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9333EA 0%, #7C3AED 100%);
+  background: linear-gradient(135deg, #589BF3 0%, #3385F0 100%);
   color: white;
   font-size: 0.6875rem;
   font-weight: 600;

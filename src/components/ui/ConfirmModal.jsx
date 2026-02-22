@@ -1,40 +1,33 @@
-import { useEffect, useRef } from 'react';
-import { TouchButton } from './TouchButton';
-import './ConfirmModal.css';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+const VARIANT_COLOR = {
+  danger: 'error',
+  warning: 'warning',
+  primary: 'primary',
+};
 
 export const ConfirmModal = ({ open, title, message, onConfirm, onCancel, confirmText = 'Delete', variant = 'danger' }) => {
-  const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (open) {
-      modalRef.current?.focus();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === 'Escape' && open) onCancel();
-    };
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [open, onCancel]);
-
-  if (!open) return null;
+  const color = VARIANT_COLOR[variant] || 'error';
 
   return (
-    <div className="confirm-overlay" onClick={onCancel}>
-      <div className="confirm-modal" ref={modalRef} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
-        <h3 className="confirm-title">{title || 'Are you sure?'}</h3>
-        <p className="confirm-message">{message}</p>
-        <div className="confirm-actions">
-          <TouchButton variant="secondary" onClick={onCancel}>
-            Cancel
-          </TouchButton>
-          <TouchButton variant={variant} onClick={onConfirm}>
-            {confirmText}
-          </TouchButton>
-        </div>
-      </div>
-    </div>
+    <Dialog open={!!open} onClose={onCancel} maxWidth="xs" fullWidth>
+      <DialogTitle>{title || 'Are you sure?'}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{message}</DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button variant="outlined" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="contained" color={color} onClick={onConfirm}>
+          {confirmText}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };

@@ -67,7 +67,7 @@ export const DietaryLabels = ({ labels = [], size = 'default' }) => {
     keto: { icon: '🥑', label: 'Keto', color: '#8B5CF6' },
     'low-calorie': { icon: '🔥', label: 'Low Cal', color: '#F59E0B' },
     spicy: { icon: '🌶️', label: 'Spicy', color: '#EF4444' },
-    'chef-special': { icon: '👨‍🍳', label: 'Chef Special', color: '#7C3AED' },
+    'chef-special': { icon: '👨‍🍳', label: 'Chef Special', color: '#3385F0' },
     popular: { icon: '⭐', label: 'Popular', color: '#F59E0B' },
     'new': { icon: '✨', label: 'New', color: '#10B981' },
   };

@@ -30,7 +30,7 @@
 }
 
 .touch-button-primary:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 12px rgba(51, 133, 240, 0.4);
 }
 
 .touch-button-secondary {
@@ -49,7 +49,7 @@
 }
 
 .touch-button-outline:hover:not(:disabled) {
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(51, 133, 240, 0.05);
 }
 
 .touch-button-ghost {
@@ -183,7 +183,7 @@
 }
 
 .icon-button-primary:hover {
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(51, 133, 240, 0.3);
 }
 
 .icon-button-secondary {

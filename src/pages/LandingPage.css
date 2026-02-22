@@ -86,10 +86,10 @@ html {
 
 @keyframes pulse {
   0%, 100% {
-    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 4px 14px rgba(51, 133, 240, 0.4);
   }
   50% {
-    box-shadow: 0 4px 30px rgba(124, 58, 237, 0.6);
+    box-shadow: 0 4px 30px rgba(51, 133, 240, 0.6);
   }
 }
 
@@ -134,15 +134,15 @@ html {
   left: 0;
   width: 100%;
   height: 3px;
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(51, 133, 240, 0.1);
   z-index: 9999;
 }
 
 .scroll-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #7C3AED 0%, #EC4899 50%, #F59E0B 100%);
+  background: linear-gradient(90deg, #3385F0 0%, #EC4899 50%, #F59E0B 100%);
   transition: width 0.1s ease-out;
-  box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 10px rgba(51, 133, 240, 0.5);
 }
 
 /* =================================
@@ -259,7 +259,7 @@ html {
 .shape-1 {
   width: 300px;
   height: 300px;
-  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
   top: 10%;
   left: -10%;
   animation-delay: 0s;
@@ -342,7 +342,7 @@ html {
 
 .landing-nav.scrolled {
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 4px 40px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 4px 40px rgba(51, 133, 240, 0.15);
 }
 
 .nav-container {
@@ -379,7 +379,7 @@ html {
 }
 
 .nav-links a:hover {
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .nav-links a::after {
@@ -389,7 +389,7 @@ html {
   left: 0;
   width: 0;
   height: 2px;
-  background: #7C3AED;
+  background: #3385F0;
   transition: width 0.2s;
 }
 
@@ -421,7 +421,7 @@ html {
 
 .nav-btn-cta:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 15px rgba(51, 133, 240, 0.4);
 }
 
 .mobile-cta {
@@ -455,7 +455,7 @@ html {
   left: 0;
   right: 0;
   height: 100%;
-  background-image: radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+  background-image: radial-gradient(circle at 20% 50%, rgba(51, 133, 240, 0.08) 0%, transparent 50%),
                     radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
                     radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
   z-index: -1;
@@ -471,12 +471,12 @@ html {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(124, 58, 237, 0.1);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(51, 133, 240, 0.1);
+  border: 1px solid rgba(51, 133, 240, 0.2);
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #7C3AED;
+  color: #3385F0;
   margin-bottom: 1.5rem;
 }
 
@@ -497,7 +497,7 @@ html {
 }
 
 .hero-highlight {
-  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -553,8 +553,8 @@ html {
 }
 
 .btn-secondary-large:hover {
-  border-color: #7C3AED;
-  color: #7C3AED;
+  border-color: #3385F0;
+  color: #3385F0;
   transform: translateY(-2px);
 }
 
@@ -603,7 +603,7 @@ html {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
 }
 
 .mockup-restaurant-info {
@@ -665,7 +665,7 @@ html {
 .mockup-item-price {
   height: 10px;
   width: 40px;
-  background: #7C3AED;
+  background: #3385F0;
   border-radius: 3px;
   opacity: 0.3;
 }
@@ -673,7 +673,7 @@ html {
 .mockup-cart-btn {
   margin-top: 1rem;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #589BF3 100%);
   color: white;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -745,7 +745,7 @@ html {
   padding: 1.5rem;
   background: linear-gradient(135deg, #FAFAFA 0%, #F3F0FF 100%);
   border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 4px 20px rgba(51, 133, 240, 0.1);
 }
 
 .stats-container.scroll-animate {
@@ -762,7 +762,7 @@ html {
   display: block;
   font-size: 1.75rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -806,8 +806,8 @@ html {
 .section-badge {
   display: inline-block;
   padding: 0.375rem 1rem;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
-  color: #7C3AED;
+  background: linear-gradient(135deg, rgba(51, 133, 240, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+  color: #3385F0;
   font-size: 0.75rem;
   font-weight: 700;
   border-radius: 9999px;
@@ -855,8 +855,8 @@ html {
 
 .feature-card:hover {
   transform: translateY(-8px) !important;
-  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
-  border-color: var(--accent-color, #7C3AED);
+  box-shadow: 0 20px 40px rgba(51, 133, 240, 0.15);
+  border-color: var(--accent-color, #3385F0);
 }
 
 .feature-card::before {
@@ -866,7 +866,7 @@ html {
   left: 0;
   width: 100%;
   height: 3px;
-  background: var(--accent-color, #7C3AED);
+  background: var(--accent-color, #3385F0);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.3s;
@@ -910,7 +910,7 @@ html {
   gap: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--accent-color, #7C3AED);
+  color: var(--accent-color, #3385F0);
   cursor: pointer;
   transition: gap 0.2s;
 }
@@ -955,7 +955,7 @@ html {
 
 .step-card:hover {
   transform: translateY(-8px) !important;
-  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 12px 40px rgba(51, 133, 240, 0.15);
 }
 
 .step-icon-wrapper {
@@ -987,7 +987,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(51, 133, 240, 0.3);
 }
 
 .step-title {
@@ -1023,7 +1023,7 @@ html {
   padding: 2rem;
   background: white;
   border-radius: 1.5rem;
-  box-shadow: 0 10px 40px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 10px 40px rgba(51, 133, 240, 0.1);
   text-align: center;
   position: relative;
 }
@@ -1037,7 +1037,7 @@ html {
 .quote-icon {
   font-size: 4rem;
   font-family: Georgia, serif;
-  color: #7C3AED;
+  color: #3385F0;
   opacity: 0.2;
   line-height: 1;
   margin-bottom: -1rem;
@@ -1107,7 +1107,7 @@ html {
 }
 
 .why-card:hover {
-  box-shadow: 0 12px 40px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 12px 40px rgba(51, 133, 240, 0.1);
   transform: translateY(-4px) !important;
 }
 
@@ -1192,7 +1192,7 @@ html {
   gap: 0.5rem;
   padding: 1rem 2rem;
   background: white;
-  color: #7C3AED;
+  color: #3385F0;
   text-decoration: none;
   font-size: 1rem;
   font-weight: 700;
@@ -1259,7 +1259,7 @@ html {
 .social-link {
   width: 40px;
   height: 40px;
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(51, 133, 240, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1267,11 +1267,11 @@ html {
   font-size: 1.125rem;
   text-decoration: none;
   transition: all 0.2s;
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .social-link:hover {
-  background: #7C3AED;
+  background: #3385F0;
   color: white;
   transform: translateY(-2px);
 }
@@ -1286,7 +1286,7 @@ html {
 .footer-column h4 {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #7C3AED;
+  color: #3385F0;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 1rem;
@@ -1302,7 +1302,7 @@ html {
 }
 
 .footer-column a:hover {
-  color: #7C3AED;
+  color: #3385F0;
 }
 
 .footer-big-name {
@@ -1315,7 +1315,7 @@ html {
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #EC4899 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #589BF3 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1326,7 +1326,7 @@ html {
   max-width: 1200px;
   margin: 1.5rem auto 0;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(124, 58, 237, 0.1);
+  border-top: 1px solid rgba(51, 133, 240, 0.1);
   text-align: center;
 }
 
@@ -1505,7 +1505,7 @@ html {
 
   .feature-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 20px 40px rgba(51, 133, 240, 0.15);
   }
 
   .steps-container {

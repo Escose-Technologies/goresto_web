@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { TouchButton } from './ui/TouchButton';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
-import './StaffForm.css';
 
 const STAFF_ROLES = ['Waiter', 'Chef', 'Manager', 'Bartender', 'Host/Hostess', 'Cashier', 'Kitchen Staff', 'Other'];
 
@@ -20,8 +29,21 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
     emergencyContact: '',
     notes: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [touched, setTouched] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errors = {
+    name: !formData.name ? 'Name is required' : '',
+    email: !formData.email ? 'Email is required' : !emailRegex.test(formData.email) ? 'Invalid email format' : '',
+    phone: !formData.phone ? 'Phone is required' : '',
+    role: !formData.role ? 'Role is required' : '',
+    hireDate: !formData.hireDate ? 'Hire date is required' : '',
+  };
+
+  const handleBlur = (field) => () => setTouched((prev) => ({ ...prev, [field]: true }));
 
   useEffect(() => {
     if (staff) {
@@ -37,15 +59,15 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
         emergencyContact: staff.emergencyContact || '',
         notes: staff.notes || '',
       });
-      if (staff.photo) {
-        setImagePreview(staff.photo);
-      } else {
-        setImagePreview(null);
-      }
+      setImagePreview(staff.photo || null);
     } else {
       setImagePreview(null);
     }
   }, [staff]);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
 
   const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
@@ -62,12 +84,11 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
     }
 
     setIsUploading(true);
-
     try {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result;
-        setFormData({ ...formData, photo: base64String });
+        setFormData((prev) => ({ ...prev, photo: base64String }));
         setImagePreview(base64String);
         setIsUploading(false);
       };
@@ -83,180 +104,177 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
   };
 
   const handleRemoveImage = () => {
-    setFormData({ ...formData, photo: '' });
+    setFormData((prev) => ({ ...prev, photo: '' }));
     setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
   return (
-    <div className="staff-form-card">
-      <h3>{staff ? 'Edit Staff Member' : 'Onboard New Staff'}</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Full Name *</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Email *</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-          </div>
-        </div>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" fontWeight={700} mb={2.5}>
+        {staff ? 'Edit Staff Member' : 'Onboard New Staff'}
+      </Typography>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Phone *</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Role *</label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              required
-            >
-              <option value="">Select Role</option>
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField label="Full Name" value={formData.name} onChange={handleChange('name')} onBlur={handleBlur('name')} error={touched.name && !!errors.name} helperText={touched.name && errors.name} required fullWidth />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField label="Email" type="email" value={formData.email} onChange={handleChange('email')} onBlur={handleBlur('email')} error={touched.email && !!errors.email} helperText={touched.email && errors.email} required fullWidth />
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField label="Phone" type="tel" value={formData.phone} onChange={handleChange('phone')} onBlur={handleBlur('phone')} error={touched.phone && !!errors.phone} helperText={touched.phone && errors.phone} required fullWidth />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField label="Role" select value={formData.role} onChange={handleChange('role')} onBlur={handleBlur('role')} error={touched.role && !!errors.role} helperText={touched.role && errors.role} required fullWidth>
+              <MenuItem value="" disabled>Select Role</MenuItem>
               {STAFF_ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
+                <MenuItem key={role} value={role}>{role}</MenuItem>
               ))}
-            </select>
-          </div>
-        </div>
+            </TextField>
+          </Grid>
+        </Grid>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Hire Date *</label>
-            <input
+        <Grid container spacing={2} mb={2}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Hire Date"
               type="date"
               value={formData.hireDate}
-              onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+              onChange={handleChange('hireDate')}
+              onBlur={handleBlur('hireDate')}
+              error={touched.hireDate && !!errors.hireDate}
+              helperText={touched.hireDate && errors.hireDate}
               required
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
             />
-          </div>
-          <div className="form-group">
-            <label>Status *</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              required
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField label="Status" select value={formData.status} onChange={handleChange('status')} required fullWidth>
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="inactive">Inactive</MenuItem>
+              <MenuItem value="on-leave">On Leave</MenuItem>
+            </TextField>
+          </Grid>
+        </Grid>
+
+        <TextField
+          label="Address"
+          value={formData.address}
+          onChange={handleChange('address')}
+          fullWidth
+          multiline
+          rows={2}
+          placeholder="Street address, City, State, ZIP"
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          label="Emergency Contact"
+          value={formData.emergencyContact}
+          onChange={handleChange('emergencyContact')}
+          fullWidth
+          placeholder="Name - Phone Number"
+          sx={{ mb: 2 }}
+        />
+
+        {/* Photo Upload */}
+        <Typography variant="subtitle2" color="text.secondary" mb={1}>
+          Staff Photo
+        </Typography>
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              src={imagePreview || undefined}
+              sx={{ width: 80, height: 80, bgcolor: 'grey.200' }}
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="on-leave">On Leave</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Address</label>
-          <textarea
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            rows="2"
-            placeholder="Street address, City, State, ZIP"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Emergency Contact</label>
-          <input
-            type="text"
-            value={formData.emergencyContact}
-            onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-            placeholder="Name - Phone Number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Staff Photo</label>
-          <div className="image-upload-container">
-            {imagePreview ? (
-              <div className="image-preview-wrapper">
-                <img src={imagePreview} alt="Preview" className="image-preview" />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="remove-image-btn"
-                  title="Remove photo"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <div className="image-upload-placeholder">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-                <p>No photo selected</p>
-              </div>
+              <Icon icon="mdi:account" width={40} />
+            </Avatar>
+            {imagePreview && (
+              <IconButton
+                onClick={handleRemoveImage}
+                sx={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  width: 24,
+                  height: 24,
+                  p: 0,
+                  bgcolor: 'error.main',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'error.dark' },
+                }}
+              >
+                <Icon icon="mdi:close" width={14} />
+              </IconButton>
             )}
+          </Box>
+          <Box>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="image-file-input"
+              style={{ display: 'none' }}
               id="staff-photo-upload"
               disabled={isUploading}
             />
-            <label htmlFor="staff-photo-upload" className="image-upload-label">
-              {isUploading ? 'Uploading...' : imagePreview ? 'Change Photo' : 'Choose Photo from Device'}
+            <label htmlFor="staff-photo-upload">
+              <Button variant="outlined" size="small" component="span" disabled={isUploading}>
+                {isUploading ? 'Uploading...' : imagePreview ? 'Change Photo' : 'Choose Photo'}
+              </Button>
             </label>
-            <p className="image-upload-hint">
-              Supports JPG, PNG, GIF. Max size: 5MB
-            </p>
-          </div>
-        </div>
+            <Typography variant="caption" display="block" color="text.secondary" mt={0.5}>
+              JPG, PNG, GIF. Max 5MB
+            </Typography>
+          </Box>
+        </Stack>
 
-        <div className="form-group">
-          <label>Notes</label>
-          <textarea
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            rows="3"
-            placeholder="Additional notes about the staff member..."
-          />
-        </div>
+        <TextField
+          label="Notes"
+          value={formData.notes}
+          onChange={handleChange('notes')}
+          fullWidth
+          multiline
+          rows={3}
+          placeholder="Additional notes about the staff member..."
+          sx={{ mb: 2 }}
+        />
 
-        <div className="form-actions">
-          <TouchButton type="submit" variant="primary">
+        <Stack direction="row" spacing={1.5} mt={1}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : undefined}
+          >
             {staff ? 'Update' : 'Add Staff'}
-          </TouchButton>
-          <TouchButton variant="secondary" onClick={onCancel}>
+          </Button>
+          <Button variant="outlined" onClick={onCancel} disabled={saving}>
             Cancel
-          </TouchButton>
+          </Button>
           {staff && onDelete && (
-            <TouchButton variant="danger" onClick={onDelete} type="button">Delete</TouchButton>
+            <Button variant="outlined" color="error" onClick={onDelete} type="button" sx={{ ml: 'auto' }}>
+              Delete
+            </Button>
           )}
-        </div>
-      </form>
-    </div>
+        </Stack>
+      </Box>
+    </Box>
   );
 };
-
-

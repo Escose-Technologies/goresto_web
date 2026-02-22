@@ -1,9 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { Icon } from '@iconify/react';
 import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
 import { useToast } from '../components/ui/Toast';
-import { theme } from '../styles/theme';
 import { SearchBar, FilterPills } from '../components/ui';
 import { BottomSheet } from '../components/ui/BottomSheet';
 import { DietaryBadge, DietaryLabels, AllergenLabels } from '../components/menu/DietaryBadges';
@@ -382,19 +389,20 @@ export const PublicMenu = () => {
 
   if (loading) {
     return (
-      <div className="public-menu-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading menu...</p>
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2, bgcolor: 'grey.50' }}>
+        <CircularProgress />
+        <Typography variant="body2" color="text.secondary">Loading menu...</Typography>
+      </Box>
     );
   }
 
   if (!restaurant) {
     return (
-      <div className="public-menu-error">
-        <h2>Restaurant not found</h2>
-        <p>The menu you're looking for doesn't exist.</p>
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 1, p: 3, bgcolor: 'grey.50' }}>
+        <Icon icon="mdi:alert-circle-outline" width={48} style={{ opacity: 0.4 }} />
+        <Typography variant="h6" fontWeight={700}>Restaurant not found</Typography>
+        <Typography variant="body2" color="text.secondary">The menu you're looking for doesn't exist.</Typography>
+      </Box>
     );
   }
 
@@ -402,10 +410,7 @@ export const PublicMenu = () => {
     <div className="public-menu-container">
       {orderPlaced && (
         <div className="order-success-banner">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M7 10L9 12L13 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <Icon icon="mdi:check-circle" width={20} />
           <span>Order placed successfully! The restaurant will process your order shortly.</span>
         </div>
       )}
@@ -434,9 +439,7 @@ export const PublicMenu = () => {
             className="check-status-btn"
             onClick={() => setShowStatusCheck(true)}
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 12.75V9M9 5.25H9.0075M15.75 9C15.75 12.7279 12.7279 15.75 9 15.75C5.27208 15.75 2.25 12.7279 2.25 9C2.25 5.27208 5.27208 2.25 9 2.25C12.7279 2.25 15.75 5.27208 15.75 9Z" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Icon icon="mdi:information-outline" width={18} />
             Check Order Status
           </button>
 
@@ -446,20 +449,14 @@ export const PublicMenu = () => {
               onClick={handleCallStaff}
               disabled={callStaffSent}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Icon icon="mdi:bell-outline" width={18} />
               {callStaffSent ? 'Staff Notified!' : 'Call Staff'}
             </button>
           )}
 
           {settings?.discountText && (
             <div className="discount-banner">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H15C15.5304 19 16.0391 18.7893 16.4142 18.4142C16.7893 18.0391 17 17.5304 17 17V7L10 2Z" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M7 10L9 12L13 8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Icon icon="mdi:tag-outline" width={20} />
               <span>{settings.discountText}</span>
             </div>
           )}
@@ -467,29 +464,21 @@ export const PublicMenu = () => {
           <div className="restaurant-details">
             {settings?.address && (
               <div className="restaurant-detail-item">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 8C9.10457 8 10 7.10457 10 6C10 4.89543 9.10457 4 8 4C6.89543 4 6 4.89543 6 6C6 7.10457 6.89543 8 8 8Z" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M8 1C5.79086 1 4 2.79086 4 5C4 7.5 8 13 8 13C8 13 12 7.5 12 5C12 2.79086 10.2091 1 8 1Z" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
+                <Icon icon="mdi:map-marker-outline" width={16} />
                 <span>{settings.address}</span>
               </div>
             )}
 
             {settings?.phone && (
               <div className="restaurant-detail-item">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M14.5 11.5c0 .3-.1.6-.2.9-.1.3-.3.5-.5.7-.4.4-.9.7-1.4.8-.6.2-1.2.3-1.9.3-1.1 0-2.2-.3-3.3-.8-1.1-.5-2.1-1.2-3-2.1-.9-.9-1.6-1.9-2.1-3C1.5 7.2 1.2 6.1 1.2 5c0-.7.1-1.3.3-1.9.2-.5.5-1 .8-1.4.4-.4.9-.6 1.4-.6.2 0 .4 0 .6.1.2.1.3.2.4.4l1.4 2c.1.2.2.3.2.5s-.1.4-.2.5l-.6.7c-.1.1-.1.2-.1.3 0 .1 0 .1.1.2.1.2.3.5.6.8.3.3.5.5.8.7.1.1.2.1.2.1.1 0 .2 0 .3-.1l.7-.7c.2-.2.3-.2.5-.2s.4.1.5.2l2 1.4c.2.1.3.3.4.4.1.2.1.4.1.6z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <Icon icon="mdi:phone-outline" width={16} />
                 <a href={`tel:${settings.phone}`}>{settings.phone}</a>
               </div>
             )}
 
             {settings?.openingTime && settings?.closingTime && (
               <div className="restaurant-detail-item restaurant-hours">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M8 4V8L10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
+                <Icon icon="mdi:clock-outline" width={16} />
                 <span>
                   {formatTime(settings.openingTime)} - {formatTime(settings.closingTime)}
                 </span>
@@ -502,34 +491,22 @@ export const PublicMenu = () => {
             <div className="restaurant-social-links">
               {restaurant.website && (
                 <a href={restaurant.website.startsWith('http') ? restaurant.website : `https://${restaurant.website}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Website">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="2" y1="12" x2="22" y2="12"/>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                  </svg>
+                  <Icon icon="mdi:web" width={18} />
                 </a>
               )}
               {restaurant.socialLinks?.instagram && (
                 <a href={restaurant.socialLinks.instagram.startsWith('http') ? restaurant.socialLinks.instagram : `https://instagram.com/${restaurant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Instagram">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                  </svg>
+                  <Icon icon="mdi:instagram" width={18} />
                 </a>
               )}
               {restaurant.socialLinks?.facebook && (
                 <a href={restaurant.socialLinks.facebook.startsWith('http') ? restaurant.socialLinks.facebook : `https://facebook.com/${restaurant.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Facebook">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                  </svg>
+                  <Icon icon="mdi:facebook" width={18} />
                 </a>
               )}
               {restaurant.socialLinks?.twitter && (
                 <a href={restaurant.socialLinks.twitter.startsWith('http') ? restaurant.socialLinks.twitter : `https://twitter.com/${restaurant.socialLinks.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Twitter / X">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
+                  <Icon icon="ri:twitter-x-fill" width={18} />
                 </a>
               )}
             </div>
@@ -559,11 +536,7 @@ export const PublicMenu = () => {
       {cart.length > 0 && (
         <div className="cart-button-container">
           <button className="cart-button" onClick={() => setShowCart(true)}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Icon icon="mdi:cart-outline" width={24} />
             <span>Cart ({getCartItemCount()})</span>
             <span className="cart-total">{getCurrencySymbol()}{getCartTotal().toFixed(2)}</span>
           </button>
@@ -571,39 +544,52 @@ export const PublicMenu = () => {
       )}
 
       <div className="public-menu-content">
+        {/* Category Chips */}
         {categories.length > 0 && (
-          <div className="category-tabs">
-            <button
-              className={`category-tab ${selectedCategory === 'All' ? 'active' : ''}`}
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              overflowX: 'auto',
+              px: 2,
+              py: 1.5,
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+            }}
+          >
+            <Chip
+              label="All"
+              variant={selectedCategory === 'All' ? 'filled' : 'outlined'}
+              color={selectedCategory === 'All' ? 'primary' : 'default'}
               onClick={() => setSelectedCategory('All')}
-            >
-              All
-            </button>
+              sx={{ fontWeight: selectedCategory === 'All' ? 600 : 400, flexShrink: 0 }}
+            />
             {categories.map((category) => (
-              <button
+              <Chip
                 key={category}
-                className={`category-tab ${selectedCategory === category ? 'active' : ''}`}
+                label={category}
+                variant={selectedCategory === category ? 'filled' : 'outlined'}
+                color={selectedCategory === category ? 'primary' : 'default'}
                 onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </button>
+                sx={{ fontWeight: selectedCategory === category ? 600 : 400, flexShrink: 0 }}
+              />
             ))}
-          </div>
+          </Stack>
         )}
 
         {filteredItems.length === 0 ? (
-          <div className="empty-menu">
+          <Box sx={{ textAlign: 'center', py: 6, px: 3, color: 'text.secondary' }}>
             {searchQuery || activeFilters.length > 0 ? (
               <>
-                <p>No items match your search or filters.</p>
-                <button className="clear-filters-btn" onClick={handleClearFilters}>
+                <Typography mb={1}>No items match your search or filters.</Typography>
+                <Button variant="outlined" size="small" onClick={handleClearFilters}>
                   Clear Filters
-                </button>
+                </Button>
               </>
             ) : (
-              <p>No items available in this category.</p>
+              <Typography>No items available in this category.</Typography>
             )}
-          </div>
+          </Box>
         ) : (
           <div className="menu-items-list">
             {filteredItems.map((item) => {
@@ -621,7 +607,7 @@ export const PublicMenu = () => {
                       <img src={item.image} alt={item.name} loading="lazy" />
                     ) : (
                       <div className="public-menu-item-image-placeholder">
-                        <span className="material-symbols-outlined">restaurant</span>
+                        <Icon icon="mdi:silverware-fork-knife" width={24} />
                       </div>
                     )}
                   </div>
@@ -680,9 +666,7 @@ export const PublicMenu = () => {
                           className="btn-add-to-cart-inline"
                           onClick={() => addToCart(item)}
                         >
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 4V14M4 9H14" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
+                          <Icon icon="mdi:plus" width={18} />
                           Add
                         </button>
                       )}
@@ -708,7 +692,7 @@ export const PublicMenu = () => {
                 <img src={selectedItem.image} alt={selectedItem.name} />
               ) : (
                 <div className="item-detail-image-placeholder">
-                  <span className="material-symbols-outlined">restaurant</span>
+                  <Icon icon="mdi:silverware-fork-knife" width={32} />
                 </div>
               )}
             </div>
@@ -742,12 +726,15 @@ export const PublicMenu = () => {
                 <AllergenLabels allergens={selectedItem.dietary.allergens} />
               )}
 
-              <button
-                className="btn-add-to-cart-full"
+              <Button
+                variant="contained"
+                fullWidth
+                size="large"
                 onClick={() => addToCart(selectedItem)}
+                sx={{ mt: 2 }}
               >
                 Add to Cart - {getCurrencySymbol()}{selectedItem.price.toFixed(2)}
-              </button>
+              </Button>
             </div>
 
             {/* Reviews Section */}
@@ -775,12 +762,10 @@ export const PublicMenu = () => {
           </div>
         )}
         {cart.length === 0 ? (
-          <div className="cart-empty">
-            <p>Your cart is empty</p>
-            <button className="btn-secondary" onClick={() => setShowCart(false)}>
-              Continue Shopping
-            </button>
-          </div>
+          <Box sx={{ textAlign: 'center', py: 4, px: 2 }}>
+            <Typography color="text.secondary" mb={2}>Your cart is empty</Typography>
+            <Button variant="outlined" onClick={() => setShowCart(false)}>Continue Shopping</Button>
+          </Box>
         ) : (
           <>
             <div className="cart-items">
@@ -820,28 +805,25 @@ export const PublicMenu = () => {
               ))}
             </div>
             <div className="cart-footer">
-              <div className="customer-info-section">
-                <div className="form-group">
-                  <label>Your Name *</label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Mobile Number *</label>
-                  <input
-                    type="tel"
-                    value={customerMobile}
-                    onChange={(e) => setCustomerMobile(e.target.value)}
-                    placeholder="Enter mobile number"
-                    required
-                  />
-                </div>
-              </div>
+              <Stack spacing={2} sx={{ mb: 2 }}>
+                <TextField
+                  label="Your Name"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  required
+                  fullWidth
+                  size="small"
+                />
+                <TextField
+                  label="Mobile Number"
+                  type="tel"
+                  value={customerMobile}
+                  onChange={(e) => setCustomerMobile(e.target.value)}
+                  required
+                  fullWidth
+                  size="small"
+                />
+              </Stack>
               <div className="cart-total-section">
                 <strong>Total: {getCurrencySymbol()}{getCartTotal().toFixed(2)}</strong>
               </div>
@@ -850,21 +832,14 @@ export const PublicMenu = () => {
                   <p>Table number is required to place an order. Please access this menu through a table QR code.</p>
                 </div>
               )}
-              <div className="cart-actions">
-                <button
-                  className="btn-secondary"
-                  onClick={() => setShowCart(false)}
-                >
+              <Stack direction="row" spacing={1.5} mt={2}>
+                <Button variant="outlined" fullWidth onClick={() => setShowCart(false)}>
                   Continue Shopping
-                </button>
-                <button
-                  className="btn-primary"
-                  onClick={handlePlaceOrder}
-                  disabled={!tableNumber}
-                >
+                </Button>
+                <Button variant="contained" fullWidth onClick={handlePlaceOrder} disabled={!tableNumber}>
                   Place Order
-                </button>
-              </div>
+                </Button>
+              </Stack>
             </div>
           </>
         )}
@@ -881,33 +856,34 @@ export const PublicMenu = () => {
         }}
         title="Check Order Status"
       >
-        <div className="status-check-form">
-          <div className="form-group">
-            <label>Your Name *</label>
-            <input
-              type="text"
-              value={statusCheckName}
-              onChange={(e) => setStatusCheckName(e.target.value)}
-              placeholder="Enter your name"
-            />
-          </div>
-          <div className="form-group">
-            <label>Mobile Number *</label>
-            <input
-              type="tel"
-              value={statusCheckMobile}
-              onChange={(e) => setStatusCheckMobile(e.target.value)}
-              placeholder="Enter mobile number"
-            />
-          </div>
-          <button
-            className="btn-primary status-check-submit"
+        <Stack spacing={2} sx={{ px: 1, py: 1 }}>
+          <TextField
+            label="Your Name"
+            value={statusCheckName}
+            onChange={(e) => setStatusCheckName(e.target.value)}
+            required
+            fullWidth
+            size="small"
+          />
+          <TextField
+            label="Mobile Number"
+            type="tel"
+            value={statusCheckMobile}
+            onChange={(e) => setStatusCheckMobile(e.target.value)}
+            required
+            fullWidth
+            size="small"
+          />
+          <Button
+            variant="contained"
+            fullWidth
             onClick={handleCheckOrderStatus}
             disabled={statusCheckLoading}
+            startIcon={statusCheckLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
             {statusCheckLoading ? 'Checking...' : 'Check Status'}
-          </button>
-        </div>
+          </Button>
+        </Stack>
         {customerOrders.length > 0 && (
           <div className="customer-orders-list">
             <h3>Your Orders</h3>

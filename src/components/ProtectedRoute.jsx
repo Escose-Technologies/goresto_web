@@ -1,4 +1,6 @@
 import { Navigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../context/AuthContext';
 
 export const ProtectedRoute = ({ children, requireSuperAdmin = false }) => {
@@ -6,14 +8,9 @@ export const ProtectedRoute = ({ children, requireSuperAdmin = false }) => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <div>Loading...</div>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
     );
   }
 

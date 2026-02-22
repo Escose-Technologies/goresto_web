@@ -1,4 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+import Backdrop from '@mui/material/Backdrop';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
 import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, getAccessToken } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
@@ -6,7 +16,6 @@ import { Settings } from './Settings';
 import { MenuPreview } from '../components/MenuPreview';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsCard';
 import { RestaurantProfileForm } from '../components/forms/RestaurantProfileForm';
-import { TouchButton } from '../components/ui/TouchButton';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { GenerateBillModal } from '../components/billing/GenerateBillModal';
@@ -14,7 +23,6 @@ import { BillingTab } from '../components/billing/BillingTab';
 import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
 import { startStaffCallRing } from '../utils/sounds';
 import DashboardLayout from '../layouts/DashboardLayout';
-import './Dashboard.css';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -40,6 +48,7 @@ export const RestaurantAdminDashboard = () => {
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
   const [showSettings, setShowSettings] = useState(false);
+  const [prevTab, setPrevTab] = useState('orders');
   const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect } = useSocket();
   const [staffCallAlerts, setStaffCallAlerts] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
@@ -361,11 +370,12 @@ export const RestaurantAdminDashboard = () => {
   const orderCounts = pendingOrderCount > 0 ? { orders: pendingOrderCount } : {};
 
   const handleTabChange = (tabId) => {
-    setActiveTab(tabId);
     if (tabId === 'settings') {
+      setPrevTab(activeTab); // Remember where the user was
       setShowSettings(true);
       return;
     }
+    setActiveTab(tabId);
     setShowSettings(false);
     setShowForm(false);
     setEditingItem(null);
@@ -374,20 +384,25 @@ export const RestaurantAdminDashboard = () => {
     setEditingStaff(null);
   };
 
+  const closeSettings = () => {
+    setShowSettings(false);
+    setActiveTab(prevTab); // Go back to whatever tab they were on
+  };
+
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!restaurant) {
     return (
-      <div className="dashboard-container">
-        <div className="error-state">
-          <p>No restaurant assigned to your account. Please contact Super Admin.</p>
-          <TouchButton variant="primary" onClick={logout}>
-            Logout
-          </TouchButton>
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2, p: 3 }}>
+        <Typography color="text.secondary">No restaurant assigned to your account. Please contact Super Admin.</Typography>
+        <Button variant="contained" color="error" onClick={logout}>Logout</Button>
+      </Box>
     );
   }
 
@@ -403,76 +418,102 @@ export const RestaurantAdminDashboard = () => {
       connected={true}
     >
       {/* Staff call alerts overlay */}
-      {staffCallAlerts.length > 0 && (
-        <div className="staff-call-overlay">
-          <div className="staff-call-overlay-inner">
-            {staffCallAlerts.map((alert) => (
-              <div key={alert.id} className="staff-call-popup">
-                <div className="staff-call-popup-bell">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <h3 className="staff-call-popup-title">Staff Assistance Requested</h3>
-                <div className="staff-call-popup-table">Table {alert.tableNumber}</div>
-                {alert.customerName && (
-                  <div className="staff-call-popup-customer">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    {alert.customerName}
-                  </div>
-                )}
-                <div className="staff-call-popup-actions">
-                  <button
-                    className="staff-call-btn-silence"
-                    onClick={() => {
-                      if (staffCallRingsRef.current[alert.id]) {
-                        staffCallRingsRef.current[alert.id].stop();
-                        delete staffCallRingsRef.current[alert.id];
-                      }
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                      <line x1="23" y1="9" x2="17" y2="15"/>
-                      <line x1="17" y1="9" x2="23" y2="15"/>
-                    </svg>
-                    Silence
-                  </button>
-                  <button
-                    className="staff-call-btn-dismiss"
-                    onClick={() => {
-                      if (staffCallRingsRef.current[alert.id]) {
-                        staffCallRingsRef.current[alert.id].stop();
-                        delete staffCallRingsRef.current[alert.id];
-                      }
-                      staffCallTablesRef.current.delete(alert.tableNumber);
-                      setStaffCallAlerts(prev => prev.filter(a => a.id !== alert.id));
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <Backdrop
+        open={staffCallAlerts.length > 0}
+        sx={{ zIndex: 1500, backdropFilter: 'blur(4px)', p: 3, alignItems: 'center', overflow: 'auto' }}
+      >
+        <Stack direction="row" flexWrap="wrap" justifyContent="center" alignItems="flex-start" gap={2} sx={{ maxWidth: 820 }}>
+          {staffCallAlerts.map((alert) => (
+            <Card
+              key={alert.id}
+              sx={{
+                p: { xs: 3, sm: '2rem 2.5rem' },
+                textAlign: 'center',
+                borderRadius: 3,
+                maxWidth: 380,
+                flex: '1 1 320px',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                '@keyframes bellRing': { '0%': { transform: 'rotate(-12deg)' }, '100%': { transform: 'rotate(12deg)' } },
+              }}
+            >
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 80, height: 80, borderRadius: '50%', bgcolor: '#FEF3C7', color: '#D97706', mb: 1.5, animation: 'bellRing 0.6s ease-in-out infinite alternate' }}>
+                <Icon icon="mdi:bell-ring" width={48} />
+              </Box>
+              <Typography variant="overline" color="text.secondary" fontWeight={600} display="block" mb={1}>
+                Staff Assistance Requested
+              </Typography>
+              <Typography variant="h4" fontWeight={800} mb={0.5}>
+                Table {alert.tableNumber}
+              </Typography>
+              {alert.customerName && (
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, bgcolor: 'grey.100', px: 2, py: 0.75, borderRadius: 4, mb: 1.5 }}>
+                  <Icon icon="mdi:account" width={18} color="#6B7280" />
+                  <Typography variant="body1" color="text.secondary">{alert.customerName}</Typography>
+                </Box>
+              )}
+              <Stack direction="row" spacing={1} mt={2}>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  fullWidth
+                  startIcon={<Icon icon="mdi:volume-off" width={18} />}
+                  onClick={() => {
+                    if (staffCallRingsRef.current[alert.id]) {
+                      staffCallRingsRef.current[alert.id].stop();
+                      delete staffCallRingsRef.current[alert.id];
+                    }
+                  }}
+                  sx={{ fontWeight: 600 }}
+                >
+                  Silence
+                </Button>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<Icon icon="mdi:check" width={18} />}
+                  onClick={() => {
+                    if (staffCallRingsRef.current[alert.id]) {
+                      staffCallRingsRef.current[alert.id].stop();
+                      delete staffCallRingsRef.current[alert.id];
+                    }
+                    staffCallTablesRef.current.delete(alert.tableNumber);
+                    setStaffCallAlerts(prev => prev.filter(a => a.id !== alert.id));
+                  }}
+                  sx={{ fontWeight: 600 }}
+                >
+                  Dismiss
+                </Button>
+              </Stack>
+            </Card>
+          ))}
+        </Stack>
+      </Backdrop>
 
       {/* Settings modal */}
-      {showSettings && (
-        <div className="settings-modal">
-          <div className="settings-modal-content">
-            <Settings onClose={() => setShowSettings(false)} restaurant={restaurant} settings={restaurantSettings} />
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={showSettings}
+        onClose={closeSettings}
+        fullScreen
+        sx={{ zIndex: 1200 }}
+      >
+        <Settings
+          onClose={closeSettings}
+          onSettingsSaved={(updatedSettings) => {
+            setRestaurantSettings(updatedSettings);
+            // Sync restaurant name/phone/address so dashboard header updates immediately
+            if (updatedSettings.restaurantName) {
+              setRestaurant(prev => ({
+                ...prev,
+                name: updatedSettings.restaurantName,
+                address: updatedSettings.address || prev.address,
+                phone: updatedSettings.phone || prev.phone,
+              }));
+            }
+          }}
+          restaurant={restaurant}
+          settings={restaurantSettings}
+        />
+      </Dialog>
 
       {activeTab === 'menu' && (
           <MenuSection
@@ -557,25 +598,19 @@ export const RestaurantAdminDashboard = () => {
 
         {activeTab === 'analytics' && (
           <>
-            <div className="section-header">
-              <h2>Analytics</h2>
-              <button
-                onClick={refreshAnalytics}
-                className="btn-secondary"
-                title="Refresh Analytics"
-              >
-                🔄 Refresh
-              </button>
-            </div>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+              <Typography variant="h5" fontWeight={700}>Analytics</Typography>
+              <Button variant="outlined" onClick={refreshAnalytics} startIcon={<Icon icon="mdi:refresh" width={18} />}>
+                Refresh
+              </Button>
+            </Stack>
             <AnalyticsDashboard analytics={analytics} />
           </>
         )}
 
         {activeTab === 'profile' && (
           <>
-            <div className="section-header">
-              <h2>Restaurant Profile</h2>
-            </div>
+            <Typography variant="h5" fontWeight={700} mb={2}>Restaurant Profile</Typography>
             <RestaurantProfileForm
               restaurant={restaurant}
               settings={restaurantSettings}
@@ -586,24 +621,20 @@ export const RestaurantAdminDashboard = () => {
 
         {activeTab === 'preview' && (
           <>
-            <div className="section-header preview-section-header">
-              <div>
-                <h2>User Preview</h2>
-                <p className="preview-description">
+            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} justifyContent="space-between" spacing={1} mb={2}>
+              <Box>
+                <Typography variant="h5" fontWeight={700}>User Preview</Typography>
+                <Typography variant="body2" color="text.secondary" mt={0.5}>
                   See how your menu appears to customers. Changes made to menu items, settings, or discounts will be reflected here.
-                </p>
-              </div>
-              <button
-                onClick={refreshPreview}
-                className="btn-secondary"
-                title="Refresh Preview"
-              >
-                🔄 Refresh
-              </button>
-            </div>
-            <div className="preview-container">
+                </Typography>
+              </Box>
+              <Button variant="outlined" onClick={refreshPreview} startIcon={<Icon icon="mdi:refresh" width={18} />} sx={{ flexShrink: 0 }}>
+                Refresh
+              </Button>
+            </Stack>
+            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
               <MenuPreview restaurant={restaurant} settings={restaurantSettings} menuItems={menuItems} categories={categories} />
-            </div>
+            </Paper>
           </>
         )}
 
@@ -628,4 +659,3 @@ export const RestaurantAdminDashboard = () => {
     </DashboardLayout>
   );
 };
-
