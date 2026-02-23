@@ -17,6 +17,21 @@ import { useToast } from '../components/ui/Toast';
 import { INDIAN_STATES } from '../utils/indianStates';
 import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 
+// Defined OUTSIDE Settings component to avoid remounting on every render
+const SectionAccordion = ({ id, title, children, expanded, onChange, unmountOnExit = false }) => (
+  <Accordion
+    expanded={expanded}
+    onChange={onChange}
+    disableGutters
+    {...(unmountOnExit ? { slotProps: { transition: { unmountOnExit: true } } } : {})}
+  >
+    <AccordionSummary expandIcon={<Icon icon="mdi:chevron-down" width={24} />}>
+      <Typography variant="subtitle1" fontWeight={700}>{title}</Typography>
+    </AccordionSummary>
+    <AccordionDetails>{children}</AccordionDetails>
+  </Accordion>
+);
+
 export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp, settings: settingsProp }) => {
   const toast = useToast();
   const [restaurant] = useState(restaurantProp);
@@ -42,13 +57,14 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
 
   const [formData, setFormData] = useState(() => {
     if (settingsProp) {
-      const { currencySymbol, kitchenPin, ...rest } = settingsProp;
-      return { ...defaults, ...rest, currency: settingsProp.currency || 'INR', kitchenPin: '' };
+      const { currencySymbol, ...rest } = settingsProp;
+      return { ...defaults, ...rest, currency: settingsProp.currency || 'INR', kitchenPin: settingsProp.kitchenPin || '' };
     }
     return { ...defaults, restaurantName: restaurantProp?.name || '', address: restaurantProp?.address || '', phone: restaurantProp?.phone || '' };
   });
 
-  const [hasExistingPin, setHasExistingPin] = useState(() => !!(settingsProp?.kitchenPin));
+  const [hasExistingPin] = useState(() => !!(settingsProp?.kitchenPin));
+  const [showPin, setShowPin] = useState(false);
 
   const getCurrencySymbol = () => currencySymbols[formData.currency] || '₹';
 
@@ -61,21 +77,19 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
     e.preventDefault();
     setSaving(true);
     try {
-      const { kitchenPin, ...restFormData } = formData;
       const dataToSave = {
-        ...restFormData,
+        ...formData,
         currencySymbol: getCurrencySymbol(),
-        ...(kitchenPin && kitchenPin.length === 4 ? { kitchenPin } : {}),
       };
+      // Only send kitchenPin if it's a valid 4-digit PIN or empty to keep current
+      if (!dataToSave.kitchenPin || dataToSave.kitchenPin.length !== 4) {
+        delete dataToSave.kitchenPin;
+      }
       const updatedSettings = await settingsService.updateSettings(restaurant.id, dataToSave);
       await restaurantService.update(restaurant.id, {
         name: formData.restaurantName, address: formData.address, phone: formData.phone,
       });
       if (onSettingsSaved) onSettingsSaved(updatedSettings);
-      if (kitchenPin && kitchenPin.length === 4) {
-        setHasExistingPin(true);
-        setFormData((prev) => ({ ...prev, kitchenPin: '' }));
-      }
       toast.success('Settings saved successfully!');
     } catch (error) {
       toast.error('Error saving settings: ' + error.message);
@@ -96,20 +110,6 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
     );
   }
 
-  const SectionAccordion = ({ id, title, children, unmountOnExit = false }) => (
-    <Accordion
-      expanded={expanded === id}
-      onChange={handleAccordion(id)}
-      disableGutters
-      {...(unmountOnExit ? { slotProps: { transition: { unmountOnExit: true } } } : {})}
-    >
-      <AccordionSummary expandIcon={<Icon icon="mdi:chevron-down" width={24} />}>
-        <Typography variant="subtitle1" fontWeight={700}>{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>{children}</AccordionDetails>
-    </Accordion>
-  );
-
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: { xs: 2, sm: 3 } }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
@@ -121,7 +121,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
 
       <Box component="form" onSubmit={handleSubmit}>
         {/* Restaurant Information */}
-        <SectionAccordion id="restaurantInfo" title="Restaurant Information">
+        <SectionAccordion id="restaurantInfo" title="Restaurant Information" expanded={expanded === 'restaurantInfo'} onChange={handleAccordion('restaurantInfo')}>
           <Grid container spacing={2} mb={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField label="Restaurant Name" value={formData.restaurantName} onChange={handleChange('restaurantName')} required fullWidth />
@@ -135,7 +135,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Business Hours */}
-        <SectionAccordion id="businessHours" title="Business Hours">
+        <SectionAccordion id="businessHours" title="Business Hours" expanded={expanded === 'businessHours'} onChange={handleAccordion('businessHours')}>
           <Grid container spacing={2} mb={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField label="Opening Time" type="time" value={formData.openingTime} onChange={handleChange('openingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
@@ -159,7 +159,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Currency & Pricing */}
-        <SectionAccordion id="currencyPricing" title="Currency & Pricing">
+        <SectionAccordion id="currencyPricing" title="Currency & Pricing" expanded={expanded === 'currencyPricing'} onChange={handleAccordion('currencyPricing')}>
           <TextField label="Currency" select value={formData.currency} onChange={handleChange('currency')} fullWidth sx={{ mb: 2 }}>
             <MenuItem value="INR">INR - Indian Rupee (₹)</MenuItem>
             <MenuItem value="USD">USD - US Dollar ($)</MenuItem>
@@ -179,7 +179,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Billing & Tax */}
-        <SectionAccordion id="billingTax" title="Billing & Tax">
+        <SectionAccordion id="billingTax" title="Billing & Tax" expanded={expanded === 'billingTax'} onChange={handleAccordion('billingTax')}>
           {/* GST Registration */}
           <Typography variant="subtitle2" fontWeight={700} mb={1.5}>GST Registration</Typography>
           <Grid container spacing={2} mb={2}>
@@ -369,12 +369,12 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Discount Presets */}
-        <SectionAccordion id="discountPresets" title="Discount Presets" unmountOnExit>
+        <SectionAccordion id="discountPresets" title="Discount Presets" expanded={expanded === 'discountPresets'} onChange={handleAccordion('discountPresets')} unmountOnExit>
           {restaurant && <DiscountPresetManager restaurantId={restaurant.id} toast={toast} />}
         </SectionAccordion>
 
         {/* Theme & Colors */}
-        <SectionAccordion id="themeColors" title="Theme & Colors">
+        <SectionAccordion id="themeColors" title="Theme & Colors" expanded={expanded === 'themeColors'} onChange={handleAccordion('themeColors')}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography variant="body2" fontWeight={500} mb={1}>Primary Color</Typography>
@@ -394,7 +394,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Features */}
-        <SectionAccordion id="features" title="Features & Preferences">
+        <SectionAccordion id="features" title="Features & Preferences" expanded={expanded === 'features'} onChange={handleAccordion('features')}>
           <Stack spacing={1.5} mb={2}>
             <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
               <input type="checkbox" checked={formData.allowOnlineOrders} onChange={(e) => setFormData((prev) => ({ ...prev, allowOnlineOrders: e.target.checked }))} style={{ accentColor: '#3385F0' }} />
@@ -418,18 +418,29 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Kitchen Display System */}
-        <SectionAccordion id="kitchenDisplay" title="Kitchen Display System">
+        <SectionAccordion id="kitchenDisplay" title="Kitchen Display System" expanded={expanded === 'kitchenDisplay'} onChange={handleAccordion('kitchenDisplay')}>
           <TextField
             label="Kitchen PIN (4 digits)"
+            type={showPin ? 'text' : 'password'}
             value={formData.kitchenPin || ''}
             onChange={(e) => {
               const val = e.target.value.replace(/\D/g, '').slice(0, 4);
               setFormData((prev) => ({ ...prev, kitchenPin: val }));
             }}
-            placeholder={hasExistingPin ? '••••  (PIN is set)' : 'e.g. 1234'}
+            placeholder="e.g. 1234"
             fullWidth
-            slotProps={{ htmlInput: { maxLength: 4, inputMode: 'numeric', pattern: '\\d{4}' } }}
-            helperText={hasExistingPin ? 'A PIN is already set. Enter a new 4-digit PIN to change it, or leave empty to keep current.' : 'Set a 4-digit PIN for kitchen staff to access the Kitchen Display System.'}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { maxLength: 4, inputMode: 'numeric', pattern: '\\d{4}' },
+              input: {
+                endAdornment: (
+                  <IconButton onClick={() => setShowPin(!showPin)} edge="end" size="small">
+                    <Icon icon={showPin ? 'mdi:eye-off-outline' : 'mdi:eye-outline'} width={20} />
+                  </IconButton>
+                ),
+              },
+            }}
+            helperText="4-digit PIN for kitchen staff to access the Kitchen Display System."
             sx={{ mb: 2 }}
           />
           {(hasExistingPin || (formData.kitchenPin && formData.kitchenPin.length === 4)) && restaurant && (
@@ -465,7 +476,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
         </SectionAccordion>
 
         {/* Promotions */}
-        <SectionAccordion id="promotions" title="Promotions & Announcements">
+        <SectionAccordion id="promotions" title="Promotions & Announcements" expanded={expanded === 'promotions'} onChange={handleAccordion('promotions')}>
           <TextField
             label="Discount/Announcement Text"
             value={formData.discountText}

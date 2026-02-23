@@ -11,6 +11,7 @@ import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { RestaurantAdminDashboard } from './pages/RestaurantAdminDashboard';
 import { PublicMenu } from './pages/PublicMenu';
 import { KitchenDisplay } from './pages/KitchenDisplay';
+import { Register } from './pages/Register';
 import './styles/global.css';
 
 const AppRoutes = () => {
@@ -18,6 +19,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      <Route path="/register" element={<Register />} />
       <Route path="/goresto-admin" element={!isAuthenticated ? <Login /> : <Navigate to={isSuperAdmin ? '/super-admin' : '/dashboard'} replace />} />
       <Route
         path="/super-admin"

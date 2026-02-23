@@ -5,7 +5,7 @@ import * as settingsService from '../services/settings.service.js';
 import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
-import { comparePassword } from '../utils/password.js';
+
 import { prisma } from '../config/database.js';
 
 export const getRestaurant = asyncHandler(async (req, res) => {
@@ -127,8 +127,7 @@ export const verifyKitchenPin = asyncHandler(async (req, res) => {
     });
   }
 
-  const pinValid = await comparePassword(pin, settings.kitchenPin);
-  if (!pinValid) {
+  if (pin !== settings.kitchenPin) {
     return res.status(401).json({
       success: false,
       error: { code: 'INVALID_PIN', message: 'Invalid kitchen PIN' },
