@@ -107,6 +107,12 @@ enum DiscountScope {
   item_specific
 }
 
+enum RestaurantStatus {
+  pending
+  active
+  rejected
+}
+
 enum GstScheme {
   regular
   composition
@@ -164,6 +170,7 @@ model Restaurant {
   openingHours String?
   discount     Json?
   qrCode       String?
+  status       RestaurantStatus @default(pending)
 
   adminId String?
   admin   User?   @relation("PrimaryAdmin", fields: [adminId], references: [id], onDelete: SetNull)
@@ -183,6 +190,7 @@ model Restaurant {
   updatedAt DateTime @updatedAt
 
   @@index([adminId])
+  @@index([status])
 }
 
 model MenuItem {

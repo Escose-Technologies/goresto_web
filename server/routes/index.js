@@ -12,6 +12,7 @@ import analyticsRoutes from './analytics.routes.js';
 import billsRoutes from './bills.routes.js';
 import discountPresetsRoutes from './discountPresets.routes.js';
 import publicRoutes from './public.routes.js';
+import registrationRoutes from './registration.routes.js';
 
 const router = Router();
 
@@ -35,6 +36,9 @@ router.use('/restaurants/:restaurantId/discount-presets', discountPresetsRoutes)
 
 // Public endpoints (no auth)
 router.use('/public/restaurants', publicRoutes);
+
+// Registration (public + admin)
+router.use('/registrations', registrationRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

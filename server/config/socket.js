@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { env } from './env.js';
 import { verifyAccessToken } from '../utils/jwt.js';
-import { comparePassword } from '../utils/password.js';
+
 import { prisma } from './database.js';
 import * as ordersService from '../services/orders.service.js';
 
@@ -68,8 +68,7 @@ export const initializeSocket = (httpServer) => {
           return;
         }
 
-        const pinValid = await comparePassword(pin, settings.kitchenPin);
-        if (!pinValid) {
+        if (pin !== settings.kitchenPin) {
           if (callback) callback({ success: false, error: 'Invalid PIN' });
           return;
         }

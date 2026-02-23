@@ -7,7 +7,7 @@ const RESTAURANT_LIST_SELECT = {
   id: true, name: true, description: true, address: true,
   phone: true, email: true, website: true, cuisineTypes: true,
   foodType: true, socialLinks: true, openingHours: true,
-  discount: true, qrCode: true, adminId: true,
+  discount: true, qrCode: true, adminId: true, status: true,
   createdAt: true, updatedAt: true,
   // logo, coverImage: EXCLUDED — fetch via getById when needed
 };

@@ -75,8 +75,8 @@ export const GenerateBillModal = ({
       }
 
       // Set packaging charge default from settings
-      if (settingsData?.enablePackagingCharge && settingsData?.defaultPackagingCharge) {
-        setPackagingCharge(settingsData.defaultPackagingCharge);
+      if (settingsProp?.enablePackagingCharge && settingsProp?.defaultPackagingCharge) {
+        setPackagingCharge(settingsProp.defaultPackagingCharge);
       }
     } catch (err) {
       toast?.error('Failed to load billing data: ' + err.message);

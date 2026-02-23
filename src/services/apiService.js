@@ -154,6 +154,37 @@ export const authService = {
   },
 };
 
+// ─── Registration Service ────────────────────────────────
+
+export const registrationService = {
+  async register(data) {
+    const res = await fetch(`${API_BASE}/registrations/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!json.success) {
+      const err = new Error(json.error?.message || 'Registration failed');
+      err.status = res.status;
+      throw err;
+    }
+    return json.data;
+  },
+
+  async getPending() {
+    return get('/registrations/pending');
+  },
+
+  async approve(id) {
+    return patch(`/registrations/${id}/approve`, {});
+  },
+
+  async reject(id) {
+    return patch(`/registrations/${id}/reject`, {});
+  },
+};
+
 // ─── User Service ────────────────────────────────────────
 
 export const userService = {

@@ -20,6 +20,23 @@ export const login = async (email, password, role) => {
     throw new AuthenticationError('Invalid credentials');
   }
 
+  // Check restaurant status for restaurant_admin users
+  if (user.role === 'restaurant_admin') {
+    const restaurant = await prisma.restaurant.findFirst({
+      where: { OR: [{ adminId: user.id }, ...(user.restaurantId ? [{ id: user.restaurantId }] : [])] },
+      select: { status: true },
+    });
+    if (!restaurant) {
+      throw new AuthenticationError('No restaurant associated with this account');
+    }
+    if (restaurant.status === 'pending') {
+      throw new AuthenticationError('Your restaurant registration is pending approval');
+    }
+    if (restaurant.status === 'rejected') {
+      throw new AuthenticationError('Your restaurant registration has been rejected');
+    }
+  }
+
   const accessToken = generateAccessToken({
     userId: user.id,
     email: user.email,

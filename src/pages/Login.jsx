@@ -173,7 +173,14 @@ export const Login = () => {
           </Box>
         )}
 
-        <Box sx={{ textAlign: 'center', mt: 3 }}>
+        <Box sx={{ textAlign: 'center', mt: 2.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            Don't have an account?{' '}
+            <Link to="/register" style={{ color: '#3385F0', fontWeight: 600, textDecoration: 'none' }}>Register your restaurant</Link>
+          </Typography>
+        </Box>
+
+        <Box sx={{ textAlign: 'center', mt: 1.5 }}>
           <Button
             component={Link}
             to="/"
