@@ -68,6 +68,13 @@ Nothing was deleted. Super-admin: `superadmin@goresto.com` / `admin123`.
 
 ---
 
+## Settings & Profile redesign + API hardening (2026-06-21, PR #3, live)
+- **Settings** rebuilt as a two-pane layout (section rail + content panel + sticky Save) — screenshot `12-settings-redesign.png`.
+- **Profile** rebuilt with a cover/logo hero + live preview and grouped cards — screenshot `13-profile-redesign.png`.
+- **Backend security** (verified live):
+  - IDOR fixed — restaurant-admin editing another restaurant → **403**; own edit → **200**.
+  - Oversized base64 image → **413**; `javascript:` website → **400**.
+
 ## Coverage gaps (not exercised this pass)
 
 - **Billing**: bill generation / discount presets / split payment / thermal & A4 invoices (generate action not discoverable).
