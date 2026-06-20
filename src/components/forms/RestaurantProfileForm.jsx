@@ -3,9 +3,11 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -18,6 +20,22 @@ const FOOD_TYPES = [
   { value: 'non_veg', label: 'Non-Veg', desc: 'Includes non-veg, egg & veg' },
   { value: 'both', label: 'Veg & Non-Veg', desc: 'Serves all types' },
 ];
+
+// Defined outside the component so it isn't remounted on every keystroke.
+const SectionCard = ({ icon, title, subtitle, children, sx }) => (
+  <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, height: '100%', ...sx }}>
+    <Stack direction="row" spacing={1.25} alignItems="center" mb={2}>
+      <Box sx={{ width: 34, height: 34, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'primary.lighter', color: 'primary.main', flexShrink: 0 }}>
+        <Icon icon={icon} width={20} />
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="subtitle2" fontWeight={800} lineHeight={1.15}>{title}</Typography>
+        {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+      </Box>
+    </Stack>
+    {children}
+  </Paper>
+);
 
 export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }) => {
   const toast = useToast();
@@ -42,6 +60,7 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
   const [logoPreview, setLogoPreview] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (restaurant) {
@@ -106,159 +125,189 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
+    setSaving(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setSaving(false);
+    }
   };
 
+  const activeFoodType = FOOD_TYPES.find((f) => f.value === formData.foodType);
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" fontWeight={700} mb={0.5}>
-        Restaurant Profile
-      </Typography>
-      <Typography variant="body2" color="text.secondary" mb={3}>
-        Changes saved here will reflect on your public menu page.
-      </Typography>
-
-      <Box component="form" onSubmit={handleSubmit}>
-        {/* Cover Image */}
-        <Typography variant="subtitle2" fontWeight={600} mb={1}>Cover Image</Typography>
-        <Box sx={{ mb: 2 }}>
-          {coverPreview ? (
-            <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider', height: { xs: 150, sm: 220 } }}>
-              <Box component="img" src={coverPreview} alt="Cover" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <IconButton
-                onClick={() => handleRemoveImage('cover')}
-                sx={{ position: 'absolute', top: 8, right: 8, width: 32, height: 32, p: 0, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
-              >
-                <Icon icon="mdi:close" width={18} />
-              </IconButton>
-            </Box>
-          ) : (
-            <Box sx={{ height: { xs: 150, sm: 220 }, border: '2px dashed', borderColor: 'divider', borderRadius: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', bgcolor: 'grey.50' }}>
-              <Icon icon="mdi:image-outline" width={48} />
-              <Typography variant="body2">Add a cover image</Typography>
-            </Box>
-          )}
-          <input ref={coverInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'cover')} style={{ display: 'none' }} id="cover-upload" disabled={isUploading} />
-          <label htmlFor="cover-upload">
-            <Button variant="outlined" size="small" component="span" disabled={isUploading} sx={{ mt: 1 }}>
-              {isUploading ? 'Uploading...' : coverPreview ? 'Change Cover' : 'Upload Cover'}
-            </Button>
-          </label>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 980, mx: 'auto' }}>
+      {/* Sticky header with primary actions */}
+      <Box
+        sx={{
+          position: 'sticky', top: 0, zIndex: 5,
+          bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider',
+          px: { xs: 2, sm: 3 }, py: 1.5,
+          display: 'flex', alignItems: 'center', gap: 1.5,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h6" fontWeight={800} lineHeight={1.1}>Restaurant Profile</Typography>
+          <Typography variant="caption" color="text.secondary" noWrap>Shown to customers on your public menu</Typography>
         </Box>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={saving || isUploading}
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Icon icon="mdi:content-save-outline" width={18} />}
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
+        {onCancel && (
+          <IconButton onClick={onCancel} aria-label="Close profile"><Icon icon="mdi:close" width={22} /></IconButton>
+        )}
+      </Box>
 
-        {/* Logo */}
-        <Typography variant="subtitle2" fontWeight={600} mb={1}>Restaurant Logo</Typography>
-        <Stack direction="row" spacing={2} alignItems="center" mb={3}>
-          <Box sx={{ position: 'relative' }}>
-            <Avatar src={logoPreview || undefined} sx={{ width: { xs: 80, sm: 120 }, height: { xs: 80, sm: 120 }, bgcolor: 'grey.200' }}>
-              <Icon icon="mdi:store" width={40} />
-            </Avatar>
-            {logoPreview && (
-              <IconButton
-                onClick={() => handleRemoveImage('logo')}
-                sx={{ position: 'absolute', top: -4, right: -4, width: 24, height: 24, p: 0, bgcolor: 'error.main', color: 'white', '&:hover': { bgcolor: 'error.dark' } }}
-              >
-                <Icon icon="mdi:close" width={14} />
-              </IconButton>
+      <Box sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+        {/* Hero: cover + logo + live name preview */}
+        <Paper variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden', mb: 2.5 }}>
+          <Box sx={{ position: 'relative', height: { xs: 140, sm: 200 }, bgcolor: 'grey.100' }}>
+            {coverPreview ? (
+              <Box component="img" src={coverPreview} alt="Cover" sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'text.disabled', background: 'linear-gradient(135deg, #EAF3FD 0%, #F7FAFC 100%)' }}>
+                <Icon icon="mdi:image-outline" width={40} />
+                <Typography variant="caption">Add a cover image — 1600×400 looks best</Typography>
+              </Box>
             )}
+            {/* Cover actions */}
+            <Stack direction="row" spacing={1} sx={{ position: 'absolute', top: 10, right: 10 }}>
+              <input ref={coverInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'cover')} style={{ display: 'none' }} id="cover-upload" disabled={isUploading} />
+              <label htmlFor="cover-upload">
+                <Button component="span" size="small" variant="contained" disabled={isUploading} startIcon={<Icon icon="mdi:camera-outline" width={16} />} sx={{ bgcolor: 'rgba(17,20,23,0.72)', '&:hover': { bgcolor: 'rgba(17,20,23,0.88)' } }}>
+                  {coverPreview ? 'Change' : 'Add cover'}
+                </Button>
+              </label>
+              {coverPreview && (
+                <IconButton size="small" onClick={() => handleRemoveImage('cover')} sx={{ bgcolor: 'rgba(17,20,23,0.72)', color: 'white', '&:hover': { bgcolor: 'rgba(17,20,23,0.88)' } }}>
+                  <Icon icon="mdi:delete-outline" width={18} />
+                </IconButton>
+              )}
+            </Stack>
           </Box>
-          <Box>
-            <input ref={logoInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} style={{ display: 'none' }} id="logo-upload" disabled={isUploading} />
-            <label htmlFor="logo-upload">
-              <Button variant="outlined" size="small" component="span" disabled={isUploading}>
-                {logoPreview ? 'Change' : 'Upload'}
-              </Button>
-            </label>
-            <Typography variant="caption" display="block" color="text.secondary" mt={0.5}>
-              JPG, PNG, GIF. Max 5MB
-            </Typography>
+
+          {/* Logo overlapping the cover + name preview */}
+          <Box sx={{ px: { xs: 2, sm: 3 }, pb: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="flex-end" sx={{ mt: { xs: -5, sm: -6 } }}>
+              <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                <Avatar
+                  src={logoPreview || undefined}
+                  sx={{ width: { xs: 84, sm: 104 }, height: { xs: 84, sm: 104 }, bgcolor: 'grey.200', border: '4px solid', borderColor: 'background.paper', boxShadow: 2 }}
+                >
+                  <Icon icon="mdi:storefront" width={40} />
+                </Avatar>
+                <input ref={logoInputRef} type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'logo')} style={{ display: 'none' }} id="logo-upload" disabled={isUploading} />
+                <label htmlFor="logo-upload">
+                  <IconButton component="span" size="small" disabled={isUploading} sx={{ position: 'absolute', bottom: -2, right: -2, bgcolor: 'primary.main', color: 'primary.contrastText', width: 30, height: 30, '&:hover': { bgcolor: 'primary.dark' } }}>
+                    <Icon icon="mdi:camera-outline" width={16} />
+                  </IconButton>
+                </label>
+                {logoPreview && (
+                  <IconButton size="small" onClick={() => handleRemoveImage('logo')} sx={{ position: 'absolute', top: -2, right: -2, bgcolor: 'error.main', color: 'white', width: 22, height: 22, '&:hover': { bgcolor: 'error.dark' } }}>
+                    <Icon icon="mdi:close" width={13} />
+                  </IconButton>
+                )}
+              </Box>
+              <Box sx={{ minWidth: 0, pb: 0.5 }}>
+                <Typography variant="h6" fontWeight={800} noWrap>{formData.name || 'Your restaurant'}</Typography>
+                <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+                  <Chip size="small" color="primary" variant="outlined" label={activeFoodType?.label || 'Veg & Non-Veg'} />
+                  {(formData.openingTime && formData.closingTime) && (
+                    <Typography variant="caption" color="text.secondary">{formData.openingTime}–{formData.closingTime}</Typography>
+                  )}
+                </Stack>
+              </Box>
+            </Stack>
+            <Typography variant="caption" color="text.secondary" display="block" mt={1}>Logo: JPG, PNG or GIF, up to 5MB.</Typography>
           </Box>
-        </Stack>
+        </Paper>
 
-        {/* Basic Info */}
-        <TextField label="Restaurant Name" value={formData.name} onChange={handleChange('name')} required fullWidth sx={{ mb: 2 }} />
-        <TextField label="Description" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} placeholder="Tell customers about your restaurant..." sx={{ mb: 2 }} />
-
-        {/* Food Type */}
-        <Typography variant="subtitle2" fontWeight={600} mb={0.5}>Food Type</Typography>
-        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-          What type of food does your restaurant serve?
-        </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={3}>
-          {FOOD_TYPES.map((opt) => (
-            <Chip
-              key={opt.value}
-              label={opt.label}
-              variant={formData.foodType === opt.value ? 'filled' : 'outlined'}
-              color={formData.foodType === opt.value ? 'primary' : 'default'}
-              onClick={() => setFormData((prev) => ({ ...prev, foodType: opt.value }))}
-              sx={{ cursor: 'pointer' }}
-            />
-          ))}
-        </Stack>
-
-        {/* Contact */}
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>Contact Information</Typography>
-        <TextField label="Address" value={formData.address} onChange={handleChange('address')} fullWidth placeholder="123 Main Street, City, State" sx={{ mb: 2 }} />
-        <Grid container spacing={2} mb={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField label="Phone" type="tel" value={formData.phone} onChange={handleChange('phone')} fullWidth placeholder="+91 98765 43210" />
+        <Grid container spacing={2.5}>
+          {/* Basics */}
+          <Grid size={12}>
+            <SectionCard icon="mdi:card-text-outline" title="Basics" subtitle="Name, story and what you serve">
+              <TextField label="Restaurant Name" value={formData.name} onChange={handleChange('name')} required fullWidth sx={{ mb: 2 }} />
+              <TextField label="Description" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} placeholder="Tell customers about your restaurant…" sx={{ mb: 2 }} />
+              <Typography variant="body2" fontWeight={600} mb={0.5}>Food Type</Typography>
+              <Typography variant="caption" color="text.secondary" display="block" mb={1}>{activeFoodType?.desc || 'What type of food do you serve?'}</Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {FOOD_TYPES.map((opt) => (
+                  <Chip
+                    key={opt.value}
+                    label={opt.label}
+                    variant={formData.foodType === opt.value ? 'filled' : 'outlined'}
+                    color={formData.foodType === opt.value ? 'primary' : 'default'}
+                    onClick={() => setFormData((prev) => ({ ...prev, foodType: opt.value }))}
+                    sx={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </Stack>
+            </SectionCard>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField label="Email" type="email" value={formData.email} onChange={handleChange('email')} fullWidth placeholder="contact@restaurant.com" />
+
+          {/* Contact */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <SectionCard icon="mdi:map-marker-outline" title="Contact" subtitle="How customers reach you">
+              <TextField label="Address" value={formData.address} onChange={handleChange('address')} fullWidth placeholder="123 Main Street, City, State" sx={{ mb: 2 }} />
+              <TextField label="Phone" type="tel" value={formData.phone} onChange={handleChange('phone')} fullWidth placeholder="+91 98765 43210" sx={{ mb: 2 }} />
+              <TextField label="Email" type="email" value={formData.email} onChange={handleChange('email')} fullWidth placeholder="contact@restaurant.com" sx={{ mb: 2 }} />
+              <TextField label="Website" type="url" value={formData.website} onChange={handleChange('website')} fullWidth placeholder="https://www.restaurant.com" />
+            </SectionCard>
+          </Grid>
+
+          {/* Social */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <SectionCard icon="mdi:share-variant-outline" title="Social media" subtitle="Handles or full links">
+              <Stack spacing={2}>
+                <TextField
+                  label="Instagram"
+                  value={formData.socialLinks.instagram}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, instagram: e.target.value } }))}
+                  fullWidth
+                  placeholder="@yourrestaurant"
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="mdi:instagram" width={20} /></InputAdornment> } }}
+                />
+                <TextField
+                  label="Facebook"
+                  value={formData.socialLinks.facebook}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, facebook: e.target.value } }))}
+                  fullWidth
+                  placeholder="facebook.com/yourrestaurant"
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="mdi:facebook" width={20} /></InputAdornment> } }}
+                />
+                <TextField
+                  label="Twitter / X"
+                  value={formData.socialLinks.twitter}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, twitter: e.target.value } }))}
+                  fullWidth
+                  placeholder="@yourrestaurant"
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="ri:twitter-x-fill" width={18} /></InputAdornment> } }}
+                />
+              </Stack>
+            </SectionCard>
+          </Grid>
+
+          {/* Hours */}
+          <Grid size={12}>
+            <SectionCard icon="mdi:clock-outline" title="Operating hours" subtitle="Shown on your public menu">
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField label="Opening Time" type="time" value={formData.openingTime} onChange={handleChange('openingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField label="Closing Time" type="time" value={formData.closingTime} onChange={handleChange('closingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
+                </Grid>
+              </Grid>
+            </SectionCard>
           </Grid>
         </Grid>
-        <TextField label="Website" type="url" value={formData.website} onChange={handleChange('website')} fullWidth placeholder="https://www.restaurant.com" sx={{ mb: 2 }} />
-
-        {/* Social Links */}
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>Social Media</Typography>
-        <Stack spacing={2} mb={2}>
-          <TextField
-            label="Instagram"
-            value={formData.socialLinks.instagram}
-            onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, instagram: e.target.value } }))}
-            fullWidth
-            placeholder="@yourrestaurant"
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="mdi:instagram" width={20} /></InputAdornment> } }}
-          />
-          <TextField
-            label="Facebook"
-            value={formData.socialLinks.facebook}
-            onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, facebook: e.target.value } }))}
-            fullWidth
-            placeholder="facebook.com/yourrestaurant"
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="mdi:facebook" width={20} /></InputAdornment> } }}
-          />
-          <TextField
-            label="Twitter"
-            value={formData.socialLinks.twitter}
-            onChange={(e) => setFormData((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, twitter: e.target.value } }))}
-            fullWidth
-            placeholder="@yourrestaurant"
-            slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="mdi:twitter" width={20} /></InputAdornment> } }}
-          />
-        </Stack>
-
-        {/* Operating Hours */}
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>Operating Hours</Typography>
-        <Grid container spacing={2} mb={3}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField label="Opening Time" type="time" value={formData.openingTime} onChange={handleChange('openingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField label="Closing Time" type="time" value={formData.closingTime} onChange={handleChange('closingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
-          </Grid>
-        </Grid>
-
-        {/* Actions */}
-        <Stack direction="row" spacing={1.5}>
-          <Button type="submit" variant="contained">Save Profile</Button>
-          {onCancel && (
-            <Button variant="outlined" onClick={onCancel}>Cancel</Button>
-          )}
-        </Stack>
       </Box>
     </Box>
   );
