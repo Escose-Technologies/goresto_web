@@ -22,11 +22,20 @@ jobs:
           username: ubuntu
           key: ${{ secrets.OCI_SSH_KEY }}
           script: |
+            set -euo pipefail
             cd ~/goresto
-            git pull origin main
+            BEFORE=$(git rev-parse HEAD)
+            # --ff-only so a failed/diverged pull aborts the deploy instead of
+            # silently rebuilding stale code (with set -e the job then goes red).
+            git fetch origin main
+            git pull --ff-only origin main
+            AFTER=$(git rev-parse HEAD)
+            echo "Deploying ${BEFORE} -> ${AFTER}"
             docker compose -f docker-compose.oci.yml build app
             docker compose -f docker-compose.oci.yml run --rm app npx prisma migrate deploy --schema=prisma/schema.prisma
             docker compose -f docker-compose.oci.yml up -d app
             docker image prune -f
             sleep 5
-            curl -sf https://api.goresto.in/api/health && echo "Deploy successful!" || echo "WARNING: Health check failed!"
+            # No "|| echo" — a failing health check must fail the job.
+            curl -sf https://api.goresto.in/api/health
+            echo "Deploy successful! (${AFTER})"
