@@ -75,6 +75,12 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // If a PIN was entered, it must be exactly 4 digits — otherwise warn the
+    // user instead of silently discarding it on save.
+    if (formData.kitchenPin && !/^\d{4}$/.test(formData.kitchenPin)) {
+      toast.warning('Kitchen PIN must be exactly 4 digits');
+      return;
+    }
     setSaving(true);
     try {
       const dataToSave = {

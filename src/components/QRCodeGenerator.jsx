@@ -86,12 +86,14 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
+      // Export at 4x for HD (print-quality) output. The QR source is vector
+      // SVG, so it rasterizes cleanly at any size.
+      const SCALE = 4;
       // Set canvas size: QR code (300x300) + padding + text area + branding
-      const qrSize = 300;
-      const padding = 40;
-      const topTextHeight = 50; // Space for restaurant name at top
-      const bottomTextHeight = 80; // Space for table number and branding
-      const brandingHeight = 40; // Space for branding
+      const qrSize = 300 * SCALE;
+      const padding = 40 * SCALE;
+      const topTextHeight = 50 * SCALE; // Space for restaurant name at top
+      const bottomTextHeight = 80 * SCALE; // Space for table number and branding
       canvas.width = qrSize + (padding * 2);
       canvas.height = qrSize + (padding * 2) + topTextHeight + bottomTextHeight;
       
@@ -103,7 +105,7 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
           
           // Draw restaurant name at the top
           ctx.fillStyle = '#1F2937';
-          ctx.font = 'bold 24px Arial, sans-serif';
+          ctx.font = `bold ${24 * SCALE}px Arial, sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
           
@@ -117,47 +119,47 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
           ctx.drawImage(img, qrX, qrY, qrSize, qrSize);
           
           // Draw table number if available (below QR code)
-          let brandingY = qrY + qrSize + 20;
+          let brandingY = qrY + qrSize + 20 * SCALE;
           if (tableNumber) {
             ctx.fillStyle = '#3385F0';
-            ctx.font = 'bold 20px Arial, sans-serif';
+            ctx.font = `bold ${20 * SCALE}px Arial, sans-serif`;
             const tableText = `Table ${tableNumber}`;
             ctx.fillText(tableText, canvas.width / 2, brandingY);
-            brandingY += 35;
+            brandingY += 35 * SCALE;
           }
-          
+
           // Draw border around QR code
           ctx.strokeStyle = '#E5E7EB';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10);
+          ctx.lineWidth = 2 * SCALE;
+          ctx.strokeRect(qrX - 5 * SCALE, qrY - 5 * SCALE, qrSize + 10 * SCALE, qrSize + 10 * SCALE);
           
           // Draw branding "Powered by GoResto"
           ctx.textBaseline = 'top';
           
           // Measure "Powered by" with smaller font
-          ctx.font = '14px Arial, sans-serif';
+          ctx.font = `${14 * SCALE}px Arial, sans-serif`;
           const poweredByText = 'Powered by';
           const poweredByWidth = ctx.measureText(poweredByText).width;
           
           // Measure "GoResto" with larger font
-          ctx.font = 'bold 22px Arial, sans-serif';
+          ctx.font = `bold ${22 * SCALE}px Arial, sans-serif`;
           const gorestoText = 'GoResto';
           const gorestoWidth = ctx.measureText(gorestoText).width;
           
           // Calculate total width and starting position for centered text
-          const spacing = 8; // Space between "Powered by" and "GoResto"
+          const spacing = 8 * SCALE; // Space between "Powered by" and "GoResto"
           const totalWidth = poweredByWidth + spacing + gorestoWidth;
           const startX = (canvas.width - totalWidth) / 2;
           
           // Draw "Powered by" (smaller font, gray)
           ctx.fillStyle = '#9CA3AF';
-          ctx.font = '14px Arial, sans-serif';
+          ctx.font = `${14 * SCALE}px Arial, sans-serif`;
           ctx.textAlign = 'left';
           ctx.fillText(poweredByText, startX, brandingY);
           
           // Draw "GoResto" (larger font, purple)
           ctx.fillStyle = '#3385F0';
-          ctx.font = 'bold 22px Arial, sans-serif';
+          ctx.font = `bold ${22 * SCALE}px Arial, sans-serif`;
           ctx.fillText(gorestoText, startX + poweredByWidth + spacing, brandingY);
           
           // Download as PNG

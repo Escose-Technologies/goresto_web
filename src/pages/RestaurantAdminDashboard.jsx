@@ -318,7 +318,9 @@ export const RestaurantAdminDashboard = () => {
         setOrders(prev => prev.map(o => o.id === editingOrder.id ? updated : o));
       } else {
         const created = await orderService.addOrder(restaurant.id, orderData);
-        setOrders(prev => [created, ...prev]);
+        // Guard against the socket "order:new" event having already added it,
+        // which otherwise renders the same order twice until a refresh.
+        setOrders(prev => prev.find(o => o.id === created.id) ? prev : [created, ...prev]);
       }
       handleCancelEdit();
     } catch (error) {
