@@ -1,22 +1,23 @@
+import { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
+import Collapse from '@mui/material/Collapse';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Fab from '@mui/material/Fab';
 import FormControl from '@mui/material/FormControl';
-import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import { Icon } from '@iconify/react';
 import { OrderForm } from '../OrderForm';
 import { getOrderStatusLabel } from '../../utils/statusLabels';
@@ -34,18 +35,26 @@ const STATUS_COLOR = {
   cancelled: 'error',
 };
 
-const STATUS_BORDER = {
+// Dot colour per status (for the compact rows)
+const STATUS_DOT = {
   pending: 'warning.main',
   accepted: 'info.main',
   rejected: 'error.main',
-  'on-hold': 'grey.400',
-  preparing: 'info.light',
+  'on-hold': 'grey.500',
+  preparing: 'info.main',
   prepared: 'success.light',
   served: 'success.main',
   ready: 'success.dark',
-  completed: 'success.darker',
-  cancelled: 'error.light',
+  completed: 'success.main',
+  cancelled: 'error.main',
 };
+
+const isFinished = (s) => s === 'completed' || s === 'cancelled';
+
+// Urgency for sorting tables/orders — lower = needs attention sooner.
+const URGENCY = { pending: 0, accepted: 1, 'on-hold': 1, preparing: 2, prepared: 3, ready: 3, served: 4 };
+
+const money = (n) => `₹${Number(n || 0).toFixed(2)}`;
 
 const OrdersSection = ({
   orders,
@@ -66,86 +75,119 @@ const OrdersSection = ({
   onUpdateStatus,
   onGenerateBill,
 }) => {
-  const filtered = orders.filter((order) => {
-    if (orderStatusFilter !== 'All' && order.status !== orderStatusFilter) return false;
-    if (orderSearchQuery.trim()) {
-      const q = orderSearchQuery.trim().toLowerCase();
-      const matchesName = order.customerName?.toLowerCase().includes(q);
-      const matchesMobile = order.customerMobile?.toLowerCase().includes(q);
-      const matchesId = order.id.toLowerCase().includes(q);
-      if (!matchesName && !matchesMobile && !matchesId) return false;
+  const [view, setView] = useState('floor'); // 'floor' | 'list'
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const visible = useMemo(() => {
+    const q = orderSearchQuery.trim().toLowerCase();
+    return orders.filter((o) => {
+      if (orderStatusFilter !== 'All' && o.status !== orderStatusFilter) return false;
+      if (!q) return true;
+      return (
+        o.customerName?.toLowerCase().includes(q) ||
+        o.customerMobile?.toLowerCase().includes(q) ||
+        o.id.toLowerCase().includes(q) ||
+        String(o.tableNumber || '').toLowerCase().includes(q)
+      );
+    });
+  }, [orders, orderSearchQuery, orderStatusFilter]);
+
+  const activeOrders = useMemo(() => visible.filter((o) => !isFinished(o.status)), [visible]);
+  const finishedOrders = useMemo(
+    () => visible.filter((o) => isFinished(o.status)).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)),
+    [visible],
+  );
+
+  // Group active orders by table number.
+  const ordersByTable = useMemo(() => {
+    const map = new Map();
+    for (const o of activeOrders) {
+      const key = o.tableNumber != null && o.tableNumber !== '' ? String(o.tableNumber) : '__none__';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(o);
     }
-    return true;
-  });
+    for (const list of map.values()) {
+      list.sort((a, b) => (URGENCY[a.status] ?? 9) - (URGENCY[b.status] ?? 9) || new Date(a.createdAt) - new Date(b.createdAt));
+    }
+    return map;
+  }, [activeOrders]);
+
+  // One card per known table + a "Takeaway" bucket for orders with no table.
+  const tableCards = useMemo(() => {
+    const known = (tables || []).map((t) => ({
+      key: String(t.number),
+      label: `Table ${t.number}`,
+      capacity: t.capacity,
+      orders: ordersByTable.get(String(t.number)) || [],
+    }));
+    const orphan = ordersByTable.get('__none__');
+    if (orphan?.length) known.push({ key: '__none__', label: 'Takeaway', capacity: null, orders: orphan });
+    return known.sort((a, b) => {
+      const au = a.orders.length ? Math.min(...a.orders.map((o) => URGENCY[o.status] ?? 9)) : 99;
+      const bu = b.orders.length ? Math.min(...b.orders.map((o) => URGENCY[o.status] ?? 9)) : 99;
+      if (au !== bu) return au - bu;
+      return a.label.localeCompare(b.label, undefined, { numeric: true });
+    });
+  }, [tables, ordersByTable]);
+
+  const activeCount = activeOrders.length;
+  const hasAnyTableOrders = tableCards.some((t) => t.orders.length > 0);
 
   return (
     <>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        Orders
-      </Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={2}>
+        <Stack direction="row" alignItems="baseline" spacing={1}>
+          <Typography variant="h5" fontWeight={700}>Orders</Typography>
+          <Typography variant="body2" color="text.secondary">{activeCount} active</Typography>
+        </Stack>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            component="a"
+            href={`/kitchen/${restaurantId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outlined"
+            size="small"
+            startIcon={<Icon icon="mdi:monitor-dashboard" width={18} />}
+          >
+            Kitchen Display
+          </Button>
+          <ToggleButtonGroup size="small" exclusive value={view} onChange={(_, v) => v && setView(v)} aria-label="Orders view">
+            <ToggleButton value="floor" aria-label="Floor view"><Icon icon="mdi:view-grid-outline" width={18} /></ToggleButton>
+            <ToggleButton value="list" aria-label="List view"><Icon icon="mdi:format-list-bulleted" width={18} /></ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
+      </Stack>
 
-      <Fab
-        color="primary"
-        size="medium"
-        onClick={onAdd}
-        aria-label="Create Order"
-        sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}
-      >
+      <Fab color="primary" size="medium" onClick={onAdd} aria-label="Create Order" sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1100 }}>
         <Icon icon="mdi:plus" width={24} />
       </Fab>
 
-      {/* Kitchen Display link */}
-      <Box sx={{ mb: 2 }}>
-        <Button
-          component="a"
-          href={`/kitchen/${restaurantId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="outlined"
-          size="small"
-          startIcon={<Icon icon="mdi:monitor-dashboard" width={18} />}
-        >
-          Open Kitchen Display
-        </Button>
-      </Box>
-
-      {/* Filters row */}
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2} alignItems={{ sm: 'center' }}>
+      {/* Filters */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} mb={2.5} alignItems={{ sm: 'center' }}>
         <TextField
-          placeholder="Search by name, mobile, or order ID..."
+          placeholder="Search name, mobile, table or order ID…"
           size="small"
           value={orderSearchQuery}
           onChange={(e) => setOrderSearchQuery(e.target.value)}
-          sx={{ flex: 1, maxWidth: { sm: 360 } }}
+          sx={{ flex: 1, maxWidth: { sm: 380 } }}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Icon icon="mdi:magnify" width={20} />
-                </InputAdornment>
-              ),
+              startAdornment: <InputAdornment position="start"><Icon icon="mdi:magnify" width={20} /></InputAdornment>,
               endAdornment: orderSearchQuery ? (
                 <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setOrderSearchQuery('')}>
-                    <Icon icon="mdi:close" width={18} />
-                  </IconButton>
+                  <IconButton size="small" onClick={() => setOrderSearchQuery('')}><Icon icon="mdi:close" width={18} /></IconButton>
                 </InputAdornment>
               ) : null,
             },
           }}
         />
-
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel>Status</InputLabel>
-          <Select
-            value={orderStatusFilter}
-            label="Status"
-            onChange={(e) => setOrderStatusFilter(e.target.value)}
-          >
+          <Select value={orderStatusFilter} label="Status" onChange={(e) => setOrderStatusFilter(e.target.value)}>
             <MenuItem value="All">All Orders</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
             <MenuItem value="accepted">Accepted</MenuItem>
-            <MenuItem value="rejected">Rejected</MenuItem>
             <MenuItem value="on-hold">On Hold</MenuItem>
             <MenuItem value="preparing">Preparing</MenuItem>
             <MenuItem value="prepared">Prepared</MenuItem>
@@ -157,109 +199,64 @@ const OrdersSection = ({
         </FormControl>
       </Stack>
 
-      {/* Orders list */}
-      {filtered.length === 0 ? (
-        <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
-          <Icon icon="mdi:receipt-text-outline" width={48} style={{ opacity: 0.4, marginBottom: 8 }} />
-          <Typography>No orders found. Create your first order!</Typography>
+      {/* FLOOR VIEW — grid of table cards */}
+      {view === 'floor' && (
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', alignItems: 'start' }}>
+          {tableCards.map((tc) => (
+            <TableCard key={tc.key} card={tc} onEdit={onEdit} onUpdateStatus={onUpdateStatus} onGenerateBill={onGenerateBill} onAdd={onAdd} />
+          ))}
         </Box>
-      ) : (
-        <Stack spacing={2}>
-          {filtered.map((order) => {
-            const isOldFinished =
-              ['completed', 'cancelled'].includes(order.status) &&
-              Date.now() - new Date(order.updatedAt).getTime() > 3600000;
+      )}
 
-            return (
-              <Card
-                key={order.id}
-                sx={{
-                  borderLeft: 4,
-                  borderColor: STATUS_BORDER[order.status] || 'grey.300',
-                  opacity: isOldFinished ? 0.6 : 1,
-                }}
-              >
-                <CardActionArea
-                  disabled={isOldFinished}
-                  onClick={() => !isOldFinished && onEdit(order)}
-                >
-                  <CardContent>
-                    {/* Header row */}
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="subtitle1" fontWeight={700}>
-                          #{order.id.slice(-8)}
-                        </Typography>
-                        <Chip
-                          label={getOrderStatusLabel(order.status)}
-                          color={STATUS_COLOR[order.status] || 'default'}
-                          size="small"
-                        />
-                      </Stack>
-                      <Typography variant="subtitle1" fontWeight={700}>
-                        &#8377;{order.total.toFixed(2)}
-                      </Typography>
-                    </Stack>
+      {/* LIST VIEW — table-grouped dense rows */}
+      {view === 'list' && (
+        activeCount === 0 ? (
+          <EmptyState text="No active orders." />
+        ) : (
+          <Stack spacing={2}>
+            {tableCards.filter((tc) => tc.orders.length > 0).map((tc) => (
+              <Box key={tc.key}>
+                <Stack direction="row" alignItems="center" spacing={1} mb={0.75}>
+                  <Icon icon="mdi:table-furniture" width={18} />
+                  <Typography variant="subtitle2" fontWeight={700}>{tc.label}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {tc.orders.length} {tc.orders.length === 1 ? 'order' : 'orders'} · {money(tc.orders.reduce((s, o) => s + o.total, 0))}
+                  </Typography>
+                </Stack>
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                  {tc.orders.map((o, i) => (
+                    <OrderRow key={o.id} order={o} divider={i > 0} onEdit={onEdit} onUpdateStatus={onUpdateStatus} onGenerateBill={onGenerateBill} />
+                  ))}
+                </Paper>
+              </Box>
+            ))}
+          </Stack>
+        )
+      )}
 
-                    {/* Meta row */}
-                    <Stack direction="row" spacing={1.5} flexWrap="wrap" sx={{ color: 'text.secondary', mb: 1 }}>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Icon icon="mdi:table-furniture" width={16} />
-                        <Typography variant="body2">Table {order.tableNumber}</Typography>
-                      </Stack>
-                      {order.customerName && (
-                        <Stack direction="row" spacing={0.5} alignItems="center">
-                          <Icon icon="mdi:account-outline" width={16} />
-                          <Typography variant="body2">{order.customerName}</Typography>
-                        </Stack>
-                      )}
-                      {order.customerMobile && (
-                        <Stack direction="row" spacing={0.5} alignItems="center">
-                          <Icon icon="mdi:phone-outline" width={16} />
-                          <Typography variant="body2">{order.customerMobile}</Typography>
-                        </Stack>
-                      )}
-                      <Typography variant="body2">
-                        {new Date(order.createdAt).toLocaleString()}
-                      </Typography>
-                    </Stack>
+      {/* COMPLETED / HISTORY */}
+      {finishedOrders.length > 0 && (
+        <Box mt={3}>
+          <Button
+            onClick={() => setHistoryOpen((v) => !v)}
+            startIcon={<Icon icon={historyOpen ? 'mdi:chevron-down' : 'mdi:chevron-right'} width={20} />}
+            sx={{ color: 'text.secondary', textTransform: 'none' }}
+          >
+            Completed &amp; cancelled ({finishedOrders.length})
+          </Button>
+          <Collapse in={historyOpen}>
+            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', mt: 1 }}>
+              {finishedOrders.map((o, i) => (
+                <OrderRow key={o.id} order={o} divider={i > 0} muted onEdit={onEdit} onUpdateStatus={onUpdateStatus} onGenerateBill={onGenerateBill} />
+              ))}
+            </Paper>
+          </Collapse>
+        </Box>
+      )}
 
-                    {/* Order ID full */}
-                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>
-                      {order.id}
-                    </Typography>
-
-                    {/* Items */}
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" mb={1}>
-                      {order.items.map((item, idx) => (
-                        <Chip
-                          key={idx}
-                          label={`${item.quantity}x ${item.name}`}
-                          size="small"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Stack>
-
-                    {/* Notes */}
-                    {order.notes && (
-                      <Typography variant="body2" color="text.secondary" fontStyle="italic" mb={1}>
-                        {order.notes}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </CardActionArea>
-
-                {/* Status action buttons */}
-                <OrderActions
-                  order={order}
-                  onUpdateStatus={onUpdateStatus}
-                  onGenerateBill={onGenerateBill}
-                />
-              </Card>
-            );
-          })}
-        </Stack>
+      {/* Empty state */}
+      {!hasAnyTableOrders && activeCount === 0 && finishedOrders.length === 0 && (
+        <Box mt={2}><EmptyState text="No orders yet. Tap + to create one." /></Box>
       )}
 
       {/* Order Form Dialog */}
@@ -285,63 +282,160 @@ const OrdersSection = ({
   );
 };
 
-/* Extracted action button rows per status — buttons are instant (optimistic update) */
-const OrderActions = ({ order, onUpdateStatus, onGenerateBill }) => {
-  const buttons = [];
+const EmptyState = ({ text }) => (
+  <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
+    <Icon icon="mdi:receipt-text-outline" width={44} style={{ opacity: 0.4, marginBottom: 8 }} />
+    <Typography>{text}</Typography>
+  </Box>
+);
 
-  if (order.status === 'pending') {
-    buttons.push(
-      <Button key="accept" size="small" color="success" variant="contained" onClick={() => onUpdateStatus(order.id, 'accepted')}>Accept</Button>,
-      <Button key="reject" size="small" color="error" variant="outlined" onClick={() => onUpdateStatus(order.id, 'rejected')}>Reject</Button>,
-      <Button key="hold" size="small" color="warning" variant="outlined" onClick={() => onUpdateStatus(order.id, 'on-hold')}>Hold</Button>,
-    );
-  } else if (order.status === 'accepted' || order.status === 'on-hold') {
-    buttons.push(
-      <Button key="preparing" size="small" color="info" variant="contained" onClick={() => onUpdateStatus(order.id, 'preparing')}>Start Preparing</Button>,
-      <Button key="reject" size="small" color="error" variant="outlined" onClick={() => onUpdateStatus(order.id, 'rejected')}>Reject</Button>,
-    );
-  } else if (order.status === 'preparing') {
-    buttons.push(
-      <Button key="prepared" size="small" color="success" variant="contained" onClick={() => onUpdateStatus(order.id, 'prepared')}>Prepared</Button>,
-      <Button key="ready" size="small" color="success" variant="outlined" onClick={() => onUpdateStatus(order.id, 'ready')}>Ready</Button>,
-    );
-  } else if (order.status === 'prepared') {
-    buttons.push(
-      <Button key="served" size="small" color="success" variant="contained" onClick={() => onUpdateStatus(order.id, 'served')}>Served</Button>,
-      <Button key="ready" size="small" color="success" variant="outlined" onClick={() => onUpdateStatus(order.id, 'ready')}>Ready</Button>,
-    );
-  } else if (order.status === 'served') {
-    buttons.push(
-      <Button key="complete" size="small" color="success" variant="contained" onClick={() => onUpdateStatus(order.id, 'completed')}>Complete</Button>,
-    );
-    if (!order.billId) {
-      buttons.push(
-        <Button key="bill" size="small" variant="outlined" startIcon={<Icon icon="mdi:receipt-text-outline" width={16} />} onClick={() => onGenerateBill(order)}>Generate Bill</Button>,
-      );
-    }
-  } else if (order.status === 'ready') {
-    buttons.push(
-      <Button key="served" size="small" color="success" variant="contained" onClick={() => onUpdateStatus(order.id, 'served')}>Served</Button>,
-      <Button key="complete" size="small" color="success" variant="outlined" onClick={() => onUpdateStatus(order.id, 'completed')}>Complete</Button>,
-    );
-  } else if (order.status === 'completed' && !order.billId) {
-    buttons.push(
-      <Button key="bill" size="small" variant="outlined" startIcon={<Icon icon="mdi:receipt-text-outline" width={16} />} onClick={() => onGenerateBill(order)}>Generate Bill</Button>,
-    );
-  }
-
-  if (buttons.length === 0) return null;
+/* A single table on the floor: header + its active orders, or a free slot. */
+const TableCard = ({ card, onEdit, onUpdateStatus, onGenerateBill, onAdd }) => {
+  const { label, capacity, orders } = card;
+  const isActive = orders.length > 0;
+  const total = orders.reduce((s, o) => s + o.total, 0);
+  const topUrgency = isActive ? Math.min(...orders.map((o) => URGENCY[o.status] ?? 9)) : 99;
+  const accent = topUrgency === 0 ? 'warning.main' : topUrgency <= 2 ? 'info.main' : 'success.main';
 
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{ px: 2, pb: 1.5, flexWrap: 'wrap', gap: 1 }}
-      onClick={(e) => e.stopPropagation()}
+    <Paper
+      variant="outlined"
+      sx={{
+        borderRadius: 3, overflow: 'hidden',
+        borderColor: isActive ? accent : 'divider',
+        borderTop: 3, borderTopColor: isActive ? accent : 'divider',
+        opacity: isActive ? 1 : 0.7,
+      }}
     >
-      {buttons}
-    </Stack>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 1.75, py: 1.25, bgcolor: isActive ? 'action.hover' : 'transparent' }}>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+          <Icon icon="mdi:table-furniture" width={20} />
+          <Typography variant="subtitle1" fontWeight={800} noWrap>{label}</Typography>
+          {capacity ? <Typography variant="caption" color="text.secondary" noWrap>· {capacity} seats</Typography> : null}
+        </Stack>
+        {isActive ? (
+          <Typography variant="subtitle2" fontWeight={800}>{money(total)}</Typography>
+        ) : (
+          <Chip label="Free" size="small" variant="outlined" />
+        )}
+      </Stack>
+
+      {isActive ? (
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ px: 1.75, pb: 0.25, display: 'block' }}>
+            {orders.length} active {orders.length === 1 ? 'order' : 'orders'}
+          </Typography>
+          {orders.map((o) => (
+            <OrderRow key={o.id} order={o} divider compact onEdit={onEdit} onUpdateStatus={onUpdateStatus} onGenerateBill={onGenerateBill} />
+          ))}
+        </Box>
+      ) : (
+        <Box sx={{ px: 1.75, py: 2, textAlign: 'center' }}>
+          <Button size="small" variant="text" startIcon={<Icon icon="mdi:plus" width={16} />} onClick={onAdd}>New order</Button>
+        </Box>
+      )}
+    </Paper>
   );
 };
+
+/* Compact order row used in cards, list view and history. */
+const OrderRow = ({ order, divider, compact, muted, onEdit, onUpdateStatus, onGenerateBill }) => {
+  const items = order.items?.map((it) => `${it.quantity}× ${it.name}`).join(', ');
+  const actions = statusActions(order, onUpdateStatus, onGenerateBill);
+
+  return (
+    <Box
+      sx={{
+        px: 1.75, py: 1,
+        borderTop: divider ? 1 : 0, borderColor: 'divider',
+        opacity: muted ? 0.75 : 1,
+        '&:hover': { bgcolor: 'action.hover' },
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: STATUS_DOT[order.status] || 'grey.400', flexShrink: 0 }} />
+        <Box
+          role="button"
+          tabIndex={0}
+          onClick={() => onEdit(order)}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onEdit(order)}
+          sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+        >
+          <Stack direction="row" spacing={0.75} alignItems="center" sx={{ minWidth: 0 }}>
+            <Typography variant="body2" fontWeight={700} noWrap>#{order.id.slice(-6)}</Typography>
+            <Typography variant="caption" color={`${STATUS_COLOR[order.status] || 'text.secondary'}.main`} fontWeight={600} noWrap>
+              {getOrderStatusLabel(order.status)}
+            </Typography>
+            {order.customerName && !compact && (
+              <Typography variant="caption" color="text.secondary" noWrap>· {order.customerName}</Typography>
+            )}
+          </Stack>
+          {items && <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>{items}</Typography>}
+        </Box>
+        <Typography variant="body2" fontWeight={700} sx={{ flexShrink: 0 }}>{money(order.total)}</Typography>
+      </Stack>
+
+      {actions.length > 0 && (
+        <Stack direction="row" spacing={0.75} mt={0.75} sx={{ pl: 2, flexWrap: 'wrap', gap: 0.75 }}>
+          {actions}
+        </Stack>
+      )}
+    </Box>
+  );
+};
+
+/* Compact action buttons per status (same transitions as before, optimistic). */
+function statusActions(order, onUpdateStatus, onGenerateBill) {
+  const btn = (key, label, color, variant, onClick, icon) => (
+    <Button
+      key={key}
+      size="small"
+      color={color}
+      variant={variant}
+      onClick={onClick}
+      startIcon={icon ? <Icon icon={icon} width={15} /> : undefined}
+      sx={{ minWidth: 0, px: 1, py: 0.25, fontSize: 12 }}
+    >
+      {label}
+    </Button>
+  );
+  const set = (s) => () => onUpdateStatus(order.id, s);
+  const out = [];
+
+  switch (order.status) {
+    case 'pending':
+      out.push(btn('accept', 'Accept', 'success', 'contained', set('accepted')));
+      out.push(btn('reject', 'Reject', 'error', 'outlined', set('rejected')));
+      out.push(btn('hold', 'Hold', 'warning', 'outlined', set('on-hold')));
+      break;
+    case 'accepted':
+    case 'on-hold':
+      out.push(btn('prep', 'Start Preparing', 'info', 'contained', set('preparing')));
+      out.push(btn('reject', 'Reject', 'error', 'outlined', set('rejected')));
+      break;
+    case 'preparing':
+      out.push(btn('prepared', 'Prepared', 'success', 'contained', set('prepared')));
+      out.push(btn('ready', 'Ready', 'success', 'outlined', set('ready')));
+      break;
+    case 'prepared':
+      out.push(btn('served', 'Served', 'success', 'contained', set('served')));
+      out.push(btn('ready', 'Ready', 'success', 'outlined', set('ready')));
+      break;
+    case 'served':
+      out.push(btn('complete', 'Complete', 'success', 'contained', set('completed')));
+      if (!order.billId) out.push(btn('bill', 'Bill', 'primary', 'outlined', () => onGenerateBill(order), 'mdi:receipt-text-outline'));
+      break;
+    case 'ready':
+      out.push(btn('served', 'Served', 'success', 'contained', set('served')));
+      out.push(btn('complete', 'Complete', 'success', 'outlined', set('completed')));
+      break;
+    case 'completed':
+      if (!order.billId) out.push(btn('bill', 'Bill', 'primary', 'outlined', () => onGenerateBill(order), 'mdi:receipt-text-outline'));
+      break;
+    default:
+      break;
+  }
+  return out;
+}
 
 export default OrdersSection;
