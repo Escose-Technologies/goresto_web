@@ -74,7 +74,7 @@ export const getAnalytics = async (restaurantId) => {
     .slice(0, 10)
     .map((o) => ({
       type: 'order',
-      message: `Order from ${o.customerName || `Table ${o.tableNumber}`} - $${o.total}`,
+      message: `Order from ${o.customerName || `Table ${o.tableNumber}`} - ₹${o.total}`,
       timestamp: o.createdAt.toISOString(),
     }));
 
