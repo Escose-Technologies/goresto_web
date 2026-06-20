@@ -497,6 +497,7 @@ export const RestaurantAdminDashboard = () => {
         onClose={closeSettings}
         fullScreen
         sx={{ zIndex: 1200 }}
+        slotProps={{ paper: { sx: { bgcolor: 'background.default' } } }}
       >
         <Settings
           onClose={closeSettings}

@@ -111,7 +111,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
   const activeSection = SECTIONS.find((s) => s.id === active) || SECTIONS[0];
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 1040, mx: 'auto' }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 1040, mx: 'auto' }}>
       {/* Sticky header with primary actions */}
       <Box
         sx={{
@@ -190,8 +190,17 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
           })}
         </Box>
 
-        {/* Active section content */}
-        <Paper variant="outlined" sx={{ flex: 1, minWidth: 0, p: { xs: 2, sm: 3 }, borderRadius: 3 }}>
+        {/* Active section content — flexBasis 0 keeps the panel a constant width
+            regardless of how much content the active section has. */}
+        <Paper
+          variant="outlined"
+          sx={{
+            flex: '1 1 0', minWidth: 0,
+            p: { xs: 2, sm: 3 }, borderRadius: 3,
+            minHeight: { md: 560 },
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
           <Stack direction="row" spacing={1.25} alignItems="center" mb={2.5}>
             <Box sx={{ width: 38, height: 38, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'primary.lighter', color: 'primary.main' }}>
               <Icon icon={activeSection.icon} width={22} />
@@ -202,6 +211,9 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
             </Box>
           </Stack>
 
+          {/* Inner column capped for readability so every section's fields line
+              up to the same width — the standard settings-form look. */}
+          <Box sx={{ maxWidth: 760, width: '100%' }}>
           {/* Restaurant Information */}
           {active === 'restaurantInfo' && (
             <Box>
@@ -579,6 +591,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
               helperText="This will be displayed prominently on your public menu. Leave empty to hide."
             />
           )}
+          </Box>
         </Paper>
       </Box>
     </Box>
