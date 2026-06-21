@@ -1,3 +1,6 @@
+import { QRCodeCanvas } from 'qrcode.react';
+import { getCurrencySymbol } from '../../utils/currency';
+
 const ORDER_TYPE_LABELS = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' };
 
 const formatCurrency = (n) => {
@@ -42,7 +45,11 @@ function amountInWords(amount) {
 export const A4Invoice = ({ bill, restaurant, settings }) => {
   if (!bill) return null;
 
+  const cur = getCurrencySymbol(settings);
   const isComposition = settings?.gstScheme === 'composition';
+  const feedbackUrl = (restaurant?.id || bill?.restaurantId)
+    ? `${window.location.origin}/menu/${restaurant?.id || bill.restaurantId}`
+    : '';
   const billTitle = isComposition ? 'Bill of Supply' : 'Tax Invoice';
   const items = bill.billItems || [];
   const hasItemDiscounts = items.some(it => it.discountAmount > 0);
@@ -115,14 +122,14 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
         </thead>
         <tbody>
           {items.map((item, i) => {
-            const lineTotal = item.price * item.quantity;
+            const lineTotal = (item.unitPrice || item.price || 0) * item.quantity;
             const afterDisc = lineTotal - (item.discountAmount || 0);
             return (
               <tr key={i}>
                 <td className="a4-col-sn">{i + 1}</td>
                 <td className="a4-col-name">{item.name}</td>
                 <td className="a4-col-qty">{item.quantity}</td>
-                <td className="a4-col-rate">{formatCurrency(item.price)}</td>
+                <td className="a4-col-rate">{formatCurrency(item.unitPrice || item.price || 0)}</td>
                 {hasItemDiscounts && (
                   <td className="a4-col-disc">
                     {item.discountAmount > 0 ? (
@@ -218,7 +225,7 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
 
         <div className="a4-grand-total-row">
           <span>Grand Total</span>
-          <span>₹ {formatCurrency(bill.grandTotal)}</span>
+          <span>{cur} {formatCurrency(bill.grandTotal)}</span>
         </div>
 
         <div className="a4-amount-words">
@@ -233,7 +240,7 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
           <span>
             Split —{' '}
             {splits.map((s, i) => (
-              <span key={i}>{s.mode?.toUpperCase()}: ₹{formatCurrency(s.amount)}{i < splits.length - 1 ? ', ' : ''}</span>
+              <span key={i}>{s.mode?.toUpperCase()}: {cur}{formatCurrency(s.amount)}{i < splits.length - 1 ? ', ' : ''}</span>
             ))}
           </span>
         ) : (
@@ -258,6 +265,12 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
 
       {/* Footer */}
       <div className="a4-footer">
+        {settings?.showFeedbackQR && feedbackUrl && (
+          <div className="a4-footer-qr">
+            <QRCodeCanvas value={feedbackUrl} size={84} level="M" />
+            <span>Scan for menu &amp; feedback</span>
+          </div>
+        )}
         <div className="a4-footer-text">{settings?.billFooterText || 'Thank you for dining with us!'}</div>
         {settings?.fssaiNumber && (
           <div className="a4-footer-fssai">FSSAI Lic. No: {settings.fssaiNumber}</div>

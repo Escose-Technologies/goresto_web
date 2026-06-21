@@ -1,9 +1,12 @@
+import { useCurrency } from '../../contexts/CurrencyContext';
+
 export const OrderSelector = ({
   orders,
   selectedOrderIds,
   onSelectionChange,
   tableNumber,
 }) => {
+  const cur = useCurrency();
   const toggleOrder = (orderId) => {
     const next = selectedOrderIds.includes(orderId)
       ? selectedOrderIds.filter(id => id !== orderId)
@@ -75,7 +78,7 @@ export const OrderSelector = ({
                     <span className="order-selector-item-customer">{order.customerName}</span>
                   )}
                   <span className="order-selector-item-total">
-                    ₹{(order.total || 0).toFixed(2)}
+                    {cur}{(order.total || 0).toFixed(2)}
                   </span>
                 </div>
                 <div className="order-selector-item-items">
@@ -95,7 +98,7 @@ export const OrderSelector = ({
         <div className="order-selector-summary">
           <span><strong>{selectedOrders.length}</strong> order{selectedOrders.length !== 1 ? 's' : ''} selected</span>
           <span><strong>{totalItems}</strong> item{totalItems !== 1 ? 's' : ''}</span>
-          <span>Base total: <strong>₹{baseTotal.toFixed(2)}</strong></span>
+          <span>Base total: <strong>{cur}{baseTotal.toFixed(2)}</strong></span>
         </div>
       )}
     </div>

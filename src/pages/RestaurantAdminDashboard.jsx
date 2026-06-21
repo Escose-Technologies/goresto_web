@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -19,10 +18,12 @@ import { RestaurantProfileForm } from '../components/forms/RestaurantProfileForm
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { GenerateBillModal } from '../components/billing/GenerateBillModal';
+import { BillPreview } from '../components/billing/BillPreview';
 import { BillingTab } from '../components/billing/BillingTab';
 import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
 import { startStaffCallRing } from '../utils/sounds';
 import DashboardLayout from '../layouts/DashboardLayout';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -36,7 +37,10 @@ export const RestaurantAdminDashboard = () => {
   const [staff, setStaff] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'orders';
+  });
   const [showForm, setShowForm] = useState(false); // For new items only
   const [editingItem, setEditingItem] = useState(null);
   const [editingTable, setEditingTable] = useState(null);
@@ -47,20 +51,28 @@ export const RestaurantAdminDashboard = () => {
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
-  const [showSettings, setShowSettings] = useState(false);
-  const [prevTab, setPrevTab] = useState('orders');
   const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect } = useSocket();
   const [staffCallAlerts, setStaffCallAlerts] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [showBillModal, setShowBillModal] = useState(false);
   const [billTriggerOrder, setBillTriggerOrder] = useState(null);
   const [billingRefreshKey, setBillingRefreshKey] = useState(0);
+  const [autoPrintBill, setAutoPrintBill] = useState(null);
   const staffCallRingsRef = useRef({});
   const staffCallTablesRef = useRef(new Set());
 
   useEffect(() => {
     loadRestaurantData();
   }, [user]);
+
+  // Apply the restaurant's brand colours to the CSS custom properties that the
+  // app's stylesheets read (--color-primary*). Note: MUI components use the
+  // static JS theme and are unaffected; full admin theming is a follow-up.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (restaurantSettings?.primaryColor) root.style.setProperty('--color-primary', restaurantSettings.primaryColor);
+    if (restaurantSettings?.secondaryColor) root.style.setProperty('--color-primary-light', restaurantSettings.secondaryColor);
+  }, [restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor]);
 
   // Socket: join restaurant room and listen for real-time updates
   useEffect(() => {
@@ -363,32 +375,28 @@ export const RestaurantAdminDashboard = () => {
     setShowBillModal(true);
   };
 
-  const handleBillCreated = () => {
+  const handleBillCreated = (bill) => {
     // Bill creation doesn't change order data in our state — just refresh billing tab
     setBillingRefreshKey(k => k + 1);
+    // Auto-print the freshly created bill when the setting is enabled.
+    if (bill && restaurantSettings?.autoPrintOnBill) {
+      setAutoPrintBill(bill);
+    }
   };
 
   const pendingOrderCount = orders.filter(o => o.status === 'pending').length;
   const orderCounts = pendingOrderCount > 0 ? { orders: pendingOrderCount } : {};
 
   const handleTabChange = (tabId) => {
-    if (tabId === 'settings') {
-      setPrevTab(activeTab); // Remember where the user was
-      setShowSettings(true);
-      return;
-    }
     setActiveTab(tabId);
-    setShowSettings(false);
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabId);
+    window.history.replaceState({}, '', url);
     setShowForm(false);
     setEditingItem(null);
     setEditingTable(null);
     setEditingOrder(null);
     setEditingStaff(null);
-  };
-
-  const closeSettings = () => {
-    setShowSettings(false);
-    setActiveTab(prevTab); // Go back to whatever tab they were on
   };
 
   if (loading) {
@@ -409,6 +417,7 @@ export const RestaurantAdminDashboard = () => {
   }
 
   return (
+    <CurrencyProvider settings={restaurantSettings}>
     <DashboardLayout
       activeTab={activeTab}
       onTabChange={handleTabChange}
@@ -491,16 +500,8 @@ export const RestaurantAdminDashboard = () => {
         </Stack>
       </Backdrop>
 
-      {/* Settings modal */}
-      <Dialog
-        open={showSettings}
-        onClose={closeSettings}
-        fullScreen
-        sx={{ zIndex: 1200 }}
-        slotProps={{ paper: { sx: { bgcolor: 'background.default' } } }}
-      >
+      {activeTab === 'settings' && (
         <Settings
-          onClose={closeSettings}
           onSettingsSaved={(updatedSettings) => {
             setRestaurantSettings(updatedSettings);
             // Sync restaurant name/phone/address so dashboard header updates immediately
@@ -516,7 +517,7 @@ export const RestaurantAdminDashboard = () => {
           restaurant={restaurant}
           settings={restaurantSettings}
         />
-      </Dialog>
+      )}
 
       {activeTab === 'menu' && (
           <MenuSection
@@ -652,6 +653,18 @@ export const RestaurantAdminDashboard = () => {
         />
       )}
 
+      {autoPrintBill && restaurant && (
+        <BillPreview
+          restaurantId={restaurant.id}
+          restaurant={restaurant}
+          bill={autoPrintBill}
+          settings={restaurantSettings}
+          toast={toast}
+          autoPrint
+          onClose={() => setAutoPrintBill(null)}
+        />
+      )}
+
       <ConfirmModal
         open={confirmModal.open}
         title={confirmModal.title}
@@ -660,5 +673,6 @@ export const RestaurantAdminDashboard = () => {
         onCancel={closeConfirm}
       />
     </DashboardLayout>
+    </CurrencyProvider>
   );
 };

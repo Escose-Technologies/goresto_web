@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 const DISCOUNT_OPTIONS = [
   { value: '', label: 'None' },
@@ -15,6 +16,7 @@ export const BillItemsEditor = ({
   itemDiscounts,
   onItemDiscountsChange,
 }) => {
+  const cur = useCurrency();
   // Consolidate items from all selected orders
   const consolidatedItems = useMemo(() => {
     const items = [];
@@ -111,7 +113,7 @@ export const BillItemsEditor = ({
                   )}
                 </td>
                 <td className="item-qty">{item.quantity}</td>
-                <td className="item-rate">₹{(item.unitPrice || 0).toFixed(2)}</td>
+                <td className="item-rate">{cur}{(item.unitPrice || 0).toFixed(2)}</td>
                 <td className="item-discount-cell">
                   <select
                     value={getDiscountSelectValue(item)}
@@ -123,7 +125,7 @@ export const BillItemsEditor = ({
                   </select>
                 </td>
                 <td className={`item-value${item.discountValue === 100 ? ' item-comp' : item.discountValue > 0 ? ' item-discounted' : ''}`}>
-                  ₹{item.taxableValue.toFixed(2)}
+                  {cur}{item.taxableValue.toFixed(2)}
                 </td>
               </tr>
             ))}
@@ -138,7 +140,7 @@ export const BillItemsEditor = ({
             <div className="bill-item-card-top">
               <span className="bill-item-card-name">{item.name}</span>
               <div className="bill-item-card-meta">
-                <span>{item.quantity}x ₹{(item.unitPrice || 0).toFixed(2)}</span>
+                <span>{item.quantity}x {cur}{(item.unitPrice || 0).toFixed(2)}</span>
               </div>
             </div>
             <div className="bill-item-card-bottom">
@@ -151,7 +153,7 @@ export const BillItemsEditor = ({
                 ))}
               </select>
               <span className={`bill-item-card-value${item.discountValue > 0 ? ' discounted' : ''}`}>
-                ₹{item.taxableValue.toFixed(2)}
+                {cur}{item.taxableValue.toFixed(2)}
               </span>
             </div>
           </div>
@@ -161,17 +163,17 @@ export const BillItemsEditor = ({
       <div className="bill-items-subtotals">
         <div className="bill-items-subtotals-row">
           <span>Subtotal</span>
-          <span>₹{subtotal.toFixed(2)}</span>
+          <span>{cur}{subtotal.toFixed(2)}</span>
         </div>
         {totalItemDiscount > 0 && (
           <div className="bill-items-subtotals-row discount">
             <span>Item Discounts</span>
-            <span>-₹{totalItemDiscount.toFixed(2)}</span>
+            <span>-{cur}{totalItemDiscount.toFixed(2)}</span>
           </div>
         )}
         <div className="bill-items-subtotals-row" style={{ fontWeight: 600 }}>
           <span>After Item Discounts</span>
-          <span>₹{afterItemDiscount.toFixed(2)}</span>
+          <span>{cur}{afterItemDiscount.toFixed(2)}</span>
         </div>
       </div>
     </div>

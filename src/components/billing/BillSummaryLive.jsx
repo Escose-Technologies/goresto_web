@@ -1,5 +1,8 @@
+import { getCurrencySymbol } from '../../utils/currency';
+
 export const BillSummaryLive = ({ calculation, settings }) => {
   if (!calculation) return null;
+  const cur = getCurrencySymbol(settings);
 
   const {
     subtotal = 0,
@@ -30,20 +33,20 @@ export const BillSummaryLive = ({ calculation, settings }) => {
 
       <div className="bill-summary-row">
         <span>Subtotal</span>
-        <span>₹{subtotal.toFixed(2)}</span>
+        <span>{cur}{subtotal.toFixed(2)}</span>
       </div>
 
       {totalItemDiscount > 0 && (
         <div className="bill-summary-row discount">
           <span>Item Discounts</span>
-          <span>-₹{totalItemDiscount.toFixed(2)}</span>
+          <span>-{cur}{totalItemDiscount.toFixed(2)}</span>
         </div>
       )}
 
       {totalItemDiscount > 0 && (
         <div className="bill-summary-row">
           <span>After Item Discounts</span>
-          <span>₹{afterItemDiscount.toFixed(2)}</span>
+          <span>{cur}{afterItemDiscount.toFixed(2)}</span>
         </div>
       )}
 
@@ -53,28 +56,28 @@ export const BillSummaryLive = ({ calculation, settings }) => {
             Bill Discount
             {billDiscountType === 'percentage' ? ` (${billDiscountValue}%)` : ` (Flat)`}
           </span>
-          <span>-₹{billDiscountAmount.toFixed(2)}</span>
+          <span>-{cur}{billDiscountAmount.toFixed(2)}</span>
         </div>
       )}
 
       {(totalItemDiscount > 0 || billDiscountAmount > 0) && (
         <div className="bill-summary-row">
           <span>After All Discounts</span>
-          <span>₹{afterAllDiscounts.toFixed(2)}</span>
+          <span>{cur}{afterAllDiscounts.toFixed(2)}</span>
         </div>
       )}
 
       {serviceChargeAmount > 0 && (
         <div className="bill-summary-row charge">
           <span>Service Charge ({serviceChargeRate}%)</span>
-          <span>+₹{serviceChargeAmount.toFixed(2)}</span>
+          <span>+{cur}{serviceChargeAmount.toFixed(2)}</span>
         </div>
       )}
 
       {packagingCharge > 0 && (
         <div className="bill-summary-row charge">
           <span>Packaging Charge</span>
-          <span>+₹{packagingCharge.toFixed(2)}</span>
+          <span>+{cur}{packagingCharge.toFixed(2)}</span>
         </div>
       )}
 
@@ -82,18 +85,18 @@ export const BillSummaryLive = ({ calculation, settings }) => {
 
       <div className="bill-summary-row">
         <span>Taxable Amount</span>
-        <span>₹{taxableAmount.toFixed(2)}</span>
+        <span>{cur}{taxableAmount.toFixed(2)}</span>
       </div>
 
       {!isComposition && (
         <>
           <div className="bill-summary-row tax">
             <span>CGST ({cgstRate}%)</span>
-            <span>₹{cgstAmount.toFixed(2)}</span>
+            <span>{cur}{cgstAmount.toFixed(2)}</span>
           </div>
           <div className="bill-summary-row tax">
             <span>SGST ({sgstRate}%)</span>
-            <span>₹{sgstAmount.toFixed(2)}</span>
+            <span>{cur}{sgstAmount.toFixed(2)}</span>
           </div>
         </>
       )}
@@ -101,7 +104,7 @@ export const BillSummaryLive = ({ calculation, settings }) => {
       {roundOff !== 0 && (
         <div className="bill-summary-row round-off">
           <span>Round Off</span>
-          <span>{roundOff > 0 ? '+' : ''}₹{roundOff.toFixed(2)}</span>
+          <span>{roundOff > 0 ? '+' : ''}{cur}{roundOff.toFixed(2)}</span>
         </div>
       )}
 
@@ -109,7 +112,7 @@ export const BillSummaryLive = ({ calculation, settings }) => {
 
       <div className="bill-summary-total">
         <span>GRAND TOTAL</span>
-        <span>₹{grandTotal.toFixed(2)}</span>
+        <span>{cur}{grandTotal.toFixed(2)}</span>
       </div>
 
       {serviceChargeAmount > 0 && (

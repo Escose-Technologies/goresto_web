@@ -4,11 +4,14 @@ const SPLIT_MODES = [
   { value: 'upi', label: 'UPI' },
 ];
 
+import { useCurrency } from '../../contexts/CurrencyContext';
+
 export const SplitPaymentEditor = ({
   splitPayments,
   onSplitPaymentsChange,
   grandTotal,
 }) => {
+  const cur = useCurrency();
   const handleModeChange = (index, mode) => {
     const next = [...splitPayments];
     next[index] = { ...next[index], mode };
@@ -60,7 +63,7 @@ export const SplitPaymentEditor = ({
               step="0.01"
               value={payment.amount || ''}
               onChange={(e) => handleAmountChange(index, e.target.value)}
-              placeholder="₹ Amount"
+              placeholder={`${cur} Amount`}
             />
             {splitPayments.length > 2 && (
               <button
@@ -83,13 +86,13 @@ export const SplitPaymentEditor = ({
       )}
 
       <div className={`split-payment-total ${isValid ? 'valid' : 'invalid'}`}>
-        <span>Split Total: ₹{splitTotal.toFixed(2)}</span>
+        <span>Split Total: {cur}{splitTotal.toFixed(2)}</span>
         <span>
           {isValid
             ? '✓ Matches'
             : difference > 0
-              ? `₹${difference.toFixed(2)} over`
-              : `₹${Math.abs(difference).toFixed(2)} short`
+              ? `${cur}${difference.toFixed(2)} over`
+              : `${cur}${Math.abs(difference).toFixed(2)} short`
           }
         </span>
       </div>

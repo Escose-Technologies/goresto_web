@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useCurrency } from '../../contexts/CurrencyContext';
 import { discountPresetService } from '../../services/apiService';
 import { TouchButton } from '../ui/TouchButton';
 import './DiscountPresetManager.css';
@@ -25,6 +26,7 @@ const emptyForm = {
 };
 
 export const DiscountPresetManager = ({ restaurantId, toast }) => {
+  const cur = useCurrency();
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // null = list view, 'new' or preset object
@@ -211,7 +213,7 @@ export const DiscountPresetManager = ({ restaurantId, toast }) => {
               <label>Type</label>
               <select name="discountType" value={form.discountType} onChange={handleChange}>
                 <option value="percentage">Percentage (%)</option>
-                <option value="flat">Flat Amount (₹)</option>
+                <option value="flat">Flat Amount ({cur})</option>
               </select>
             </div>
             <div className="preset-form-group">
@@ -338,10 +340,10 @@ export const DiscountPresetManager = ({ restaurantId, toast }) => {
                 </div>
                 <div className="preset-card-meta">
                   <span className="preset-card-value">
-                    {preset.discountType === 'percentage' ? `${preset.discountValue}%` : `₹${preset.discountValue}`}
+                    {preset.discountType === 'percentage' ? `${preset.discountValue}%` : `${cur}${preset.discountValue}`}
                   </span>
                   <span className="preset-card-scope">{SCOPE_LABELS[preset.scope] || preset.scope}</span>
-                  {preset.minBillAmount > 0 && <span>Min ₹{preset.minBillAmount}</span>}
+                  {preset.minBillAmount > 0 && <span>Min {cur}{preset.minBillAmount}</span>}
                   {preset.startDate && (
                     <span>
                       {new Date(preset.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}

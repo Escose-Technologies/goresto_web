@@ -69,12 +69,16 @@ export const getAnalytics = async (restaurantId) => {
     statusMap[row.status] = row._count.status;
   }
 
+  const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: '₹', CAD: 'C$', AUD: 'A$' };
+  const settings = await prisma.settings.findFirst({ where: { restaurantId }, select: { currency: true } });
+  const cur = SYMBOLS[settings?.currency] || '₹';
+
   // Recent activity (last 10 from the already-fetched orders)
   const recentActivity = recentOrders
     .slice(0, 10)
     .map((o) => ({
       type: 'order',
-      message: `Order from ${o.customerName || `Table ${o.tableNumber}`} - ₹${o.total}`,
+      message: `Order from ${o.customerName || `Table ${o.tableNumber}`} - ${cur}${o.total}`,
       timestamp: o.createdAt.toISOString(),
     }));
 

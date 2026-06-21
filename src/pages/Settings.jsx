@@ -7,6 +7,9 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
@@ -27,7 +30,7 @@ const SECTIONS = [
   { id: 'promotions', label: 'Promotions', icon: 'mdi:bullhorn-outline', hint: 'Menu announcement' },
 ];
 
-export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp, settings: settingsProp }) => {
+export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings: settingsProp }) => {
   const toast = useToast();
   const [restaurant] = useState(restaurantProp);
   const [saving, setSaving] = useState(false);
@@ -61,23 +64,67 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
   const [hasExistingPin] = useState(() => !!(settingsProp?.kitchenPin));
   const [showPin, setShowPin] = useState(false);
 
+  // Inline validation — client rules mirror the backend Zod schema
+  // (server/validators/settings.validator.js) so the message shown on the field
+  // matches what the server would reject with. Empty optional fields pass.
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const VALIDATORS = {
+    email: (v) => (!v || EMAIL_RE.test(v) ? '' : 'Invalid email address'),
+    notificationEmail: (v) => (!v || EMAIL_RE.test(v) ? '' : 'Invalid email address'),
+    gstin: (v) => (!v || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v) ? '' : 'Invalid GSTIN format'),
+    fssaiNumber: (v) => (!v || /^[0-9]{14}$/.test(v) ? '' : 'FSSAI number must be exactly 14 digits'),
+    placeOfSupplyCode: (v) => (!v || /^[0-9]{2}$/.test(v) ? '' : 'Must be a 2-digit state code'),
+    billPrefix: (v) => (/^[A-Z0-9]{1,5}$/.test(v || '') ? '' : 'Must be 1-5 uppercase alphanumeric characters'),
+    primaryColor: (v) => (!v || /^#[0-9A-Fa-f]{6}$/.test(v) ? '' : 'Must be a hex colour, e.g. #3385F0'),
+    secondaryColor: (v) => (!v || /^#[0-9A-Fa-f]{6}$/.test(v) ? '' : 'Must be a hex colour, e.g. #589BF3'),
+    kitchenPin: (v) => (!v || /^\d{4}$/.test(v) ? '' : 'Must be exactly 4 digits'),
+    taxRate: (v) => (v === '' || v == null || (Number(v) >= 0 && Number(v) <= 1) ? '' : 'Enter a fraction between 0 and 1'),
+    serviceCharge: (v) => (v === '' || v == null || (Number(v) >= 0 && Number(v) <= 1) ? '' : 'Enter a fraction between 0 and 1'),
+  };
+  // Which section each validated field lives in, so a failed save can jump there.
+  const FIELD_SECTION = {
+    email: 'restaurantInfo', taxRate: 'currencyPricing', serviceCharge: 'currencyPricing',
+    gstin: 'billingTax', fssaiNumber: 'billingTax', placeOfSupplyCode: 'billingTax', billPrefix: 'billingTax',
+    primaryColor: 'themeColors', secondaryColor: 'themeColors',
+    notificationEmail: 'features', kitchenPin: 'kitchenDisplay',
+  };
+
+  const [touched, setTouched] = useState({});
+  const [serverErrors, setServerErrors] = useState({});
+
+  // Combined error for a field: server-reported error wins, else client rule once touched.
+  const fieldError = (name) => serverErrors[name] || (touched[name] ? (VALIDATORS[name]?.(formData[name]) || '') : '');
+  const markTouched = (name) => () => {
+    setTouched((p) => ({ ...p, [name]: true }));
+    setServerErrors((p) => (p[name] ? { ...p, [name]: undefined } : p));
+  };
+
   const getCurrencySymbol = () => currencySymbols[formData.currency] || '₹';
 
   const handleChange = (name) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (serverErrors[name]) setServerErrors((p) => ({ ...p, [name]: undefined }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // If a PIN was entered, it must be exactly 4 digits — otherwise warn the
-    // user instead of silently discarding it on save.
-    if (formData.kitchenPin && !/^\d{4}$/.test(formData.kitchenPin)) {
-      toast.warning('Kitchen PIN must be exactly 4 digits');
-      setActive('kitchenDisplay');
+    // Validate every rule-bound field up front and surface errors inline.
+    const errors = {};
+    Object.keys(VALIDATORS).forEach((name) => {
+      const msg = VALIDATORS[name](formData[name]);
+      if (msg) errors[name] = msg;
+    });
+    if (Object.keys(errors).length) {
+      setTouched((p) => ({ ...p, ...Object.fromEntries(Object.keys(errors).map((k) => [k, true])) }));
+      // Jump to the section holding the first invalid field.
+      const firstSection = FIELD_SECTION[Object.keys(errors)[0]];
+      if (firstSection) setActive(firstSection);
+      toast.warning('Please fix the highlighted fields');
       return;
     }
     setSaving(true);
+    setServerErrors({});
     try {
       const dataToSave = {
         ...formData,
@@ -94,7 +141,19 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
       if (onSettingsSaved) onSettingsSaved(updatedSettings);
       toast.success('Settings saved successfully!');
     } catch (error) {
-      toast.error('Error saving settings: ' + error.message);
+      // Surface backend field-level validation errors on the offending inputs.
+      const details = error.details;
+      if (Array.isArray(details) && details.length) {
+        const mapped = {};
+        details.forEach((d) => { if (d.field) mapped[d.field] = d.message; });
+        setServerErrors(mapped);
+        setTouched((p) => ({ ...p, ...Object.fromEntries(Object.keys(mapped).map((k) => [k, true])) }));
+        const firstSection = FIELD_SECTION[Object.keys(mapped)[0]];
+        if (firstSection) setActive(firstSection);
+        toast.error('Please fix the highlighted fields');
+      } else {
+        toast.error('Error saving settings: ' + error.message);
+      }
     } finally {
       setSaving(false);
     }
@@ -111,93 +170,53 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
   const activeSection = SECTIONS.find((s) => s.id === active) || SECTIONS[0];
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 1040, mx: 'auto' }}>
-      {/* Sticky header with primary actions */}
-      <Box
-        sx={{
-          position: 'sticky', top: 0, zIndex: 5,
-          bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider',
-          px: { xs: 2, sm: 3 }, py: 1.5,
-          display: 'flex', alignItems: 'center', gap: 1.5,
-        }}
-      >
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="h6" fontWeight={800} lineHeight={1.1}>Settings</Typography>
-          <Typography variant="caption" color="text.secondary" noWrap>{restaurant.name}</Typography>
+    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+      {/* Page header — matches the other dashboard tabs (title + primary action) */}
+      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} mb={2}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="h5" fontWeight={700} lineHeight={1.1}>Settings</Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>{restaurant.name}</Typography>
         </Box>
         <Button
           type="submit"
           variant="contained"
           disabled={saving}
           startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Icon icon="mdi:content-save-outline" width={18} />}
+          sx={{ flexShrink: 0 }}
         >
           {saving ? 'Saving…' : 'Save'}
         </Button>
-        {onClose && (
-          <IconButton onClick={onClose} aria-label="Close settings"><Icon icon="mdi:close" width={22} /></IconButton>
-        )}
-      </Box>
+      </Stack>
 
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, p: { xs: 1.5, sm: 2.5 } }}>
-        {/* Section navigation rail */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'row', md: 'column' },
-            gap: 0.5,
-            overflowX: { xs: 'auto', md: 'visible' },
-            flexShrink: 0,
-            width: { xs: '100%', md: 232 },
-            pb: { xs: 0.5, md: 0 },
-            // keep the rail visible while the content scrolls on desktop
-            position: { md: 'sticky' }, top: { md: 76 }, alignSelf: { md: 'flex-start' },
-          }}
-        >
-          {SECTIONS.map((s) => {
-            const selected = s.id === active;
-            return (
-              <Box
-                key={s.id}
-                component="button"
-                type="button"
-                onClick={() => setActive(s.id)}
-                aria-current={selected}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.25,
-                  textAlign: 'left', cursor: 'pointer', border: 0,
-                  borderRadius: 2, px: 1.5, py: 1.1, width: { xs: 'auto', md: '100%' },
-                  flexShrink: 0,
-                  bgcolor: selected ? 'primary.main' : 'transparent',
-                  color: selected ? 'primary.contrastText' : 'text.primary',
-                  transition: 'background-color .15s ease',
-                  '&:hover': { bgcolor: selected ? 'primary.main' : 'action.hover' },
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
-                }}
-              >
-                <Icon icon={s.icon} width={20} style={{ flexShrink: 0 }} />
-                <Box sx={{ minWidth: 0, display: { xs: 'block', md: 'block' } }}>
-                  <Typography variant="body2" fontWeight={600} noWrap lineHeight={1.2}>{s.label}</Typography>
-                  <Typography
-                    variant="caption"
-                    noWrap
-                    sx={{ display: { xs: 'none', md: 'block' }, opacity: selected ? 0.85 : 0.6 }}
-                  >
-                    {s.hint}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
+      {/* Section tabs — kept inside the body so there's a single (left) nav */}
+      <Tabs
+        value={active}
+        onChange={(_, v) => setActive(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+        sx={{ mb: 2.5, borderBottom: 1, borderColor: 'divider', minHeight: 44, '& .MuiTab-root': { minHeight: 44, textTransform: 'none', fontWeight: 600 } }}
+      >
+        {SECTIONS.map((s) => (
+          <Tooltip key={s.id} title={s.hint} arrow enterDelay={400}>
+            <Tab
+              value={s.id}
+              label={s.label}
+              iconPosition="start"
+              icon={<Icon icon={s.icon} width={18} />}
+            />
+          </Tooltip>
+        ))}
+      </Tabs>
 
-        {/* Active section content — flexBasis 0 keeps the panel a constant width
-            regardless of how much content the active section has. */}
+      <Box>
+        {/* Active section content */}
         <Paper
           variant="outlined"
           sx={{
-            flex: '1 1 0', minWidth: 0,
+            minWidth: 0,
             p: { xs: 2, sm: 3 }, borderRadius: 3,
-            minHeight: { md: 560 },
+            minHeight: { md: 480 },
             display: 'flex', flexDirection: 'column',
           }}
         >
@@ -226,7 +245,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                 </Grid>
               </Grid>
               <TextField label="Address" value={formData.address} onChange={handleChange('address')} fullWidth multiline rows={2} sx={{ mb: 2 }} />
-              <TextField label="Email" type="email" value={formData.email} onChange={handleChange('email')} fullWidth />
+              <TextField label="Email" type="text" value={formData.email} onChange={handleChange('email')} onBlur={markTouched('email')} error={!!fieldError('email')} helperText={fieldError('email') || ''} fullWidth slotProps={{ htmlInput: { inputMode: 'email' } }} />
             </Box>
           )}
 
@@ -269,10 +288,10 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
               </TextField>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Tax Rate" type="number" value={formData.taxRate} onChange={handleChange('taxRate')} fullWidth slotProps={{ htmlInput: { min: 0, max: 1, step: 0.01 } }} helperText="As a fraction, e.g. 0.05 = 5%" />
+                  <TextField label="Tax Rate" type="number" value={formData.taxRate} onChange={handleChange('taxRate')} onBlur={markTouched('taxRate')} error={!!fieldError('taxRate')} fullWidth slotProps={{ htmlInput: { min: 0, max: 1, step: 0.01 } }} helperText={fieldError('taxRate') || 'As a fraction, e.g. 0.05 = 5%'} />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Service Charge" type="number" value={formData.serviceCharge} onChange={handleChange('serviceCharge')} fullWidth slotProps={{ htmlInput: { min: 0, max: 1, step: 0.01 } }} helperText="As a fraction, e.g. 0.1 = 10%" />
+                  <TextField label="Service Charge" type="number" value={formData.serviceCharge} onChange={handleChange('serviceCharge')} onBlur={markTouched('serviceCharge')} error={!!fieldError('serviceCharge')} fullWidth slotProps={{ htmlInput: { min: 0, max: 1, step: 0.01 } }} helperText={fieldError('serviceCharge') || 'As a fraction, e.g. 0.1 = 10%'} />
                 </Grid>
               </Grid>
             </Box>
@@ -326,8 +345,10 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                   }}
                   placeholder="e.g. 29AADCB2230M1ZP"
                   fullWidth
+                  onBlur={markTouched('gstin')}
+                  error={!!fieldError('gstin')}
                   slotProps={{ htmlInput: { maxLength: 15, style: { textTransform: 'uppercase', fontFamily: 'monospace' } } }}
-                  helperText="Required for Tax Invoice. First 2 digits must match your state code."
+                  helperText={fieldError('gstin') || 'Required for Tax Invoice. First 2 digits must match your state code.'}
                   sx={{ mb: 2 }}
                 />
               )}
@@ -341,8 +362,10 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                 }}
                 placeholder="e.g. 12345678901234"
                 fullWidth
+                onBlur={markTouched('fssaiNumber')}
+                error={!!fieldError('fssaiNumber')}
                 slotProps={{ htmlInput: { maxLength: 14, inputMode: 'numeric', style: { fontFamily: 'monospace' } } }}
-                helperText="Mandatory on all food business bills in India."
+                helperText={fieldError('fssaiNumber') || 'Mandatory on all food business bills in India.'}
                 sx={{ mb: 2 }}
               />
 
@@ -357,7 +380,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                   </TextField>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="State Code" value={formData.placeOfSupplyCode || ''} fullWidth slotProps={{ input: { readOnly: true } }} helperText="Auto-filled from state selection." sx={{ '& .MuiOutlinedInput-root': { bgcolor: 'grey.50' } }} />
+                  <TextField label="State Code" value={formData.placeOfSupplyCode || ''} fullWidth error={!!fieldError('placeOfSupplyCode')} slotProps={{ input: { readOnly: true } }} helperText={fieldError('placeOfSupplyCode') || 'Auto-filled from state selection.'} sx={{ '& .MuiOutlinedInput-root': { bgcolor: 'grey.50' } }} />
                 </Grid>
               </Grid>
 
@@ -373,8 +396,10 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                     }}
                     placeholder="INV"
                     fullWidth
+                    onBlur={markTouched('billPrefix')}
+                    error={!!fieldError('billPrefix')}
                     slotProps={{ htmlInput: { maxLength: 5, style: { textTransform: 'uppercase' } } }}
-                    helperText={`Preview: ${formData.billPrefix || 'INV'}/2526/0001`}
+                    helperText={fieldError('billPrefix') || `Preview: ${formData.billPrefix || 'INV'}/2526/0001`}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
@@ -479,15 +504,15 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" fontWeight={500} mb={1}>Primary Color</Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <input type="color" value={formData.primaryColor} onChange={(e) => setFormData((prev) => ({ ...prev, primaryColor: e.target.value }))} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
-                  <TextField size="small" value={formData.primaryColor} onChange={(e) => setFormData((prev) => ({ ...prev, primaryColor: e.target.value }))} sx={{ width: 120 }} />
+                  <input type="color" value={/^#[0-9A-Fa-f]{6}$/.test(formData.primaryColor || '') ? formData.primaryColor : '#3385F0'} onChange={(e) => { setFormData((prev) => ({ ...prev, primaryColor: e.target.value })); markTouched('primaryColor')(); }} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
+                  <TextField size="small" value={formData.primaryColor} onChange={handleChange('primaryColor')} onBlur={markTouched('primaryColor')} error={!!fieldError('primaryColor')} helperText={fieldError('primaryColor') || ''} sx={{ width: 140 }} />
                 </Stack>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" fontWeight={500} mb={1}>Secondary Color</Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <input type="color" value={formData.secondaryColor} onChange={(e) => setFormData((prev) => ({ ...prev, secondaryColor: e.target.value }))} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
-                  <TextField size="small" value={formData.secondaryColor} onChange={(e) => setFormData((prev) => ({ ...prev, secondaryColor: e.target.value }))} sx={{ width: 120 }} />
+                  <input type="color" value={/^#[0-9A-Fa-f]{6}$/.test(formData.secondaryColor || '') ? formData.secondaryColor : '#589BF3'} onChange={(e) => { setFormData((prev) => ({ ...prev, secondaryColor: e.target.value })); markTouched('secondaryColor')(); }} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
+                  <TextField size="small" value={formData.secondaryColor} onChange={handleChange('secondaryColor')} onBlur={markTouched('secondaryColor')} error={!!fieldError('secondaryColor')} helperText={fieldError('secondaryColor') || ''} sx={{ width: 140 }} />
                 </Stack>
               </Grid>
             </Grid>
@@ -515,7 +540,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                   </Typography>
                 </Box>
               </Stack>
-              <TextField label="Notification Email" type="email" value={formData.notificationEmail} onChange={handleChange('notificationEmail')} placeholder="Email for order notifications" fullWidth />
+              <TextField label="Notification Email" type="text" value={formData.notificationEmail} onChange={handleChange('notificationEmail')} onBlur={markTouched('notificationEmail')} error={!!fieldError('notificationEmail')} helperText={fieldError('notificationEmail') || ''} placeholder="Email for order notifications" fullWidth slotProps={{ htmlInput: { inputMode: 'email' } }} />
             </Box>
           )}
 
@@ -532,9 +557,11 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                 }}
                 placeholder="e.g. 1234"
                 fullWidth
+                onBlur={markTouched('kitchenPin')}
+                error={!!fieldError('kitchenPin')}
                 slotProps={{
                   inputLabel: { shrink: true },
-                  htmlInput: { maxLength: 4, inputMode: 'numeric', pattern: '\\d{4}' },
+                  htmlInput: { maxLength: 4, inputMode: 'numeric' },
                   input: {
                     endAdornment: (
                       <IconButton onClick={() => setShowPin(!showPin)} edge="end" size="small">
@@ -543,7 +570,7 @@ export const Settings = ({ onClose, onSettingsSaved, restaurant: restaurantProp,
                     ),
                   },
                 }}
-                helperText="4-digit PIN for kitchen staff to access the Kitchen Display System."
+                helperText={fieldError('kitchenPin') || '4-digit PIN for kitchen staff to access the Kitchen Display System.'}
                 sx={{ mb: 2 }}
               />
               {(hasExistingPin || (formData.kitchenPin && formData.kitchenPin.length === 4)) && (

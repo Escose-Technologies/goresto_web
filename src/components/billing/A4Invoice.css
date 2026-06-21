@@ -244,6 +244,16 @@
   margin-top: 0.25rem;
 }
 
+.a4-footer-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.6875rem;
+  color: #4B5563;
+}
+
 /* Cancelled */
 .a4-cancelled-stamp {
   text-align: center;

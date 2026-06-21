@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 export const BillDiscountSection = ({
   activePresets,
@@ -10,6 +11,7 @@ export const BillDiscountSection = ({
   afterItemDiscount,
   onBillDiscountChange,
 }) => {
+  const cur = useCurrency();
   const handlePresetSelect = (preset) => {
     if (discountPresetId === preset.id) {
       // Deselect
@@ -82,7 +84,7 @@ export const BillDiscountSection = ({
               className={`bill-discount-preset-btn${discountPresetId === preset.id ? ' active' : ''}`}
               onClick={() => handlePresetSelect(preset)}
             >
-              {preset.name} ({preset.discountType === 'percentage' ? `${preset.discountValue}%` : `₹${preset.discountValue}`})
+              {preset.name} ({preset.discountType === 'percentage' ? `${preset.discountValue}%` : `${cur}${preset.discountValue}`})
             </button>
           ))}
         </div>
@@ -124,11 +126,11 @@ export const BillDiscountSection = ({
           step={billDiscountType === 'percentage' ? 1 : 0.01}
           value={billDiscountValue || ''}
           onChange={(e) => handleValueChange(e.target.value)}
-          placeholder={billDiscountType === 'flat' ? '₹ Amount' : '%'}
+          placeholder={billDiscountType === 'flat' ? `${cur} Amount` : '%'}
         />
-        <span>{billDiscountType === 'flat' ? '₹' : '%'}</span>
+        <span>{billDiscountType === 'flat' ? cur : '%'}</span>
         {hasDiscount && (
-          <span className="bill-discount-amount">-₹{(billDiscountAmount || 0).toFixed(2)}</span>
+          <span className="bill-discount-amount">-{cur}{(billDiscountAmount || 0).toFixed(2)}</span>
         )}
       </div>
 

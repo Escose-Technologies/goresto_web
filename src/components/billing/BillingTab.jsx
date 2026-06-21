@@ -5,6 +5,7 @@ import { BillPreview } from './BillPreview';
 import { DailySummary } from './DailySummary';
 import { PaymentModeSelector } from './PaymentModeSelector';
 import { TouchButton } from '../ui/TouchButton';
+import { getCurrencySymbol } from '../../utils/currency';
 import './BillingTab.css';
 
 const DATE_PRESETS = [
@@ -41,6 +42,7 @@ function getDateRange(preset) {
 }
 
 export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, settings }) => {
+  const cur = getCurrencySymbol(settings);
   const [billingView, setBillingView] = useState('bills'); // 'bills' | 'reports'
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -220,13 +222,13 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
         <div className="billing-stat-card">
           <div className="billing-stat-label">Revenue</div>
           <div className="billing-stat-value revenue">
-            ₹{(overview.totalRevenue ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+            {cur}{(overview.totalRevenue ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
           </div>
         </div>
         <div className="billing-stat-card">
           <div className="billing-stat-label">Tax Collected</div>
           <div className="billing-stat-value tax">
-            ₹{(overview.totalTaxCollected ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
+            {cur}{(overview.totalTaxCollected ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 0 })}
           </div>
         </div>
         <div className="billing-stat-card">
@@ -337,7 +339,7 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
           <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Record Payment</h3>
             <div className="pay-modal-total">
-              {payingBill.billNumber} — ₹{payingBill.grandTotal.toFixed(2)}
+              {payingBill.billNumber} — {cur}{payingBill.grandTotal.toFixed(2)}
             </div>
             <PaymentModeSelector
               paymentMode={payMode}

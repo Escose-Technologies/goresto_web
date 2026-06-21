@@ -1,3 +1,6 @@
+import { QRCodeCanvas } from 'qrcode.react';
+import { getCurrencySymbol } from '../../utils/currency';
+
 const ORDER_TYPE_LABELS = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' };
 
 const formatCurrency = (n) => {
@@ -21,6 +24,7 @@ const formatDate = (iso) => {
 export const ThermalBill = ({ bill, restaurant, settings }) => {
   if (!bill) return null;
 
+  const cur = getCurrencySymbol(settings);
   const isComposition = settings?.gstScheme === 'composition';
   const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
   const items = bill.billItems || [];
@@ -30,9 +34,13 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
   const hasPackaging = bill.packagingCharge > 0;
   const isSplit = bill.paymentMode === 'split';
   const splits = bill.splitPayments || [];
+  const is58mm = settings?.thermalPrinterWidth === 'fifty_eight_mm';
+  const feedbackUrl = (restaurant?.id || bill?.restaurantId)
+    ? `${window.location.origin}/menu/${restaurant?.id || bill.restaurantId}`
+    : '';
 
   return (
-    <div className="thermal-bill">
+    <div className={`thermal-bill${is58mm ? ' thermal-bill-58' : ''}`}>
       {/* Header */}
       <div className="thermal-header">
         <div className="thermal-restaurant-name">{restaurant?.name || settings?.restaurantName || 'Restaurant'}</div>
@@ -80,7 +88,7 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
             <div className="thermal-item-row">
               <span className="thermal-item-name-col">{item.name}</span>
               <span className="thermal-item-qty-col">{item.quantity}</span>
-              <span className="thermal-item-amt-col">{formatCurrency(item.price * item.quantity)}</span>
+              <span className="thermal-item-amt-col">{formatCurrency((item.unitPrice || item.price || 0) * item.quantity)}</span>
             </div>
             {item.discountAmount > 0 && (
               <div className="thermal-item-discount">
@@ -174,7 +182,7 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
 
         <div className="thermal-grand-total">
           <span>GRAND TOTAL</span>
-          <span>₹ {formatCurrency(bill.grandTotal)}</span>
+          <span>{cur} {formatCurrency(bill.grandTotal)}</span>
         </div>
       </div>
 
@@ -187,7 +195,7 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
             <div>Payment: Split</div>
             <div className="thermal-split-detail">
               {splits.map((s, i) => (
-                <span key={i}>{s.mode?.toUpperCase()}: ₹{formatCurrency(s.amount)}{i < splits.length - 1 ? ' | ' : ''}</span>
+                <span key={i}>{s.mode?.toUpperCase()}: {cur}{formatCurrency(s.amount)}{i < splits.length - 1 ? ' | ' : ''}</span>
               ))}
             </div>
           </>
@@ -229,6 +237,13 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
       <div className="thermal-footer">
         {settings?.billFooterText || 'Thank you for dining with us!'}
       </div>
+
+      {settings?.showFeedbackQR && feedbackUrl && (
+        <div className="thermal-qr">
+          <QRCodeCanvas value={feedbackUrl} size={96} level="M" />
+          <div className="thermal-qr-label">Scan for menu &amp; feedback</div>
+        </div>
+      )}
 
       {bill.cancelledAt && (
         <div className="thermal-cancelled">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useCurrency } from '../contexts/CurrencyContext';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -15,6 +16,7 @@ import { useToast } from './ui/Toast';
 
 export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete }) => {
   const toast = useToast();
+  const cur = useCurrency();
   const [formData, setFormData] = useState({
     tableNumber: '',
     items: [],
@@ -172,7 +174,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
               .filter((item) => item.available)
               .map((item) => (
                 <MenuItem key={item.id} value={item.id}>
-                  {item.name} - ₹{item.price.toFixed(2)}
+                  {item.name} - {cur}{item.price.toFixed(2)}
                 </MenuItem>
               ))}
           </TextField>
@@ -236,7 +238,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
                     <Icon icon="mdi:plus" width={18} />
                   </IconButton>
                   <Typography variant="body2" fontWeight={600} color="primary" sx={{ minWidth: 70, textAlign: 'right' }}>
-                    ₹{(item.price * item.quantity).toFixed(2)}
+                    {cur}{(item.price * item.quantity).toFixed(2)}
                   </Typography>
                   <IconButton
                     size="small"
@@ -251,7 +253,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
             ))}
             <Divider sx={{ my: 1.5 }} />
             <Typography variant="subtitle1" fontWeight={700} textAlign="right">
-              Total: ₹{calculateTotal().toFixed(2)}
+              Total: {cur}{calculateTotal().toFixed(2)}
             </Typography>
           </Card>
         )}

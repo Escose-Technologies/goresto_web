@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { OrderForm } from '../OrderForm';
 import { getOrderStatusLabel } from '../../utils/statusLabels';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 const STATUS_COLOR = {
   pending: 'warning',
@@ -54,7 +55,7 @@ const isFinished = (s) => s === 'completed' || s === 'cancelled';
 // Urgency for sorting tables/orders — lower = needs attention sooner.
 const URGENCY = { pending: 0, accepted: 1, 'on-hold': 1, preparing: 2, prepared: 3, ready: 3, served: 4 };
 
-const money = (n) => `₹${Number(n || 0).toFixed(2)}`;
+const money = (n, cur = '₹') => `${cur}${Number(n || 0).toFixed(2)}`;
 
 const OrdersSection = ({
   orders,
@@ -75,6 +76,7 @@ const OrdersSection = ({
   onUpdateStatus,
   onGenerateBill,
 }) => {
+  const cur = useCurrency();
   const [view, setView] = useState('floor'); // 'floor' | 'list'
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -220,7 +222,7 @@ const OrdersSection = ({
                   <Icon icon="mdi:table-furniture" width={18} />
                   <Typography variant="subtitle2" fontWeight={700}>{tc.label}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {tc.orders.length} {tc.orders.length === 1 ? 'order' : 'orders'} · {money(tc.orders.reduce((s, o) => s + o.total, 0))}
+                    {tc.orders.length} {tc.orders.length === 1 ? 'order' : 'orders'} · {money(tc.orders.reduce((s, o) => s + o.total, 0), cur)}
                   </Typography>
                 </Stack>
                 <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
@@ -291,6 +293,7 @@ const EmptyState = ({ text }) => (
 
 /* A single table on the floor: header + its active orders, or a free slot. */
 const TableCard = ({ card, onEdit, onUpdateStatus, onGenerateBill, onAdd }) => {
+  const cur = useCurrency();
   const { label, capacity, orders } = card;
   const isActive = orders.length > 0;
   const total = orders.reduce((s, o) => s + o.total, 0);
@@ -314,7 +317,7 @@ const TableCard = ({ card, onEdit, onUpdateStatus, onGenerateBill, onAdd }) => {
           {capacity ? <Typography variant="caption" color="text.secondary" noWrap>· {capacity} seats</Typography> : null}
         </Stack>
         {isActive ? (
-          <Typography variant="subtitle2" fontWeight={800}>{money(total)}</Typography>
+          <Typography variant="subtitle2" fontWeight={800}>{money(total, cur)}</Typography>
         ) : (
           <Chip label="Free" size="small" variant="outlined" />
         )}
@@ -340,6 +343,7 @@ const TableCard = ({ card, onEdit, onUpdateStatus, onGenerateBill, onAdd }) => {
 
 /* Compact order row used in cards, list view and history. */
 const OrderRow = ({ order, divider, compact, muted, onEdit, onUpdateStatus, onGenerateBill }) => {
+  const cur = useCurrency();
   const items = order.items?.map((it) => `${it.quantity}× ${it.name}`).join(', ');
   const actions = statusActions(order, onUpdateStatus, onGenerateBill);
 
@@ -372,7 +376,7 @@ const OrderRow = ({ order, divider, compact, muted, onEdit, onUpdateStatus, onGe
           </Stack>
           {items && <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>{items}</Typography>}
         </Box>
-        <Typography variant="body2" fontWeight={700} sx={{ flexShrink: 0 }}>{money(order.total)}</Typography>
+        <Typography variant="body2" fontWeight={700} sx={{ flexShrink: 0 }}>{money(order.total, cur)}</Typography>
       </Stack>
 
       {actions.length > 0 && (

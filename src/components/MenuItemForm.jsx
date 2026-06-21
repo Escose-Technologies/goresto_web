@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useCurrency } from '../contexts/CurrencyContext';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -73,6 +74,7 @@ const DietaryIcon = ({ type, size = 14 }) => (
 
 export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onDelete }) => {
   const toast = useToast();
+  const cur = useCurrency();
   const fileInputRef = useRef(null);
   const [nameSuggestions, setNameSuggestions] = useState([]);
   const [formData, setFormData] = useState({
@@ -226,7 +228,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
           </Grid>
           <Grid size={{ xs: 12, sm: 5 }}>
             <TextField
-              label="Price (₹)"
+              label={`Price (${cur})`}
               type="number"
               value={formData.price}
               onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}

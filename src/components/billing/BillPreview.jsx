@@ -7,12 +7,13 @@ import './ThermalBill.css';
 import './A4Invoice.css';
 import './BillPreview.css';
 
-export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClose, toast, settings }) => {
+export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClose, toast, settings, autoPrint = false }) => {
   const [bill, setBill] = useState(initialBill);
   const [loading, setLoading] = useState(!initialBill?.billItems);
   const [downloading, setDownloading] = useState(false);
   const [viewMode, setViewMode] = useState('thermal'); // 'thermal' | 'a4'
   const printRef = useRef(null);
+  const autoPrintedRef = useRef(false);
 
   useEffect(() => {
     // Only fetch full bill if we have summary data without items
@@ -32,6 +33,16 @@ export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClo
     };
     load();
   }, [restaurantId, initialBill, toast]);
+
+  // Auto-print once the bill has rendered, when the restaurant has the
+  // "auto-print on bill" setting enabled.
+  useEffect(() => {
+    if (autoPrint && !loading && bill && !autoPrintedRef.current) {
+      autoPrintedRef.current = true;
+      const t = setTimeout(() => handlePrint(), 300);
+      return () => clearTimeout(t);
+    }
+  }, [autoPrint, loading, bill]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePrint = () => {
     const content = printRef.current;
@@ -67,7 +78,7 @@ export const BillPreview = ({ restaurantId, restaurant, bill: initialBill, onClo
     @media print {
       body { margin: 0; }
       @page {
-        size: ${viewMode === 'thermal' ? '80mm auto' : 'A4'};
+        size: ${viewMode === 'thermal' ? `${settings?.thermalPrinterWidth === 'fifty_eight_mm' ? '58mm' : '80mm'} auto` : 'A4'};
         margin: ${viewMode === 'thermal' ? '2mm' : '10mm'};
       }
     }

@@ -16,24 +16,28 @@ import { DRAWER_WIDTH } from './Sidebar';
 
 const AppBarHeader = ({
   onMenuToggle,
+  onSidebarCollapse,
   restaurantName,
   userName,
   onLogout,
   notificationCount = 0,
   connected = false,
+  sidebarWidth,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const width = sidebarWidth ?? DRAWER_WIDTH;
 
   return (
     <AppBar
       position="fixed"
       sx={{
-        width: { lg: `calc(100% - ${DRAWER_WIDTH}px)` },
-        ml: { lg: `${DRAWER_WIDTH}px` },
+        width: { lg: `calc(100% - ${width}px)` },
+        ml: { lg: `${width}px` },
         backgroundColor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
         color: 'text.primary',
+        transition: 'width 0.2s ease, margin-left 0.2s ease',
       }}
     >
       <Toolbar sx={{ minHeight: { xs: 64, md: 72 }, px: { xs: 2, md: 3 } }}>
@@ -45,6 +49,7 @@ const AppBarHeader = ({
         >
           <Icon icon="material-symbols:menu-rounded" width={24} />
         </IconButton>
+
 
         {/* Restaurant name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>

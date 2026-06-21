@@ -7,6 +7,7 @@ import { PaymentModeSelector } from './PaymentModeSelector';
 import { SplitPaymentEditor } from './SplitPaymentEditor';
 import { BillSummaryLive } from './BillSummaryLive';
 import { TouchButton } from '../ui/TouchButton';
+import { getCurrencySymbol } from '../../utils/currency';
 import './GenerateBillModal.css';
 
 export const GenerateBillModal = ({
@@ -28,6 +29,7 @@ export const GenerateBillModal = ({
   const [tableOrders, setTableOrders] = useState([]);
   const [settings, setSettings] = useState(null);
   const [activePresets, setActivePresets] = useState([]);
+  const cur = getCurrencySymbol(settings);
 
   // Step 1: order selection (trigger order is pre-checked)
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
@@ -138,7 +140,7 @@ export const GenerateBillModal = ({
       const splitTotal = splitPayments.reduce((s, p) => s + (p.amount || 0), 0);
       const gt = calculation?.grandTotal || 0;
       if (Math.abs(splitTotal - gt) > 0.01) {
-        toast?.error(`Split total (₹${splitTotal.toFixed(2)}) doesn't match grand total (₹${gt.toFixed(2)})`);
+        toast?.error(`Split total (${cur}${splitTotal.toFixed(2)}) doesn't match grand total (${cur}${gt.toFixed(2)})`);
         return;
       }
     }
@@ -314,7 +316,7 @@ export const GenerateBillModal = ({
                         onChange={(e) => setPackagingCharge(parseFloat(e.target.value) || 0)}
                         className="bill-extras-input"
                       />
-                      <span className="bill-extras-unit">₹</span>
+                      <span className="bill-extras-unit">{cur}</span>
                     </label>
                   </div>
                 )}

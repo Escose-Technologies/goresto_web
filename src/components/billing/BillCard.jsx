@@ -1,3 +1,5 @@
+import { useCurrency } from '../../contexts/CurrencyContext';
+
 const PAYMENT_MODE_LABELS = {
   cash: 'Cash',
   card: 'Card',
@@ -13,6 +15,7 @@ const PAYMENT_STATUS_CONFIG = {
 };
 
 export const BillCard = ({ bill, onView, onPay, onCancel }) => {
+  const cur = useCurrency();
   const status = PAYMENT_STATUS_CONFIG[bill.paymentStatus] || PAYMENT_STATUS_CONFIG.unpaid;
   const orderCount = bill.orders?.length || 0;
   const createdAt = new Date(bill.createdAt);
@@ -51,7 +54,7 @@ export const BillCard = ({ bill, onView, onPay, onCancel }) => {
       )}
 
       <div className="bill-card-bottom">
-        <div className="bill-card-total">₹{(bill.grandTotal || 0).toFixed(2)}</div>
+        <div className="bill-card-total">{cur}{(bill.grandTotal || 0).toFixed(2)}</div>
         <div className="bill-card-actions" onClick={(e) => e.stopPropagation()}>
           {bill.paymentStatus === 'unpaid' && onPay && (
             <button className="bill-action-btn bill-action-pay" onClick={() => onPay(bill)}>

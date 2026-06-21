@@ -71,6 +71,8 @@ const COLOR = {
 export function generateBillPdf(bill) {
   const restaurant = bill.restaurant || {};
   const settings = bill.restaurantSettings || {};
+  const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: '₹', CAD: 'C$', AUD: 'A$' };
+  const cur = SYMBOLS[settings.currency] || '₹';
   const items = bill.billItems || [];
   const isComposition = settings.gstScheme === 'composition';
   const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
@@ -304,7 +306,7 @@ export function generateBillPdf(bill) {
   doc.strokeColor(COLOR.black).lineWidth(1.5)
     .moveTo(sumX, y).lineTo(sumX + sumW, y).stroke();
   y += 4;
-  addSumRow('GRAND TOTAL', `₹ ${fmt(bill.grandTotal)}`, { bold: true, fontSize: 12, spacing: 16 });
+  addSumRow('GRAND TOTAL', `${cur} ${fmt(bill.grandTotal)}`, { bold: true, fontSize: 12, spacing: 16 });
   doc.strokeColor(COLOR.black).lineWidth(1.5)
     .moveTo(sumX, y - 2).lineTo(sumX + sumW, y - 2).stroke();
   y += 4;
@@ -321,7 +323,7 @@ export function generateBillPdf(bill) {
 
   doc.font('Helvetica').fontSize(9).fillColor(COLOR.dark);
   if (isSplit) {
-    const splitStr = splits.map(s => `${(s.mode || '').toUpperCase()}: ₹${fmt(s.amount)}`).join(', ');
+    const splitStr = splits.map(s => `${(s.mode || '').toUpperCase()}: ${cur}${fmt(s.amount)}`).join(', ');
     doc.text(`Payment: Split — ${splitStr}`, doc.page.margins.left, y, { width: pageWidth });
   } else {
     doc.text(`Payment: ${(bill.paymentMode || '').toUpperCase()}`, doc.page.margins.left, y, { width: pageWidth });
