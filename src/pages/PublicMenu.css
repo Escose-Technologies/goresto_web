@@ -1628,3 +1628,40 @@
     page-break-inside: avoid;
   }
 }
+
+/* ── Category filter pills (used by MenuPreview) ── */
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 0 16px 16px;
+}
+
+.category-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  color: #4B5563;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.category-tab:hover {
+  border-color: #3385F0;
+  color: #3385F0;
+  background: #EFF6FF;
+}
+
+.category-tab.active {
+  background: #3385F0;
+  color: #fff;
+  border-color: #3385F0;
+  font-weight: 600;
+}
