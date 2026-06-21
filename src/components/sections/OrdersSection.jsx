@@ -178,7 +178,7 @@ const OrdersSection = ({
               startAdornment: <InputAdornment position="start"><Icon icon="mdi:magnify" width={20} /></InputAdornment>,
               endAdornment: orderSearchQuery ? (
                 <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setOrderSearchQuery('')}><Icon icon="mdi:close" width={18} /></IconButton>
+                  <IconButton size="small" onClick={() => setOrderSearchQuery('')}><Icon icon="material-symbols:close-rounded" width={18} /></IconButton>
                 </InputAdornment>
               ) : null,
             },

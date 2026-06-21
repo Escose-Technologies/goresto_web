@@ -161,7 +161,7 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
           {saving ? 'Saving…' : 'Save'}
         </Button>
         {onCancel && (
-          <IconButton onClick={onCancel} aria-label="Close profile"><Icon icon="mdi:close" width={22} /></IconButton>
+          <IconButton onClick={onCancel} aria-label="Close profile"><Icon icon="material-symbols:close-rounded" width={22} /></IconButton>
         )}
       </Box>
 
@@ -211,7 +211,7 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
                 </label>
                 {logoPreview && (
                   <IconButton size="small" onClick={() => handleRemoveImage('logo')} sx={{ position: 'absolute', top: -2, right: -2, bgcolor: 'error.main', color: 'white', width: 22, height: 22, '&:hover': { bgcolor: 'error.dark' } }}>
-                    <Icon icon="mdi:close" width={13} />
+                    <Icon icon="material-symbols:close-rounded" width={13} />
                   </IconButton>
                 )}
               </Box>

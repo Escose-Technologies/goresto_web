@@ -135,7 +135,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+  background: #F9FAFB;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   color: var(--color-text-primary);
@@ -155,43 +155,17 @@ html {
   min-height: -webkit-fill-available;
 }
 
-/* Button Reset */
+/* ── Minimal global resets (safe for MUI) ── */
 button {
   font-family: inherit;
   cursor: pointer;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: inherit;
-  color: inherit;
-  /* Touch-friendly minimum size */
-  min-height: var(--touch-min);
-  /* Remove tap highlight on mobile */
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Input Reset - 16px font prevents iOS zoom */
 input, textarea, select {
   font-family: inherit;
-  outline: none;
   font-size: 16px; /* Prevents iOS zoom on focus */
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  width: 100%;
-  /* Touch-friendly minimum height */
-  min-height: var(--touch-min);
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Remove native styling for text inputs and selects, but NOT radios/checkboxes */
-input:not([type="radio"]):not([type="checkbox"]):not([type="color"]):not([type="range"]),
-textarea,
-select {
-  -webkit-appearance: none;
-  appearance: none;
 }
 
 /* Native radio & checkbox — just accent-color, no custom drawing */
@@ -202,18 +176,52 @@ input[type="checkbox"] {
   padding: 0;
   border: none;
   cursor: pointer;
-  accent-color: #3385F0;
+  accent-color: var(--color-primary);
 }
 
-input:focus, textarea:focus, select:focus {
+/* ── Full input/button styling for non-MUI pages ──
+   Scoped to pages that use bare HTML controls (public menu, kitchen, landing,
+   register, login). MUI's own theme owns the dashboard controls. */
+.bare-controls button {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: inherit;
+  color: inherit;
+  min-height: var(--touch-min);
+}
+
+.bare-controls input,
+.bare-controls textarea,
+.bare-controls select {
+  outline: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  width: 100%;
+  min-height: var(--touch-min);
+}
+
+.bare-controls input:not([type="radio"]):not([type="checkbox"]):not([type="color"]):not([type="range"]),
+.bare-controls textarea,
+.bare-controls select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bare-controls input:focus,
+.bare-controls textarea:focus,
+.bare-controls select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(51, 133, 240, 0.15);
 }
 
 /* Fix for iOS input styling — handled above via combined rule */
 
-/* Select arrow styling */
-select {
+/* Select arrow — scoped to bare-controls to avoid fighting MUI Select */
+.bare-controls select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236B7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 10.5L3 5.5h10L8 10.5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;

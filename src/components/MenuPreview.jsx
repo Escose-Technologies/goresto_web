@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { CloseButton } from './ui/CloseButton';
 import '../pages/PublicMenu.css';
 
 export const MenuPreview = ({ restaurant, settings, menuItems: allMenuItems, categories }) => {
@@ -184,9 +185,7 @@ export const MenuPreview = ({ restaurant, settings, menuItems: allMenuItems, cat
       {selectedItem && (
         <div className="item-modal" onClick={() => setSelectedItem(null)}>
           <div className="item-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedItem(null)}>
-              ×
-            </button>
+            <CloseButton onClick={() => setSelectedItem(null)} sx={{ position: 'absolute', top: 8, right: 8 }} />
             {selectedItem.image && (
               <div className="modal-image">
                 <img src={selectedItem.image} alt={selectedItem.name} />

@@ -436,7 +436,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
                   onClick={handleRemoveImage}
                   sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(0,0,0,0.6)', color: 'white', width: 28, height: 28, p: 0, '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
                 >
-                  <Icon icon="mdi:close" width={16} />
+                  <Icon icon="material-symbols:close-rounded" width={16} />
                 </IconButton>
               </Box>
             ) : (

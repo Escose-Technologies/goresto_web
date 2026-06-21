@@ -159,7 +159,7 @@ export const KitchenDisplay = () => {
   // ─── PIN Entry Screen ───────────────────────────────────
   if (!authenticated) {
     return (
-      <div className="kds-pin-screen">
+      <div className="kds-pin-screen bare-controls">
         <form className="kds-pin-card" onSubmit={handlePinSubmit}>
           <h1>Kitchen Display</h1>
           <p>Enter 4-digit PIN to access</p>
@@ -210,7 +210,7 @@ export const KitchenDisplay = () => {
 
   // ─── Kitchen Display ────────────────────────────────────
   return (
-    <div className="kds-container">
+    <div className="kds-container bare-controls">
       <header className="kds-header">
         <div className="kds-header-left">
           <h1>Kitchen Display</h1>

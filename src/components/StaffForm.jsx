@@ -220,7 +220,7 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
                   '&:hover': { bgcolor: 'error.dark' },
                 }}
               >
-                <Icon icon="mdi:close" width={14} />
+                <Icon icon="material-symbols:close-rounded" width={14} />
               </IconButton>
             )}
           </Box>

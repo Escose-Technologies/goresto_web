@@ -246,7 +246,7 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
                     onClick={() => handleRemoveItem(index)}
                     sx={{ width: 36, height: 36 }}
                   >
-                    <Icon icon="mdi:close" width={18} />
+                    <Icon icon="material-symbols:close-rounded" width={18} />
                   </IconButton>
                 </Stack>
               </Stack>

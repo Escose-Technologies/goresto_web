@@ -407,7 +407,7 @@ export const PublicMenu = () => {
   }
 
   return (
-    <div className="public-menu-container">
+    <div className="public-menu-container bare-controls">
       {orderPlaced && (
         <div className="order-success-banner">
           <Icon icon="mdi:check-circle" width={20} />
