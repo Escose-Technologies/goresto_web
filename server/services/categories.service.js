@@ -16,6 +16,7 @@ export const create = async (restaurantId, data) => {
     data: {
       restaurantId,
       name: data.name.trim(),
+      description: data.description?.trim() || null,
       displayOrder: data.displayOrder ?? (maxOrder._max.displayOrder ?? -1) + 1,
     },
   });
@@ -26,6 +27,7 @@ export const update = async (restaurantId, id, data) => {
     where: { id, restaurantId },
     data: {
       ...(data.name !== undefined && { name: data.name.trim() }),
+      ...(data.description !== undefined && { description: data.description?.trim() || null }),
       ...(data.displayOrder !== undefined && { displayOrder: data.displayOrder }),
     },
   });
