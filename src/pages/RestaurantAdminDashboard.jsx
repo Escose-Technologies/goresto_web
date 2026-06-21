@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, getAccessToken } from '../services/apiService';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
 import { MenuPreview } from '../components/MenuPreview';
@@ -136,17 +136,19 @@ export const RestaurantAdminDashboard = () => {
       const restaurantData = await restaurantService.getByUserId(user?.id, user?.restaurantId);
       if (restaurantData) {
         setRestaurant(restaurantData);
-        const [items, tablesData, ordersData, staffData, analyticsData, settingsData] = await Promise.all([
+        const [items, tablesData, ordersData, staffData, analyticsData, settingsData, categoryData] = await Promise.all([
           menuService.getMenuItems(restaurantData.id),
           tableService.getTables(restaurantData.id),
           orderService.getOrders(restaurantData.id),
           staffService.getStaff(restaurantData.id),
           analyticsService.getAnalytics(restaurantData.id),
           settingsService.getSettings(restaurantData.id),
+          categoryService.getAll(restaurantData.id).catch(() => []),
         ]);
         setMenuItems(items);
-        // Derive categories client-side — saves 1 API call + DB query
-        setCategories([...new Set(items.map(i => i.category).filter(Boolean))].sort());
+        const modelCats = categoryData.map((c) => c.name);
+        const derivedCats = items.map((i) => i.category).filter(Boolean);
+        setCategories([...new Set([...modelCats, ...derivedCats])].sort());
         setTables(tablesData);
         setOrders(ordersData);
         setStaff(staffData);
@@ -179,7 +181,10 @@ export const RestaurantAdminDashboard = () => {
         settingsService.getSettings(restaurant.id),
       ]);
       setMenuItems(items);
-      setCategories([...new Set(items.map(i => i.category).filter(Boolean))].sort());
+      const cats = await categoryService.getAll(restaurant.id).catch(() => []);
+      const modelCats = cats.map((c) => c.name);
+      const derivedCats = items.map((i) => i.category).filter(Boolean);
+      setCategories([...new Set([...modelCats, ...derivedCats])].sort());
       setRestaurantSettings(settingsData);
     } catch (error) {
       console.error('Error refreshing preview:', error);
@@ -525,6 +530,7 @@ export const RestaurantAdminDashboard = () => {
             categories={categories}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            restaurantId={restaurant.id}
             restaurantFoodType={restaurant?.foodType}
             showForm={showForm}
             editingItem={editingItem}
@@ -533,6 +539,8 @@ export const RestaurantAdminDashboard = () => {
             onSave={handleSaveItem}
             onCancel={handleCancelEdit}
             onDelete={handleDelete}
+            onCategoriesChange={setCategories}
+            toast={toast}
           />
         )}
 

@@ -562,3 +562,21 @@ export const discountPresetService = {
     return del(`/restaurants/${restaurantId}/discount-presets/${presetId}`);
   },
 };
+
+export const categoryService = {
+  async getAll(restaurantId) {
+    return get(`/restaurants/${restaurantId}/categories`);
+  },
+  async create(restaurantId, data) {
+    return post(`/restaurants/${restaurantId}/categories`, data);
+  },
+  async update(restaurantId, id, data) {
+    return patch(`/restaurants/${restaurantId}/categories/${id}`, data);
+  },
+  async remove(restaurantId, id) {
+    return del(`/restaurants/${restaurantId}/categories/${id}`);
+  },
+  async reorder(restaurantId, orderedIds) {
+    return put(`/restaurants/${restaurantId}/categories/reorder`, { orderedIds });
+  },
+};

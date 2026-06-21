@@ -16,12 +16,14 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { MenuItemForm } from '../MenuItemForm';
+import { CategoryManager } from '../menu/CategoryManager';
 
 const MenuSection = ({
   menuItems,
   categories,
   selectedCategory,
   setSelectedCategory,
+  restaurantId,
   restaurantFoodType,
   showForm,
   editingItem,
@@ -30,6 +32,8 @@ const MenuSection = ({
   onSave,
   onCancel,
   onDelete,
+  onCategoriesChange,
+  toast,
 }) => {
   const filtered =
     selectedCategory === 'All'
@@ -38,9 +42,17 @@ const MenuSection = ({
 
   return (
     <>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        Menu Items
-      </Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h5" fontWeight={700}>Menu Items</Typography>
+        {restaurantId && (
+          <CategoryManager
+            restaurantId={restaurantId}
+            categories={categories}
+            onCategoriesChange={onCategoriesChange}
+            toast={toast}
+          />
+        )}
+      </Stack>
 
       <Fab
         color="primary"

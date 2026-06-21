@@ -1,12 +1,11 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { prisma } from '../config/database.js';
 import * as restaurantsService from '../services/restaurants.service.js';
 import * as menuItemsService from '../services/menuItems.service.js';
 import * as settingsService from '../services/settings.service.js';
 import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
-
-import { prisma } from '../config/database.js';
 
 export const getRestaurant = asyncHandler(async (req, res) => {
   const restaurant = await restaurantsService.getById(req.params.restaurantId);
@@ -101,8 +100,13 @@ export const getMenuItemReviews = asyncHandler(async (req, res) => {
 });
 
 export const getCategories = asyncHandler(async (req, res) => {
-  const categories = await menuItemsService.getCategories(req.params.restaurantId);
-  res.json({ success: true, data: categories });
+  const [derived, managed] = await Promise.all([
+    menuItemsService.getCategories(req.params.restaurantId),
+    prisma.category.findMany({ where: { restaurantId: req.params.restaurantId }, orderBy: { displayOrder: 'asc' }, select: { name: true } }),
+  ]);
+  const managedNames = managed.map((c) => c.name);
+  const merged = [...new Set([...managedNames, ...derived])];
+  res.json({ success: true, data: merged });
 });
 
 export const verifyKitchenPin = asyncHandler(async (req, res) => {
