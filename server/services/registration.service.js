@@ -2,6 +2,7 @@ import { prisma } from '../config/database.js';
 import { hashPassword } from '../utils/password.js';
 import { ConflictError, NotFoundError } from '../errors/index.js';
 import { formatRestaurant } from '../utils/formatters.js';
+import { DEFAULT_CATEGORIES } from '../config/defaultCategories.js';
 
 export const register = async (data) => {
   const { ownerName, email, password, phone, restaurantName, address, cuisineTypes, foodType } = data;
@@ -45,6 +46,15 @@ export const register = async (data) => {
     await tx.user.update({
       where: { id: user.id },
       data: { restaurantId: restaurant.id },
+    });
+
+    await tx.category.createMany({
+      data: DEFAULT_CATEGORIES.map((cat, i) => ({
+        restaurantId: restaurant.id,
+        name: cat.name,
+        description: cat.description,
+        displayOrder: i,
+      })),
     });
 
     return { restaurantId: restaurant.id };

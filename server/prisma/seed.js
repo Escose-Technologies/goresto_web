@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { DEFAULT_CATEGORIES } from '../config/defaultCategories.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, '../../.env') });
@@ -86,19 +87,16 @@ async function main() {
 
   console.log('Created restaurant:', restaurant.name);
 
-  // Create categories
-  const categoryData = [
-    { name: 'Salads', description: 'Fresh greens & composed salads', displayOrder: 0 },
-    { name: 'Pizza', description: 'Wood-fired & classic pizzas', displayOrder: 1 },
-    { name: 'Pasta', description: 'Italian pasta dishes', displayOrder: 2 },
-    { name: 'Main Course', description: 'Hearty entrees & grills', displayOrder: 3 },
-    { name: 'Desserts', description: 'Sweet finishes & confections', displayOrder: 4 },
-    { name: 'Beverages', description: 'Drinks, juices & smoothies', displayOrder: 5 },
-  ];
-  await Promise.all(categoryData.map((c) =>
-    prisma.category.create({ data: { restaurantId: restaurant.id, ...c } })
-  ));
-  console.log(`Created ${categoryData.length} categories`);
+  // Create default categories
+  await prisma.category.createMany({
+    data: DEFAULT_CATEGORIES.map((cat, i) => ({
+      restaurantId: restaurant.id,
+      name: cat.name,
+      description: cat.description,
+      displayOrder: i,
+    })),
+  });
+  console.log(`Created ${DEFAULT_CATEGORIES.length} default categories`);
 
   // Create menu items
   const menuItems = await Promise.all([
