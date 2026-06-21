@@ -17,6 +17,7 @@ async function main() {
   await prisma.review.deleteMany();
   await prisma.order.deleteMany();
   await prisma.menuItem.deleteMany();
+  await prisma.category.deleteMany();
   await prisma.table.deleteMany();
   await prisma.staff.deleteMany();
   await prisma.settings.deleteMany();
@@ -84,6 +85,20 @@ async function main() {
   });
 
   console.log('Created restaurant:', restaurant.name);
+
+  // Create categories
+  const categoryData = [
+    { name: 'Salads', description: 'Fresh greens & composed salads', displayOrder: 0 },
+    { name: 'Pizza', description: 'Wood-fired & classic pizzas', displayOrder: 1 },
+    { name: 'Pasta', description: 'Italian pasta dishes', displayOrder: 2 },
+    { name: 'Main Course', description: 'Hearty entrees & grills', displayOrder: 3 },
+    { name: 'Desserts', description: 'Sweet finishes & confections', displayOrder: 4 },
+    { name: 'Beverages', description: 'Drinks, juices & smoothies', displayOrder: 5 },
+  ];
+  await Promise.all(categoryData.map((c) =>
+    prisma.category.create({ data: { restaurantId: restaurant.id, ...c } })
+  ));
+  console.log(`Created ${categoryData.length} categories`);
 
   // Create menu items
   const menuItems = await Promise.all([
