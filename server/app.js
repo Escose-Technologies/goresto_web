@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { corsOptions } from './config/cors.js';
-import { generalLimiter } from './config/rateLimiter.js';
+import { generalLimiter, publicLimiter } from './config/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
 import routes from './routes/index.js';
@@ -29,8 +29,11 @@ if (process.env.NODE_ENV === 'production') {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
-app.use('/api', generalLimiter);
+// Rate limiting — separate budgets for public (customer) vs authenticated (admin) routes
+app.use('/api/public', publicLimiter);
+app.use('/api/auth', generalLimiter);
+app.use('/api/restaurants', generalLimiter);
+app.use('/api/superadmin', generalLimiter);
 
 // API routes
 app.use('/api', routes);

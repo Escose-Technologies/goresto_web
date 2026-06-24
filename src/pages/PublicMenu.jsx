@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
-import { restaurantService, menuService, settingsService, orderService, reviewService, tableService } from '../services/apiService';
+import { publicService } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { useToast } from '../components/ui/Toast';
@@ -131,23 +131,23 @@ export const PublicMenu = () => {
 
   const loadMenuData = async () => {
     try {
-      const restaurantData = await restaurantService.getById(restaurantId);
+      const restaurantData = await publicService.getRestaurant(restaurantId);
       if (restaurantData) {
         setRestaurant(restaurantData);
 
-        const restaurantSettings = await settingsService.getSettings(restaurantId);
+        const restaurantSettings = await publicService.getSettings(restaurantId);
         setSettings(restaurantSettings);
         applyRestaurantTheme(restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor);
 
-        const items = await menuService.getMenuItems(restaurantId);
+        const items = await publicService.getMenuItems(restaurantId);
         const availableItems = items.filter(item => item.available);
         setMenuItems(availableItems);
-        const cats = await menuService.getCategories(restaurantId);
+        const cats = await publicService.getCategories(restaurantId);
         setCategories(cats);
 
         if (tableNumber) {
           try {
-            const tableData = await tableService.getTableStatus(restaurantId, tableNumber);
+            const tableData = await publicService.getTableStatus(restaurantId, tableNumber);
             if (tableData?.status && tableData.status !== 'available') {
               setTableStatus(tableData.status);
             }
@@ -167,7 +167,7 @@ export const PublicMenu = () => {
   const loadItemReviews = async (menuItemId) => {
     if (itemReviews[menuItemId]) return;
     try {
-      const reviews = await reviewService.getReviewsByMenuItem(restaurantId, menuItemId);
+      const reviews = await publicService.getReviewsByMenuItem(restaurantId, menuItemId);
       setItemReviews(prev => ({ ...prev, [menuItemId]: reviews }));
     } catch (error) {
       console.error('Error loading reviews:', error);
@@ -300,7 +300,7 @@ export const PublicMenu = () => {
         customerMobile: customerMobile.trim(),
       };
 
-      await orderService.addOrder(restaurantId, orderData);
+      await publicService.placeOrder(restaurantId, orderData);
       setCart([]);
       setShowCart(false);
       setCustomerName('');
@@ -324,7 +324,7 @@ export const PublicMenu = () => {
 
     setStatusCheckLoading(true);
     try {
-      const orders = await orderService.getOrdersByCustomer(
+      const orders = await publicService.getOrdersByCustomer(
         restaurantId,
         statusCheckName.trim(),
         statusCheckMobile.trim()
@@ -343,9 +343,9 @@ export const PublicMenu = () => {
 
   const handleSubmitReview = async (reviewData) => {
     try {
-      await reviewService.addReview(restaurantId, reviewData);
+      await publicService.submitReview(restaurantId, reviewData);
       // Reload reviews for this item
-      const reviews = await reviewService.getReviewsByMenuItem(restaurantId, reviewData.menuItemId);
+      const reviews = await publicService.getReviewsByMenuItem(restaurantId, reviewData.menuItemId);
       setItemReviews(prev => ({ ...prev, [reviewData.menuItemId]: reviews }));
       // Reload menu to get updated rating
       await loadMenuData();
@@ -801,7 +801,7 @@ export const PublicMenu = () => {
         {cart.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4, px: 2 }}>
             <Typography color="text.secondary" mb={2}>Your cart is empty</Typography>
-            <Button variant="outlined" onClick={() => setShowCart(false)}>Continue Shopping</Button>
+            <button className="cart-btn cart-btn--outline" onClick={() => setShowCart(false)}>Continue Shopping</button>
           </Box>
         ) : (
           <>
@@ -869,14 +869,14 @@ export const PublicMenu = () => {
                   <p>Table number is required to place an order. Please access this menu through a table QR code.</p>
                 </div>
               )}
-              <Stack direction="row" spacing={1.5} mt={2}>
-                <Button variant="outlined" fullWidth onClick={() => setShowCart(false)}>
+              <div className="cart-action-row">
+                <button className="cart-btn cart-btn--outline" onClick={() => setShowCart(false)}>
                   Continue Shopping
-                </Button>
-                <Button variant="contained" fullWidth onClick={handlePlaceOrder} disabled={!tableNumber}>
+                </button>
+                <button className="cart-btn cart-btn--primary" onClick={handlePlaceOrder} disabled={!tableNumber}>
                   Place Order
-                </Button>
-              </Stack>
+                </button>
+              </div>
             </div>
           </>
         )}

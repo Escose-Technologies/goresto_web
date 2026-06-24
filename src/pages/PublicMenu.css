@@ -1003,6 +1003,47 @@
   color: #92400E;
 }
 
+/* Cart Action Buttons */
+.cart-action-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cart-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 48px;
+  text-align: center;
+}
+
+.cart-btn:active {
+  transform: scale(0.97);
+}
+
+.cart-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-btn--outline {
+  background: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.cart-btn--primary {
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 .cart-empty {
   padding: 2.5rem 1rem;
   text-align: center;

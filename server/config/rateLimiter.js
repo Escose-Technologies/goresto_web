@@ -20,10 +20,20 @@ export const authLimiter = isDev ? noop : rateLimit({
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts, please try again later' } },
 });
 
-export const publicOrderLimiter = isDev ? noop : rateLimit({
-  windowMs: 60000,
-  max: 5,
+export const publicLimiter = isDev ? noop : rateLimit({
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => `public:${req.ip}`,
+  message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests, please try again later' } },
+});
+
+export const publicOrderLimiter = isDev ? noop : rateLimit({
+  windowMs: 60000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `order:${req.ip}`,
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many orders, please try again later' } },
 });

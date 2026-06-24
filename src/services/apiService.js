@@ -471,6 +471,38 @@ export const reviewService = {
   },
 };
 
+// ─── Public Service (no auth, no fallback double-calls) ─
+
+export const publicService = {
+  async getRestaurant(restaurantId) {
+    return get(`/public/restaurants/${restaurantId}`);
+  },
+  async getSettings(restaurantId) {
+    return get(`/public/restaurants/${restaurantId}/settings`);
+  },
+  async getMenuItems(restaurantId) {
+    return get(`/public/restaurants/${restaurantId}/menu`);
+  },
+  async getCategories(restaurantId) {
+    return get(`/public/restaurants/${restaurantId}/menu/categories`);
+  },
+  async getTableStatus(restaurantId, tableNumber) {
+    return get(`/public/restaurants/${restaurantId}/tables/${encodeURIComponent(tableNumber)}/status`);
+  },
+  async getReviewsByMenuItem(restaurantId, menuItemId) {
+    return get(`/public/restaurants/${restaurantId}/menu-items/${menuItemId}/reviews`);
+  },
+  async submitReview(restaurantId, review) {
+    return post(`/public/restaurants/${restaurantId}/reviews`, review);
+  },
+  async placeOrder(restaurantId, order) {
+    return post(`/public/restaurants/${restaurantId}/orders`, order);
+  },
+  async getOrdersByCustomer(restaurantId, customerName, customerMobile) {
+    return get(`/public/restaurants/${restaurantId}/orders/status?customerName=${encodeURIComponent(customerName)}&customerMobile=${encodeURIComponent(customerMobile)}`);
+  },
+};
+
 // ─── Kitchen Display Service ────────────────────────────
 
 export const kitchenService = {
