@@ -14,6 +14,7 @@ import discountPresetsRoutes from './discountPresets.routes.js';
 import categoriesRoutes from './categories.routes.js';
 import publicRoutes from './public.routes.js';
 import registrationRoutes from './registration.routes.js';
+import uploadRoutes from './upload.routes.js';
 
 const router = Router();
 
@@ -38,6 +39,9 @@ router.use('/restaurants/:restaurantId/categories', categoriesRoutes);
 
 // Public endpoints (no auth)
 router.use('/public/restaurants', publicRoutes);
+
+// Upload (authenticated)
+router.use('/upload', uploadRoutes);
 
 // Registration (public + admin)
 router.use('/registrations', registrationRoutes);

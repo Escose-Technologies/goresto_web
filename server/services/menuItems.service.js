@@ -2,11 +2,10 @@ import { prisma } from '../config/database.js';
 import { NotFoundError } from '../errors/index.js';
 import { formatMenuItem, toEnum } from '../utils/formatters.js';
 
-// Fields needed by formatMenuItem — excludes base64 `image` for list queries
 const MENU_ITEM_LIST_SELECT = {
   id: true, name: true, price: true, description: true, category: true,
   available: true, dietaryType: true, spiceLevel: true, allergens: true,
-  labels: true, rating: true, reviewCount: true, createdAt: true, updatedAt: true,
+  labels: true, rating: true, reviewCount: true, image: true, createdAt: true, updatedAt: true,
 };
 
 export const getAll = async (restaurantId, query = {}) => {

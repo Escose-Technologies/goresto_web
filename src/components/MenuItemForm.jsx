@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
 import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
+import { uploadService } from '../services/apiService';
 
 const allergenOptions = [
   { id: 'nuts', label: 'Nuts' },
@@ -137,17 +138,14 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
     if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
     setIsUploading(true);
+    setImagePreview(URL.createObjectURL(file));
     try {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, image: reader.result }));
-        setImagePreview(reader.result);
-        setIsUploading(false);
-      };
-      reader.onerror = () => { toast.error('Error reading image file'); setIsUploading(false); };
-      reader.readAsDataURL(file);
+      const { url } = await uploadService.uploadImage(file);
+      setFormData((prev) => ({ ...prev, image: url }));
+      setIsUploading(false);
     } catch (error) {
-      toast.error('Error processing image: ' + error.message);
+      toast.error('Error uploading image: ' + error.message);
+      setImagePreview(null);
       setIsUploading(false);
     }
   };

@@ -34,6 +34,7 @@ app.use('/api/public', publicLimiter);
 app.use('/api/auth', generalLimiter);
 app.use('/api/restaurants', generalLimiter);
 app.use('/api/superadmin', generalLimiter);
+app.use('/api/upload', generalLimiter);
 
 // API routes
 app.use('/api', routes);

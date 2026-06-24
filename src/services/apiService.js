@@ -471,6 +471,24 @@ export const reviewService = {
   },
 };
 
+// ─── Upload Service ─────────────────────────────────────
+
+export const uploadService = {
+  async uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const token = localStorage.getItem('accessToken');
+    const res = await fetch(`${API_URL}/upload/image`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || 'Upload failed');
+    return data.data;
+  },
+};
+
 // ─── Public Service (no auth, no fallback double-calls) ─
 
 export const publicService = {

@@ -25,6 +25,13 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().default(50),
+  OCI_NAMESPACE: z.string().default(''),
+  OCI_BUCKET: z.string().default('goresto-images'),
+  OCI_REGION: z.string().default('ap-mumbai-1'),
+  OCI_TENANCY_OCID: z.string().default(''),
+  OCI_USER_OCID: z.string().default(''),
+  OCI_FINGERPRINT: z.string().default(''),
+  OCI_PRIVATE_KEY_PATH: z.string().default(''),
 });
 
 const parsed = envSchema.safeParse(process.env);
