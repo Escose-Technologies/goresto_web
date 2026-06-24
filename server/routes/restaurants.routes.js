@@ -15,6 +15,8 @@ router.get('/mine', authorize('restaurant_admin', 'superadmin'), restaurantsCont
 router.get('/', authorize('superadmin'), restaurantsController.getAll);
 router.get('/:id', validate(idParamSchema, 'params'), restaurantOwnership, restaurantsController.getById);
 router.post('/', authorize('superadmin'), validate(createRestaurantSchema), restaurantsController.create);
+router.patch('/:id/deactivate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.deactivate);
+router.patch('/:id/activate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.activate);
 router.patch('/:id', authorize('restaurant_admin', 'superadmin'), validate(idParamSchema, 'params'), validate(updateRestaurantSchema), restaurantOwnership, restaurantsController.update);
 router.delete('/:id', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.remove);
 

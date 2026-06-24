@@ -35,6 +35,9 @@ export const login = async (email, password, role) => {
     if (restaurant.status === 'rejected') {
       throw new AuthenticationError('Your restaurant registration has been rejected');
     }
+    if (restaurant.status === 'suspended') {
+      throw new AuthenticationError('Your restaurant has been deactivated. Please contact the Goresto team to reactivate it.');
+    }
   }
 
   const accessToken = generateAccessToken({
@@ -59,6 +62,19 @@ export const refresh = async (refreshTokenValue) => {
   const user = await prisma.user.findUnique({ where: { id: stored.userId } });
   if (!user) {
     throw new AuthenticationError('User no longer exists');
+  }
+
+  // Defense in depth: a suspended restaurant's admin must not be able to mint
+  // fresh tokens. Bounds residual access to the current access token's TTL.
+  if (user.role === 'restaurant_admin') {
+    const restaurant = await prisma.restaurant.findFirst({
+      where: { OR: [{ adminId: user.id }, ...(user.restaurantId ? [{ id: user.restaurantId }] : [])] },
+      select: { status: true },
+    });
+    if (restaurant && restaurant.status === 'suspended') {
+      await revokeAllUserTokens(user.id);
+      throw new AuthenticationError('Your restaurant has been deactivated. Please contact the Goresto team to reactivate it.');
+    }
   }
 
   // Rotate: delete old token, create new pair

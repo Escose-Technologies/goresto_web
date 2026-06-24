@@ -31,6 +31,7 @@ export const PublicMenu = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState(false);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -142,6 +143,9 @@ export const PublicMenu = () => {
         setCategories(cats);
       }
     } catch (error) {
+      if (error?.code === 'RESTAURANT_UNAVAILABLE' || error?.status === 403) {
+        setUnavailable(true);
+      }
       console.error('Error loading menu data:', error);
     } finally {
       setLoading(false);
@@ -392,6 +396,18 @@ export const PublicMenu = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2, bgcolor: 'grey.50' }}>
         <CircularProgress />
         <Typography variant="body2" color="text.secondary">Loading menu...</Typography>
+      </Box>
+    );
+  }
+
+  if (unavailable) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 1, p: 3, bgcolor: 'grey.50' }}>
+        <Icon icon="mdi:store-off-outline" width={48} style={{ opacity: 0.5 }} />
+        <Typography variant="h6" fontWeight={700}>Restaurant currently unavailable</Typography>
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          This restaurant is not accepting orders right now. Please check back later.
+        </Typography>
       </Box>
     );
   }

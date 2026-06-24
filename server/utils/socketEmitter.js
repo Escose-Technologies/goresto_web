@@ -43,3 +43,23 @@ export const emitBillUpdated = (restaurantId, bill) => {
     console.error('emitBillUpdated error:', err.message);
   }
 };
+
+export const emitRestaurantSuspended = (restaurantId) => {
+  try {
+    const io = getIO();
+    if (!io) return;
+    io.to(`restaurant:${restaurantId}`).emit('restaurant:suspended', { restaurantId });
+  } catch (err) {
+    console.error('emitRestaurantSuspended error:', err.message);
+  }
+};
+
+export const emitRestaurantReactivated = (restaurantId) => {
+  try {
+    const io = getIO();
+    if (!io) return;
+    io.to(`restaurant:${restaurantId}`).emit('restaurant:reactivated', { restaurantId });
+  } catch (err) {
+    console.error('emitRestaurantReactivated error:', err.message);
+  }
+};

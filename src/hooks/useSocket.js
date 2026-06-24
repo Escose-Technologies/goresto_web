@@ -86,6 +86,18 @@ export const useSocket = () => {
     return () => socket.off('bill:updated', callback);
   }, []);
 
+  const onRestaurantSuspended = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('restaurant:suspended', callback);
+    return () => socket.off('restaurant:suspended', callback);
+  }, []);
+
+  const onRestaurantReactivated = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('restaurant:reactivated', callback);
+    return () => socket.off('restaurant:reactivated', callback);
+  }, []);
+
   const isConnected = useCallback(() => {
     const socket = getSocket();
     return socket.connected;
@@ -114,6 +126,8 @@ export const useSocket = () => {
     onStaffCalled,
     onBillNew,
     onBillUpdated,
+    onRestaurantSuspended,
+    onRestaurantReactivated,
     isConnected,
     onConnect,
     onDisconnect,

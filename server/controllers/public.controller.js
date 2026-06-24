@@ -7,8 +7,16 @@ import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
 
+const UNAVAILABLE = {
+  success: false,
+  error: { code: 'RESTAURANT_UNAVAILABLE', message: 'This restaurant is currently unavailable.' },
+};
+
 export const getRestaurant = asyncHandler(async (req, res) => {
   const restaurant = await restaurantsService.getById(req.params.restaurantId);
+  if (restaurant.status !== 'active') {
+    return res.status(403).json(UNAVAILABLE);
+  }
   // Return only public-safe fields
   const { adminId, ...publicData } = restaurant;
   res.json({ success: true, data: publicData });
@@ -32,6 +40,12 @@ export const getSettings = asyncHandler(async (req, res) => {
 export const placeOrder = asyncHandler(async (req, res) => {
   const { restaurantId } = req.params;
   const { items, ...rest } = req.body;
+
+  // Block ordering for non-active (suspended/pending/rejected) restaurants
+  const r = await prisma.restaurant.findUnique({ where: { id: restaurantId }, select: { status: true } });
+  if (!r || r.status !== 'active') {
+    return res.status(403).json(UNAVAILABLE);
+  }
 
   // Server-side price lookup — never trust client-submitted prices
   const menuItemIds = items.map(i => i.menuItemId);

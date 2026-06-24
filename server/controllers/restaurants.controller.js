@@ -26,6 +26,16 @@ export const update = asyncHandler(async (req, res) => {
   res.json({ success: true, data: restaurant });
 });
 
+export const deactivate = asyncHandler(async (req, res) => {
+  const restaurant = await restaurantsService.setStatus(req.params.id, 'suspended');
+  res.json({ success: true, data: restaurant });
+});
+
+export const activate = asyncHandler(async (req, res) => {
+  const restaurant = await restaurantsService.setStatus(req.params.id, 'active');
+  res.json({ success: true, data: restaurant });
+});
+
 export const remove = asyncHandler(async (req, res) => {
   await restaurantsService.remove(req.params.id);
   res.json({ success: true, data: { message: 'Restaurant deleted successfully' } });

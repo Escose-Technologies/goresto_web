@@ -111,6 +111,7 @@ enum RestaurantStatus {
   pending
   active
   rejected
+  suspended
 }
 
 enum GstScheme {

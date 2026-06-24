@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import Backdrop from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -51,8 +53,9 @@ export const RestaurantAdminDashboard = () => {
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
-  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect } = useSocket();
+  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated } = useSocket();
   const [staffCallAlerts, setStaffCallAlerts] = useState([]);
+  const [suspended, setSuspended] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [showBillModal, setShowBillModal] = useState(false);
   const [billTriggerOrder, setBillTriggerOrder] = useState(null);
@@ -113,6 +116,9 @@ export const RestaurantAdminDashboard = () => {
       setBillingRefreshKey(k => k + 1);
     });
 
+    const cleanupSuspended = onRestaurantSuspended(() => setSuspended(true));
+    const cleanupReactivated = onRestaurantReactivated(() => setSuspended(false));
+
     // Re-join restaurant room on reconnect (e.g. after network drop)
     const cleanupConnect = onConnect(() => {
       const reconnectToken = getAccessToken();
@@ -128,14 +134,17 @@ export const RestaurantAdminDashboard = () => {
       cleanupBillNew();
       cleanupBillUpdated();
       cleanupConnect();
+      cleanupSuspended();
+      cleanupReactivated();
     };
-  }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect]);
+  }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated]);
 
   const loadRestaurantData = async () => {
     try {
       const restaurantData = await restaurantService.getByUserId(user?.id, user?.restaurantId);
       if (restaurantData) {
         setRestaurant(restaurantData);
+        setSuspended(restaurantData.status === 'suspended');
         const [items, tablesData, ordersData, staffData, analyticsData, settingsData, categoryData] = await Promise.all([
           menuService.getMenuItems(restaurantData.id),
           tableService.getTables(restaurantData.id),
@@ -433,6 +442,15 @@ export const RestaurantAdminDashboard = () => {
       notificationCount={staffCallAlerts.length}
       connected={true}
     >
+      {/* Suspension banner — shown across all tabs when the restaurant is deactivated */}
+      {suspended && (
+        <Alert severity="error" icon={<Icon icon="mdi:alert-octagon-outline" width={24} />} sx={{ mb: 2, borderRadius: 2 }}>
+          <AlertTitle sx={{ fontWeight: 700 }}>Your restaurant has been suspended</AlertTitle>
+          Access has been deactivated by the Goresto team. Your public menu is offline and you will be signed out shortly.
+          Please contact the Goresto team to reactivate your restaurant.
+        </Alert>
+      )}
+
       {/* Staff call alerts overlay */}
       <Backdrop
         open={staffCallAlerts.length > 0}

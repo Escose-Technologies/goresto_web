@@ -238,6 +238,14 @@ export const restaurantService = {
     return patch(`/restaurants/${id}`, updates);
   },
 
+  async deactivate(id) {
+    return patch(`/restaurants/${id}/deactivate`, {});
+  },
+
+  async activate(id) {
+    return patch(`/restaurants/${id}/activate`, {});
+  },
+
   async delete(id) {
     return del(`/restaurants/${id}`);
   },

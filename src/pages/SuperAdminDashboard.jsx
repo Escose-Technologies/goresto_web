@@ -138,11 +138,40 @@ export const SuperAdminDashboard = () => {
     });
   };
 
+  const handleDeactivate = (id) => {
+    setConfirmModal({
+      open: true,
+      title: 'Deactivate Restaurant',
+      message: 'This will suspend the restaurant. The admin will be signed out shortly and the public menu will go offline until reactivated. Continue?',
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await restaurantService.deactivate(id);
+          toast.success('Restaurant deactivated');
+          await loadData();
+        } catch (error) {
+          toast.error('Error deactivating: ' + error.message);
+        }
+      },
+    });
+  };
+
+  const handleActivate = async (id) => {
+    try {
+      await restaurantService.activate(id);
+      toast.success('Restaurant reactivated');
+      await loadData();
+    } catch (error) {
+      toast.error('Error reactivating: ' + error.message);
+    }
+  };
+
   const statusChip = (status) => {
     const config = {
       active: { color: 'success', label: 'Active' },
       pending: { color: 'warning', label: 'Pending' },
       rejected: { color: 'error', label: 'Rejected' },
+      suspended: { color: 'default', label: 'Suspended' },
     };
     const c = config[status] || { color: 'default', label: status };
     return <Chip size="small" color={c.color} label={c.label} />;
@@ -273,6 +302,16 @@ export const SuperAdminDashboard = () => {
                       <IconButton size="small" onClick={() => handleEdit(restaurant)} title="Edit">
                         <Icon icon="mdi:pencil" width={18} />
                       </IconButton>
+                      {restaurant.status === 'active' && (
+                        <IconButton size="small" color="warning" onClick={() => handleDeactivate(restaurant.id)} title="Deactivate">
+                          <Icon icon="mdi:pause-circle-outline" width={18} />
+                        </IconButton>
+                      )}
+                      {restaurant.status === 'suspended' && (
+                        <IconButton size="small" color="success" onClick={() => handleActivate(restaurant.id)} title="Reactivate">
+                          <Icon icon="mdi:play-circle-outline" width={18} />
+                        </IconButton>
+                      )}
                       <IconButton size="small" color="error" onClick={() => handleDelete(restaurant.id)} title="Delete">
                         <Icon icon="mdi:close" width={18} />
                       </IconButton>

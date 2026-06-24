@@ -1,6 +1,8 @@
 import { prisma } from '../config/database.js';
-import { NotFoundError } from '../errors/index.js';
+import { NotFoundError, ConflictError } from '../errors/index.js';
 import { formatRestaurant } from '../utils/formatters.js';
+import { revokeAllUserTokens } from '../utils/jwt.js';
+import { emitRestaurantSuspended, emitRestaurantReactivated } from '../utils/socketEmitter.js';
 
 // Excludes large base64 columns from list/summary queries
 const RESTAURANT_LIST_SELECT = {
@@ -61,6 +63,46 @@ export const update = async (id, data) => {
   if (!existing) throw new NotFoundError('Restaurant');
 
   const restaurant = await prisma.restaurant.update({ where: { id }, data });
+  return formatRestaurant(restaurant);
+};
+
+// Superadmin-only operational suspend/reactivate. Only toggles between
+// active <-> suspended; does not touch the registration lifecycle states.
+export const setStatus = async (id, target) => {
+  const existing = await prisma.restaurant.findUnique({
+    where: { id },
+    select: { id: true, status: true, adminId: true },
+  });
+  if (!existing) throw new NotFoundError('Restaurant');
+
+  if (target === 'suspended') {
+    if (existing.status !== 'active') {
+      throw new ConflictError(`Only active restaurants can be deactivated (current: ${existing.status})`);
+    }
+  } else if (target === 'active') {
+    if (existing.status !== 'suspended') {
+      throw new ConflictError(`Only suspended restaurants can be reactivated (current: ${existing.status})`);
+    }
+  } else {
+    throw new ConflictError('Invalid status transition');
+  }
+
+  const restaurant = await prisma.restaurant.update({ where: { id }, data: { status: target } });
+
+  if (target === 'suspended') {
+    // Immediately kill the refresh path for all admins of this restaurant
+    const adminConditions = [{ restaurantId: id }];
+    if (existing.adminId) adminConditions.push({ id: existing.adminId });
+    const admins = await prisma.user.findMany({
+      where: { OR: adminConditions, role: 'restaurant_admin' },
+      select: { id: true },
+    });
+    await Promise.all(admins.map((u) => revokeAllUserTokens(u.id)));
+    emitRestaurantSuspended(id);
+  } else {
+    emitRestaurantReactivated(id);
+  }
+
   return formatRestaurant(restaurant);
 };
 
