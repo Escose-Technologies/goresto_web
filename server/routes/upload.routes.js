@@ -12,8 +12,9 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Only image files are allowed'));
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (ALLOWED_TYPES.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPEG, PNG, WebP, and GIF images are allowed'));
   },
 });
 
@@ -28,7 +29,8 @@ router.post('/image', (req, res, next) => {
 }, asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, error: { message: 'No image file provided' } });
 
-  const ext = req.file.originalname.split('.').pop() || 'jpg';
+  const EXT_MAP = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+  const ext = EXT_MAP[req.file.mimetype] || 'jpg';
   const fileName = `menu-items/${randomUUID()}.${ext}`;
   const url = await uploadImage(req.file.buffer, fileName, req.file.mimetype);
 
