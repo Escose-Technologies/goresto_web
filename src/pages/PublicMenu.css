@@ -5,7 +5,7 @@
    ================================= */
 
 .public-menu-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
 }
@@ -15,7 +15,7 @@
 }
 
 .preview-banner {
-  background: linear-gradient(135deg, #3385F0 0%, #589BF3 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: white;
   padding: 0.75rem 1rem;
   display: flex;
@@ -73,9 +73,9 @@
 .restaurant-banner {
   position: relative;
   width: 100%;
-  height: 180px;
+  height: clamp(150px, 42vw, 320px);
   overflow: hidden;
-  background: linear-gradient(135deg, #3385F0 0%, #589BF3 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
 }
 
 .restaurant-banner-image {
@@ -127,7 +127,7 @@
 }
 
 .restaurant-info h1 {
-  font-size: 1.375rem;
+  font-size: clamp(1.375rem, 1rem + 3.2vw, 2rem);
   font-weight: 700;
   color: #1F2937;
   margin-bottom: 0.75rem;
@@ -137,7 +137,7 @@
 .table-badge {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background: linear-gradient(180deg, #589BF3 0%, #3385F0 100%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
   color: white;
   border-radius: 9999px;
   font-size: 0.8125rem;
@@ -163,13 +163,13 @@
 
 .restaurant-detail-item svg {
   flex-shrink: 0;
-  color: #3385F0;
+  color: var(--color-primary);
   width: 16px;
   height: 16px;
 }
 
 .restaurant-detail-item a {
-  color: #3385F0;
+  color: var(--color-primary);
   text-decoration: none;
   transition: opacity 0.2s;
 }
@@ -213,7 +213,7 @@
 
 .social-link-btn:hover,
 .social-link-btn:active {
-  background: #3385F0;
+  background: var(--color-primary);
   color: white;
   transform: scale(1.1);
 }
@@ -278,8 +278,8 @@
 }
 
 .filter-pill.active {
-  background: linear-gradient(180deg, #589BF3 0%, #3385F0 100%);
-  border-color: #3385F0;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  border-color: var(--color-primary);
   color: white;
 }
 
@@ -327,7 +327,7 @@
 .public-menu-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: clamp(0.75rem, 0.4rem + 1.8vw, 1.5rem);
 }
 
 /* Menu Items List */
@@ -356,7 +356,7 @@
 
 .public-menu-item-image {
   width: 100%;
-  height: 160px;
+  height: clamp(140px, 38vw, 200px);
   border-radius: 0.5rem;
   overflow: hidden;
   flex-shrink: 0;
@@ -385,7 +385,7 @@
 
 .item-detail-image {
   width: 100%;
-  height: 220px;
+  height: clamp(180px, 50vw, 280px);
   border-radius: 0.75rem;
   overflow: hidden;
   background: #F3F4F6;
@@ -427,7 +427,7 @@
 }
 
 .item-title-row h3 {
-  font-size: 1rem;
+  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.1875rem);
   font-weight: 600;
   color: #1F2937;
   flex: 1;
@@ -449,14 +449,14 @@
 }
 
 .public-menu-item-price {
-  font-size: 1.125rem;
+  font-size: clamp(1.0625rem, 0.95rem + 0.7vw, 1.3125rem);
   font-weight: 700;
-  color: #3385F0;
+  color: var(--color-primary);
 }
 
 .public-menu-item-category {
   font-size: 0.6875rem;
-  color: #3385F0;
+  color: var(--color-primary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -496,7 +496,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: linear-gradient(135deg, #589BF3 0%, #3385F0 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -533,7 +533,7 @@
   border-radius: 0.5rem;
   border: 1px solid #E5E7EB;
   background: white;
-  color: #3385F0;
+  color: var(--color-primary);
   font-size: 1.25rem;
   font-weight: 600;
   cursor: pointer;
@@ -544,9 +544,9 @@
 }
 
 .item-qty-btn:active {
-  background: #3385F0;
+  background: var(--color-primary);
   color: white;
-  border-color: #3385F0;
+  border-color: var(--color-primary);
 }
 
 .item-qty-display {
@@ -592,7 +592,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.25rem;
-  background: linear-gradient(135deg, #589BF3 0%, #3385F0 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
   color: white;
   border: none;
   border-radius: 9999px;
@@ -716,7 +716,7 @@
 
 .modal-category {
   font-size: 0.75rem;
-  color: #3385F0;
+  color: var(--color-primary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -726,7 +726,7 @@
 .modal-price {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #3385F0;
+  color: var(--color-primary);
   margin-bottom: 0.75rem;
 }
 
@@ -760,7 +760,7 @@
 .item-detail-price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #3385F0;
+  color: var(--color-primary);
   margin-bottom: 1rem;
 }
 
@@ -787,7 +787,7 @@
 .btn-add-to-cart {
   width: 100%;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #589BF3 0%, #3385F0 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -916,8 +916,8 @@
 
 .quantity-btn:active {
   background: #F3F4F6;
-  border-color: #3385F0;
-  color: #3385F0;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .cart-item-quantity {
@@ -931,7 +931,7 @@
   min-width: 70px;
   text-align: right;
   font-weight: 700;
-  color: #3385F0;
+  color: var(--color-primary);
   font-size: 0.9375rem;
 }
 
@@ -1000,7 +1000,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #589BF3 0%, #3385F0 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -1249,11 +1249,7 @@
    ================================= */
 
 @media (min-width: 640px) {
-  /* Banner */
-  .restaurant-banner {
-    height: 220px;
-  }
-
+  /* Banner height is fluid via clamp() in base styles */
   .restaurant-logo {
     width: 88px;
     height: 88px;
@@ -1480,9 +1476,9 @@
   }
 
   .item-qty-btn:hover {
-    background: #3385F0;
+    background: var(--color-primary);
     color: white;
-    border-color: #3385F0;
+    border-color: var(--color-primary);
   }
 
   /* Cart Button */
@@ -1545,8 +1541,8 @@
 
   .quantity-btn:hover {
     background: #F3F4F6;
-    border-color: #3385F0;
-    color: #3385F0;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 
   .cart-total-section {
@@ -1654,14 +1650,28 @@
 }
 
 .category-tab:hover {
-  border-color: #3385F0;
-  color: #3385F0;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   background: #EFF6FF;
 }
 
 .category-tab.active {
-  background: #3385F0;
+  background: var(--color-primary);
   color: #fff;
-  border-color: #3385F0;
+  border-color: var(--color-primary);
   font-weight: 600;
+}
+
+/* =================================
+   ACCESSIBILITY
+   ================================= */
+@media (prefers-reduced-motion: reduce) {
+  .public-menu-container *,
+  .public-menu-container *::before,
+  .public-menu-container *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

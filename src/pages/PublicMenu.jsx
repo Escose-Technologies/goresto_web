@@ -9,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/apiService';
+import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { useToast } from '../components/ui/Toast';
 import { SearchBar, FilterPills } from '../components/ui';
@@ -135,6 +136,7 @@ export const PublicMenu = () => {
 
         const restaurantSettings = await settingsService.getSettings(restaurantId);
         setSettings(restaurantSettings);
+        applyRestaurantTheme(restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor);
 
         const items = await menuService.getMenuItems(restaurantId);
         const availableItems = items.filter(item => item.available);

@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
 import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, getAccessToken } from '../services/apiService';
+import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
 import { MenuPreview } from '../components/MenuPreview';
@@ -72,9 +73,7 @@ export const RestaurantAdminDashboard = () => {
   // app's stylesheets read (--color-primary*). Note: MUI components use the
   // static JS theme and are unaffected; full admin theming is a follow-up.
   useEffect(() => {
-    const root = document.documentElement;
-    if (restaurantSettings?.primaryColor) root.style.setProperty('--color-primary', restaurantSettings.primaryColor);
-    if (restaurantSettings?.secondaryColor) root.style.setProperty('--color-primary-light', restaurantSettings.secondaryColor);
+    applyRestaurantTheme(restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor);
   }, [restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor]);
 
   // Socket: join restaurant room and listen for real-time updates
