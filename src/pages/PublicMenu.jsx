@@ -106,7 +106,7 @@ export const PublicMenu = () => {
       // pure_veg only has veg items, so no dietary filter needed
       options.push({ id: 'veg', label: 'Veg', icon: <span className="filter-dot filter-dot-veg" /> });
     }
-    if (ft === 'egg' || ft === 'non_veg' || ft === 'both') {
+    if (ft === 'egg' || ft === 'veg_egg' || ft === 'non_veg' || ft === 'both') {
       options.push({ id: 'egg', label: 'Egg', icon: <span className="filter-dot filter-dot-egg" /> });
     }
     if (ft === 'non_veg' || ft === 'both') {

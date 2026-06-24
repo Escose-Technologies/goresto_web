@@ -23,6 +23,7 @@ enum DietaryType {
 enum FoodType {
   pure_veg
   egg
+  veg_egg
   non_veg
   both
 }

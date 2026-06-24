@@ -17,6 +17,7 @@ import { useToast } from '../ui/Toast';
 const FOOD_TYPES = [
   { value: 'pure_veg', label: 'Pure Veg', desc: 'Strictly vegetarian, no egg' },
   { value: 'egg', label: 'Egg', desc: 'Vegetarian & egg items' },
+  { value: 'veg_egg', label: 'Veg + Egg', desc: 'Vegetarian & egg items' },
   { value: 'non_veg', label: 'Non-Veg', desc: 'Includes non-veg, egg & veg' },
   { value: 'both', label: 'Veg & Non-Veg', desc: 'Serves all types' },
 ];

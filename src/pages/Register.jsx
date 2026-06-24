@@ -27,6 +27,7 @@ const CUISINE_OPTIONS = [
 const FOOD_TYPES = [
   { value: 'pure_veg', label: 'Pure Veg' },
   { value: 'egg', label: 'Egg' },
+  { value: 'veg_egg', label: 'Veg + Egg' },
   { value: 'non_veg', label: 'Non-Veg' },
   { value: 'both', label: 'Both (Veg & Non-Veg)' },
 ];

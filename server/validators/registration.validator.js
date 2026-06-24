@@ -8,5 +8,5 @@ export const registerSchema = z.object({
   restaurantName: z.string().min(1, 'Restaurant name is required').max(200).trim(),
   address: z.string().min(1, 'Address is required').max(500).trim(),
   cuisineTypes: z.array(z.string().trim()).max(20).default([]),
-  foodType: z.enum(['pure_veg', 'egg', 'non_veg', 'both']).default('both'),
+  foodType: z.enum(['pure_veg', 'egg', 'veg_egg', 'non_veg', 'both']).default('both'),
 });

@@ -102,7 +102,8 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
   const allowedDietaryTypes = (() => {
     switch (foodType) {
       case 'pure_veg': return ['veg'];
-      case 'egg': return ['veg', 'egg'];
+      case 'egg':
+      case 'veg_egg': return ['veg', 'egg'];
       case 'non_veg':
       case 'both':
       default: return ['veg', 'egg', 'non-veg'];
