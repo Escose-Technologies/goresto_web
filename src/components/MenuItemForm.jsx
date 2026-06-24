@@ -138,12 +138,16 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
     if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
     setIsUploading(true);
-    setImagePreview(URL.createObjectURL(file));
+    const blobUrl = URL.createObjectURL(file);
+    setImagePreview(blobUrl);
     try {
       const { url } = await uploadService.uploadImage(file);
+      URL.revokeObjectURL(blobUrl);
       setFormData((prev) => ({ ...prev, image: url }));
+      setImagePreview(url);
       setIsUploading(false);
     } catch (error) {
+      URL.revokeObjectURL(blobUrl);
       toast.error('Error uploading image: ' + error.message);
       setImagePreview(null);
       setIsUploading(false);

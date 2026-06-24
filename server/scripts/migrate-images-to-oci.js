@@ -18,11 +18,11 @@ async function migrate() {
 
   for (const item of items) {
     try {
-      const match = item.image.match(/^data:(image\/\w+);base64,(.+)$/);
+      const match = item.image.match(/^data:(image\/[^;]+);base64,(.+)$/);
       if (!match) { console.log(`  Skipping ${item.name}: unrecognized format`); continue; }
 
       const contentType = match[1];
-      const ext = contentType.split('/')[1] || 'jpg';
+      const ext = contentType.split('/')[1].replace(/\+.*/, '') || 'jpg';
       const buffer = Buffer.from(match[2], 'base64');
       const fileName = `menu-items/${item.id}.${ext}`;
 

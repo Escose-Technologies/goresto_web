@@ -17,7 +17,15 @@ const upload = multer({
   },
 });
 
-router.post('/image', upload.single('image'), asyncHandler(async (req, res) => {
+router.post('/image', (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+      return res.status(status).json({ success: false, error: { message: err.message } });
+    }
+    next();
+  });
+}, asyncHandler(async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, error: { message: 'No image file provided' } });
 
   const ext = req.file.originalname.split('.').pop() || 'jpg';
