@@ -80,10 +80,20 @@ export const formatUser = (user) => {
 
 export const formatRestaurant = (restaurant) => {
   if (!restaurant) return null;
+  const { _count, ...rest } = restaurant;
   return {
-    ...restaurant,
+    ...rest,
     createdAt: restaurant.createdAt?.toISOString(),
     updatedAt: restaurant.updatedAt?.toISOString(),
+    suspendedAt: restaurant.suspendedAt?.toISOString() || null,
+    ...(_count && {
+      counts: {
+        menuItems: _count.menuItems,
+        orders: _count.orders,
+        staff: _count.staff,
+        tables: _count.tables,
+      },
+    }),
   };
 };
 

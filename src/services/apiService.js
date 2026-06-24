@@ -245,10 +245,6 @@ export const restaurantService = {
   async activate(id) {
     return patch(`/restaurants/${id}/activate`, {});
   },
-
-  async delete(id) {
-    return del(`/restaurants/${id}`);
-  },
 };
 
 // ─── Menu Service ────────────────────────────────────────

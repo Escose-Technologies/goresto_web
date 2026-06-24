@@ -10,7 +10,8 @@ const RESTAURANT_LIST_SELECT = {
   phone: true, email: true, website: true, cuisineTypes: true,
   foodType: true, socialLinks: true, openingHours: true,
   discount: true, qrCode: true, adminId: true, status: true,
-  createdAt: true, updatedAt: true,
+  suspendedAt: true, createdAt: true, updatedAt: true,
+  _count: { select: { menuItems: true, orders: true, staff: true, tables: true } },
   // logo, coverImage: EXCLUDED — fetch via getById when needed
 };
 
@@ -87,7 +88,10 @@ export const setStatus = async (id, target) => {
     throw new ConflictError('Invalid status transition');
   }
 
-  const restaurant = await prisma.restaurant.update({ where: { id }, data: { status: target } });
+  const restaurant = await prisma.restaurant.update({
+    where: { id },
+    data: { status: target, suspendedAt: target === 'suspended' ? new Date() : null },
+  });
 
   if (target === 'suspended') {
     // Immediately kill the refresh path for all admins of this restaurant

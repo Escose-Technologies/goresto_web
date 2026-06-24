@@ -172,6 +172,7 @@ model Restaurant {
   discount     Json?
   qrCode       String?
   status       RestaurantStatus @default(pending)
+  suspendedAt  DateTime?
 
   adminId String?
   admin   User?   @relation("PrimaryAdmin", fields: [adminId], references: [id], onDelete: SetNull)

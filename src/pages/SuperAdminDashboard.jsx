@@ -9,12 +9,32 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
 import { restaurantService, userService, registrationService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+
+const fmtDate = (iso) => {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const DetailRow = ({ icon, children }) => (
+  <Stack direction="row" spacing={1} alignItems="center">
+    <Icon icon={icon} width={16} style={{ color: 'rgba(0,0,0,0.4)', flexShrink: 0 }} />
+    <Typography variant="body2" color="text.secondary" noWrap>{children}</Typography>
+  </Stack>
+);
+
+const Stat = ({ value, label }) => (
+  <Box sx={{ textAlign: 'center', flex: 1 }}>
+    <Typography variant="subtitle2" fontWeight={700} lineHeight={1.1}>{value ?? 0}</Typography>
+    <Typography variant="caption" color="text.secondary">{label}</Typography>
+  </Box>
+);
 
 export const SuperAdminDashboard = () => {
   const { logout } = useAuth();
@@ -82,23 +102,6 @@ export const SuperAdminDashboard = () => {
     setShowForm(true);
   };
 
-  const handleDelete = (id) => {
-    setConfirmModal({
-      open: true,
-      title: 'Delete Restaurant',
-      message: 'Are you sure you want to delete this restaurant? This cannot be undone.',
-      onConfirm: async () => {
-        closeConfirm();
-        try {
-          await restaurantService.delete(id);
-          await loadData();
-        } catch (error) {
-          toast.error('Error deleting restaurant: ' + error.message);
-        }
-      },
-    });
-  };
-
   const resetForm = () => {
     setFormData({ name: '', address: '', phone: '', adminId: '' });
     setEditingRestaurant(null);
@@ -141,8 +144,10 @@ export const SuperAdminDashboard = () => {
   const handleDeactivate = (id) => {
     setConfirmModal({
       open: true,
-      title: 'Deactivate Restaurant',
+      title: 'Suspend Restaurant',
       message: 'This will suspend the restaurant. The admin will be signed out shortly and the public menu will go offline until reactivated. Continue?',
+      confirmText: 'Suspend',
+      variant: 'warning',
       onConfirm: async () => {
         closeConfirm();
         try {
@@ -292,42 +297,90 @@ export const SuperAdminDashboard = () => {
           <Grid container spacing={2}>
             {restaurants.map((restaurant) => (
               <Grid key={restaurant.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Card sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Card
+                  sx={{
+                    p: 2.5,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    border: '1px solid',
+                    borderColor: restaurant.status === 'suspended' ? 'error.main' : 'divider',
+                    bgcolor: restaurant.status === 'suspended' ? 'rgba(211, 47, 47, 0.04)' : 'background.paper',
+                  }}
+                >
                   <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={1}>
                     <Box>
                       <Typography variant="subtitle1" fontWeight={700}>{restaurant.name}</Typography>
                       {restaurant.status && statusChip(restaurant.status)}
                     </Box>
-                    <Stack direction="row" spacing={0.5}>
-                      <IconButton size="small" onClick={() => handleEdit(restaurant)} title="Edit">
+                    <Tooltip title="Edit details">
+                      <IconButton size="small" onClick={() => handleEdit(restaurant)}>
                         <Icon icon="mdi:pencil" width={18} />
                       </IconButton>
-                      {restaurant.status === 'active' && (
-                        <IconButton size="small" color="warning" onClick={() => handleDeactivate(restaurant.id)} title="Deactivate">
-                          <Icon icon="mdi:pause-circle-outline" width={18} />
-                        </IconButton>
-                      )}
-                      {restaurant.status === 'suspended' && (
-                        <IconButton size="small" color="success" onClick={() => handleActivate(restaurant.id)} title="Reactivate">
-                          <Icon icon="mdi:play-circle-outline" width={18} />
-                        </IconButton>
-                      )}
-                      <IconButton size="small" color="error" onClick={() => handleDelete(restaurant.id)} title="Delete">
-                        <Icon icon="mdi:close" width={18} />
-                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                  <Stack spacing={0.75} sx={{ flex: 1, opacity: restaurant.status === 'suspended' ? 0.6 : 1 }}>
+                    <DetailRow icon="mdi:account-tie-outline">{getAdminName(restaurant.adminId)}</DetailRow>
+                    <DetailRow icon="mdi:map-marker-outline">{restaurant.address || '—'}</DetailRow>
+                    <DetailRow icon="mdi:phone-outline">{restaurant.phone || '—'}</DetailRow>
+                    <DetailRow icon="mdi:email-outline">{restaurant.email || '—'}</DetailRow>
+                    {restaurant.cuisineTypes?.length > 0 && (
+                      <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ pt: 0.25 }}>
+                        {restaurant.cuisineTypes.map((c) => (
+                          <Chip key={c} label={c} size="small" variant="outlined" />
+                        ))}
+                      </Stack>
+                    )}
+                  </Stack>
+
+                  {restaurant.counts && (
+                    <Stack
+                      direction="row"
+                      sx={{ mt: 1.5, py: 1, borderTop: '1px solid', borderColor: 'divider' }}
+                    >
+                      <Stat value={restaurant.counts.menuItems} label="Items" />
+                      <Stat value={restaurant.counts.orders} label="Orders" />
+                      <Stat value={restaurant.counts.staff} label="Staff" />
+                      <Stat value={restaurant.counts.tables} label="Tables" />
                     </Stack>
+                  )}
+
+                  <Stack spacing={0.25} sx={{ mt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Registered {fmtDate(restaurant.createdAt)}
+                    </Typography>
+                    {restaurant.status === 'suspended' && restaurant.suspendedAt && (
+                      <Typography variant="caption" color="error.main" fontWeight={600}>
+                        Suspended {fmtDate(restaurant.suspendedAt)}
+                      </Typography>
+                    )}
                   </Stack>
-                  <Stack spacing={0.5} sx={{ flex: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Address:</strong> {restaurant.address}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Phone:</strong> {restaurant.phone}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Admin:</strong> {getAdminName(restaurant.adminId)}
-                    </Typography>
-                  </Stack>
+                  {restaurant.status === 'active' && (
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                      sx={{ mt: 2 }}
+                      startIcon={<Icon icon="mdi:pause-circle-outline" width={18} />}
+                      onClick={() => handleDeactivate(restaurant.id)}
+                    >
+                      Suspend
+                    </Button>
+                  )}
+                  {restaurant.status === 'suspended' && (
+                    <Button
+                      fullWidth
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      sx={{ mt: 2 }}
+                      startIcon={<Icon icon="mdi:play-circle-outline" width={18} />}
+                      onClick={() => handleActivate(restaurant.id)}
+                    >
+                      Reactivate
+                    </Button>
+                  )}
                 </Card>
               </Grid>
             ))}
@@ -339,6 +392,8 @@ export const SuperAdminDashboard = () => {
         open={confirmModal.open}
         title={confirmModal.title}
         message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        variant={confirmModal.variant}
         onConfirm={confirmModal.onConfirm}
         onCancel={closeConfirm}
       />

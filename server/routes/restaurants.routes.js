@@ -18,6 +18,6 @@ router.post('/', authorize('superadmin'), validate(createRestaurantSchema), rest
 router.patch('/:id/deactivate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.deactivate);
 router.patch('/:id/activate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.activate);
 router.patch('/:id', authorize('restaurant_admin', 'superadmin'), validate(idParamSchema, 'params'), validate(updateRestaurantSchema), restaurantOwnership, restaurantsController.update);
-router.delete('/:id', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.remove);
+// No hard-delete route: restaurants are suspended (PATCH /:id/deactivate), never destroyed.
 
 export default router;
