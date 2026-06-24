@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
-import { restaurantService, menuService, settingsService, orderService, reviewService } from '../services/apiService';
+import { restaurantService, menuService, settingsService, orderService, reviewService, tableService } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { useToast } from '../components/ui/Toast';
@@ -33,6 +33,7 @@ export const PublicMenu = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
+  const [tableStatus, setTableStatus] = useState(null);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -143,6 +144,15 @@ export const PublicMenu = () => {
         setMenuItems(availableItems);
         const cats = await menuService.getCategories(restaurantId);
         setCategories(cats);
+
+        if (tableNumber) {
+          try {
+            const tableData = await tableService.getTableStatus(restaurantId, tableNumber);
+            if (tableData?.status && tableData.status !== 'available') {
+              setTableStatus(tableData.status);
+            }
+          } catch (_) {}
+        }
       }
     } catch (error) {
       if (error?.code === 'RESTAURANT_UNAVAILABLE' || error?.status === 403) {
@@ -449,28 +459,37 @@ export const PublicMenu = () => {
         <div className="restaurant-info">
           <h1>{settings?.restaurantName || restaurant.name}</h1>
           {tableNumber && (
-            <div className="table-badge">
+            <div className={`table-badge ${tableStatus ? `table-badge--${tableStatus}` : ''}`}>
               Table {tableNumber}
+              {tableStatus && (
+                <span className="table-status-label">
+                  {tableStatus === 'occupied' && '· Occupied'}
+                  {tableStatus === 'reserved' && '· Reserved'}
+                  {tableStatus === 'maintenance' && '· Under Maintenance'}
+                </span>
+              )}
             </div>
           )}
-          <button
-            className="check-status-btn"
-            onClick={() => setShowStatusCheck(true)}
-          >
-            <Icon icon="mdi:information-outline" width={18} />
-            Check Order Status
-          </button>
-
-          {settings?.allowCallStaff && tableNumber && (
+          <div className="header-action-row">
             <button
-              className={`call-staff-btn ${callStaffSent ? 'call-staff-sent' : ''}`}
-              onClick={handleCallStaff}
-              disabled={callStaffSent}
+              className="check-status-btn"
+              onClick={() => setShowStatusCheck(true)}
             >
-              <Icon icon="mdi:bell-outline" width={18} />
-              {callStaffSent ? 'Staff Notified!' : 'Call Staff'}
+              <Icon icon="mdi:information-outline" width={16} />
+              Check Order Status
             </button>
-          )}
+
+            {settings?.allowCallStaff && tableNumber && tableStatus !== 'maintenance' && (
+              <button
+                className={`call-staff-btn ${callStaffSent ? 'call-staff-sent' : ''}`}
+                onClick={handleCallStaff}
+                disabled={callStaffSent}
+              >
+                <Icon icon="mdi:bell-outline" width={16} />
+                {callStaffSent ? 'Notified!' : 'Call Staff'}
+              </button>
+            )}
+          </div>
 
           {settings?.discountText && (
             <div className="discount-banner">

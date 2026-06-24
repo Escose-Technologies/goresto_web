@@ -326,6 +326,10 @@ export const tableService = {
   async createTableData(restaurantId) {
     return { restaurantId, tables: [] };
   },
+
+  async getTableStatus(restaurantId, tableNumber) {
+    return get(`/public/restaurants/${restaurantId}/tables/${encodeURIComponent(tableNumber)}/status`);
+  },
 };
 
 // ─── Order Service ───────────────────────────────────────

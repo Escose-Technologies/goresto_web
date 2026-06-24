@@ -123,6 +123,21 @@ export const getCategories = asyncHandler(async (req, res) => {
   res.json({ success: true, data: merged });
 });
 
+export const getTableStatus = asyncHandler(async (req, res) => {
+  const { restaurantId, tableNumber } = req.params;
+  const table = await prisma.table.findFirst({
+    where: { restaurantId, number: tableNumber },
+    select: { status: true, number: true },
+  });
+  if (!table) {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: 'Table not found' },
+    });
+  }
+  res.json({ success: true, data: { status: table.status, number: table.number } });
+});
+
 export const verifyKitchenPin = asyncHandler(async (req, res) => {
   const { pin } = req.body;
   const { restaurantId } = req.params;

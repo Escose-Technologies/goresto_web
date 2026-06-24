@@ -31,6 +31,7 @@ router.post('/:restaurantId/orders', publicOrderLimiter, validate(restaurantIdPa
 router.get('/:restaurantId/orders/status', validate(restaurantIdParamSchema, 'params'), publicController.checkOrderStatus);
 router.post('/:restaurantId/reviews', validate(restaurantIdParamSchema, 'params'), validate(createReviewSchema), publicController.submitReview);
 router.get('/:restaurantId/menu-items/:menuItemId/reviews', validate(restaurantIdParamSchema, 'params'), publicController.getMenuItemReviews);
+router.get('/:restaurantId/tables/:tableNumber/status', validate(restaurantIdParamSchema, 'params'), publicController.getTableStatus);
 router.post('/:restaurantId/kitchen/verify-pin', validate(restaurantIdParamSchema, 'params'), publicController.verifyKitchenPin);
 
 export default router;
