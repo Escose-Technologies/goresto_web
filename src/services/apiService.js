@@ -477,7 +477,7 @@ export const uploadService = {
   async uploadImage(file) {
     const formData = new FormData();
     formData.append('image', file);
-    const token = localStorage.getItem('accessToken');
+    const token = accessToken;
     const res = await fetch(`${API_BASE}/upload/image`, {
       method: 'POST',
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
