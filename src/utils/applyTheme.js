@@ -19,30 +19,51 @@ const shade = (hex, amount) => {
 };
 
 /**
- * @param {string|null} primaryColor   admin-set primary hex (e.g. "#3385F0")
- * @param {string|null} secondaryColor admin-set secondary hex
- * @param {HTMLElement} [target]       element to scope vars to (default :root)
+ * @param {object} opts
+ * @param {string|null} opts.primaryColor
+ * @param {string|null} opts.secondaryColor
+ * @param {string|null} [opts.fontColor]
+ * @param {number|null} [opts.fontSize]
+ * @param {HTMLElement}  [opts.target]
  */
-export const applyRestaurantTheme = (primaryColor, secondaryColor, target) => {
-  const el = target || document.documentElement;
+export const applyRestaurantTheme = (primaryOrOpts, secondaryColor, target) => {
+  let primary, secondary, fontColor, fontSize, el;
 
-  // Missing/invalid → remove overrides so global.css defaults win.
-  if (!isHex(primaryColor)) {
+  if (typeof primaryOrOpts === 'object' && primaryOrOpts !== null) {
+    ({ primaryColor: primary, secondaryColor: secondary, fontColor, fontSize, target: el } = primaryOrOpts);
+    el = el || document.documentElement;
+  } else {
+    primary = primaryOrOpts;
+    secondary = secondaryColor;
+    el = target || document.documentElement;
+  }
+
+  if (!isHex(primary)) {
     [
       '--color-primary',
       '--color-primary-light',
       '--color-primary-dark',
       '--gradient-primary',
     ].forEach((v) => el.style.removeProperty(v));
-    return;
+  } else {
+    const light = isHex(secondary) ? secondary : shade(primary, 0.18);
+    const dark = shade(primary, -0.16);
+    el.style.setProperty('--color-primary', primary);
+    el.style.setProperty('--color-primary-light', light);
+    el.style.setProperty('--color-primary-dark', dark);
+    el.style.setProperty('--gradient-primary', `linear-gradient(180deg, ${light} 0%, ${primary} 100%)`);
   }
 
-  const primary = primaryColor;
-  const light = isHex(secondaryColor) ? secondaryColor : shade(primary, 0.18);
-  const dark = shade(primary, -0.16);
+  if (isHex(fontColor)) {
+    el.style.setProperty('--pm-font-color', fontColor);
+  } else {
+    el.style.removeProperty('--pm-font-color');
+  }
 
-  el.style.setProperty('--color-primary', primary);
-  el.style.setProperty('--color-primary-light', light);
-  el.style.setProperty('--color-primary-dark', dark);
-  el.style.setProperty('--gradient-primary', `linear-gradient(180deg, ${light} 0%, ${primary} 100%)`);
+  const fs = typeof fontSize === 'number' && fontSize >= 12 && fontSize <= 22 ? fontSize : null;
+  if (fs) {
+    el.style.setProperty('--pm-font-size', `${fs}px`);
+  } else {
+    el.style.removeProperty('--pm-font-size');
+  }
 };

@@ -1750,6 +1750,8 @@
 
 /* --- Theme Variables --- */
 .public-menu-container {
+  --pm-font-color: #1F2937;
+  --pm-font-size: 16px;
   --pm-bg: #F9FAFB;
   --pm-card-bg: #ffffff;
   --pm-text: #1F2937;
@@ -1809,6 +1811,20 @@
   flex-direction: column !important;
   gap: 0 !important;
   padding: 0 1rem;
+}
+
+/* --- Font customization from admin settings --- */
+.public-menu-container {
+  font-size: var(--pm-font-size, 16px);
+  color: var(--pm-font-color, #1F2937);
+}
+
+.swiggy-card-name,
+.swiggy-detail-name,
+.swiggy-card-price,
+.swiggy-detail-desc,
+.swiggy-card-desc {
+  color: var(--pm-font-color, inherit);
 }
 
 /* --- Swiggy Card (horizontal: text left, image right) --- */

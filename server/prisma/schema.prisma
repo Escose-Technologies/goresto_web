@@ -317,6 +317,8 @@ model Settings {
   closingTime            String?
   primaryColor           String?  @default("#7C3AED")
   secondaryColor         String?  @default("#9333EA")
+  fontColor              String?  @default("#1F2937")
+  fontSize               Int?    @default(16)
   timezone               String?  @default("Asia/Kolkata")
   taxRate                Float?   @default(0.08)
   serviceCharge          Float?   @default(0.1)

@@ -10,6 +10,8 @@ export const upsertSettingsSchema = z.object({
   closingTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM format').optional().nullable(),
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a hex color').optional().nullable(),
   secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a hex color').optional().nullable(),
+  fontColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a hex color').optional().nullable(),
+  fontSize: z.number().int().min(12).max(22).optional().nullable(),
   timezone: z.string().max(100).optional().nullable(),
   taxRate: z.number().min(0).max(1).optional().nullable(),
   serviceCharge: z.number().min(0).max(1).optional().nullable(),

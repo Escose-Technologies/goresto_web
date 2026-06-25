@@ -138,7 +138,12 @@ export const PublicMenu = () => {
 
         const restaurantSettings = await publicService.getSettings(restaurantId);
         setSettings(restaurantSettings);
-        applyRestaurantTheme(restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor);
+        applyRestaurantTheme({
+          primaryColor: restaurantSettings?.primaryColor,
+          secondaryColor: restaurantSettings?.secondaryColor,
+          fontColor: restaurantSettings?.fontColor,
+          fontSize: restaurantSettings?.fontSize,
+        });
 
         const items = await publicService.getMenuItems(restaurantId);
         const availableItems = items.filter(item => item.available);

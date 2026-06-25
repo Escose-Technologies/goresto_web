@@ -12,6 +12,8 @@ import Tabs from '@mui/material/Tabs';
 import Tooltip from '@mui/material/Tooltip';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Slider from '@mui/material/Slider';
+import Divider from '@mui/material/Divider';
 import { Icon } from '@iconify/react';
 import { restaurantService, settingsService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
@@ -42,7 +44,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
   const defaults = {
     restaurantName: '', address: '', phone: '', email: '', currency: 'INR',
     openingTime: '09:00', closingTime: '22:00', primaryColor: '#3385F0',
-    secondaryColor: '#589BF3', timezone: 'Asia/Kolkata', taxRate: 0.08,
+    secondaryColor: '#589BF3', fontColor: '#1F2937', fontSize: 16, timezone: 'Asia/Kolkata', taxRate: 0.08,
     serviceCharge: 0.1, allowOnlineOrders: true, allowTableReservations: true,
     allowCallStaff: true, notificationEmail: '', discountText: '', kitchenPin: '',
     gstin: '', gstScheme: 'regular', gstRate: 5, fssaiNumber: '',
@@ -77,6 +79,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
     billPrefix: (v) => (/^[A-Z0-9]{1,5}$/.test(v || '') ? '' : 'Must be 1-5 uppercase alphanumeric characters'),
     primaryColor: (v) => (!v || /^#[0-9A-Fa-f]{6}$/.test(v) ? '' : 'Must be a hex colour, e.g. #3385F0'),
     secondaryColor: (v) => (!v || /^#[0-9A-Fa-f]{6}$/.test(v) ? '' : 'Must be a hex colour, e.g. #589BF3'),
+    fontColor: (v) => (!v || /^#[0-9A-Fa-f]{6}$/.test(v) ? '' : 'Must be a hex colour, e.g. #1F2937'),
     kitchenPin: (v) => (!v || /^\d{4}$/.test(v) ? '' : 'Must be exactly 4 digits'),
     taxRate: (v) => (v === '' || v == null || (Number(v) >= 0 && Number(v) <= 1) ? '' : 'Enter a fraction between 0 and 1'),
     serviceCharge: (v) => (v === '' || v == null || (Number(v) >= 0 && Number(v) <= 1) ? '' : 'Enter a fraction between 0 and 1'),
@@ -500,19 +503,40 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
 
           {/* Theme & Colors */}
           {active === 'themeColors' && (
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography variant="body2" fontWeight={500} mb={1}>Primary Color</Typography>
+                <Typography variant="body2" fontWeight={500} mb={0.25}>Brand Color</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Buttons, links, and accent elements</Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <input type="color" value={/^#[0-9A-Fa-f]{6}$/.test(formData.primaryColor || '') ? formData.primaryColor : '#3385F0'} onChange={(e) => { setFormData((prev) => ({ ...prev, primaryColor: e.target.value })); markTouched('primaryColor')(); }} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
                   <TextField size="small" value={formData.primaryColor} onChange={handleChange('primaryColor')} onBlur={markTouched('primaryColor')} error={!!fieldError('primaryColor')} helperText={fieldError('primaryColor') || ''} sx={{ width: 140 }} />
                 </Stack>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography variant="body2" fontWeight={500} mb={1}>Secondary Color</Typography>
+                <Typography variant="body2" fontWeight={500} mb={0.25}>Brand Color (Light)</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Gradients, hover states, and highlights</Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <input type="color" value={/^#[0-9A-Fa-f]{6}$/.test(formData.secondaryColor || '') ? formData.secondaryColor : '#589BF3'} onChange={(e) => { setFormData((prev) => ({ ...prev, secondaryColor: e.target.value })); markTouched('secondaryColor')(); }} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
                   <TextField size="small" value={formData.secondaryColor} onChange={handleChange('secondaryColor')} onBlur={markTouched('secondaryColor')} error={!!fieldError('secondaryColor')} helperText={fieldError('secondaryColor') || ''} sx={{ width: 140 }} />
+                </Stack>
+              </Grid>
+              <Grid size={12}><Divider /></Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="body2" fontWeight={500} mb={0.25}>Menu Font Color</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Text color on the public menu page</Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <input type="color" value={/^#[0-9A-Fa-f]{6}$/.test(formData.fontColor || '') ? formData.fontColor : '#1F2937'} onChange={(e) => { setFormData((prev) => ({ ...prev, fontColor: e.target.value })); markTouched('fontColor')(); }} style={{ width: 44, height: 44, border: 'none', padding: 0, cursor: 'pointer', borderRadius: 8 }} />
+                  <TextField size="small" value={formData.fontColor || '#1F2937'} onChange={handleChange('fontColor')} onBlur={markTouched('fontColor')} error={!!fieldError('fontColor')} helperText={fieldError('fontColor') || ''} sx={{ width: 140 }} />
+                </Stack>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography variant="body2" fontWeight={500} mb={0.25}>Menu Font Size</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>Base text size on the public menu (12–22px)</Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="caption">12</Typography>
+                  <Slider value={formData.fontSize || 16} min={12} max={22} step={1} onChange={(_, v) => { setFormData((prev) => ({ ...prev, fontSize: v })); markTouched('fontSize')(); }} size="small" sx={{ flex: 1 }} valueLabelDisplay="auto" />
+                  <Typography variant="caption">22</Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{ minWidth: 40, textAlign: 'center' }}>{formData.fontSize || 16}px</Typography>
                 </Stack>
               </Grid>
             </Grid>
