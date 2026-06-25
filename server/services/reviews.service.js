@@ -23,36 +23,40 @@ export const getByMenuItem = async (restaurantId, menuItemId) => {
 };
 
 export const create = async (restaurantId, data) => {
-  // Verify menu item exists in this restaurant
-  const menuItem = await prisma.menuItem.findFirst({
-    where: { id: data.menuItemId, restaurantId },
+  if (data.menuItemId) {
+    const menuItem = await prisma.menuItem.findFirst({
+      where: { id: data.menuItemId, restaurantId },
+    });
+    if (!menuItem) throw new NotFoundError('Menu item');
+
+    const review = await prisma.$transaction(async (tx) => {
+      const newReview = await tx.review.create({
+        data: { ...data, restaurantId },
+      });
+
+      const agg = await tx.review.aggregate({
+        where: { menuItemId: data.menuItemId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+
+      await tx.menuItem.update({
+        where: { id: data.menuItemId },
+        data: {
+          rating: Math.round((agg._avg.rating || 0) * 10) / 10,
+          reviewCount: agg._count.rating || 0,
+        },
+      });
+
+      return newReview;
+    });
+
+    return formatReview(review);
+  }
+
+  const review = await prisma.review.create({
+    data: { ...data, restaurantId },
   });
-  if (!menuItem) throw new NotFoundError('Menu item');
-
-  // Create review and update menu item rating in a transaction
-  const review = await prisma.$transaction(async (tx) => {
-    const newReview = await tx.review.create({
-      data: { ...data, restaurantId },
-    });
-
-    // Recalculate rating
-    const agg = await tx.review.aggregate({
-      where: { menuItemId: data.menuItemId },
-      _avg: { rating: true },
-      _count: { rating: true },
-    });
-
-    await tx.menuItem.update({
-      where: { id: data.menuItemId },
-      data: {
-        rating: Math.round((agg._avg.rating || 0) * 10) / 10,
-        reviewCount: agg._count.rating || 0,
-      },
-    });
-
-    return newReview;
-  });
-
   return formatReview(review);
 };
 

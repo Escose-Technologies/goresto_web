@@ -17,7 +17,6 @@ import { BottomSheet } from '../components/ui/BottomSheet';
 import { DietaryBadge, DietaryLabels, AllergenLabels } from '../components/menu/DietaryBadges';
 import { SpiceIndicator } from '../components/menu/SpiceLevel';
 import { RatingDisplay } from '../components/menu/Rating';
-import { ReviewSection } from '../components/menu/ReviewSection';
 import './PublicMenu.css';
 
 export const PublicMenu = () => {
@@ -50,7 +49,10 @@ export const PublicMenu = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
-  const [itemReviews, setItemReviews] = useState({});
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [lastOrderCustomer, setLastOrderCustomer] = useState({ name: '', mobile: '' });
 
   const { joinPublic, onOrderUpdated, callStaff } = useSocket();
 
@@ -167,16 +169,6 @@ export const PublicMenu = () => {
       console.error('Error loading menu data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadItemReviews = async (menuItemId) => {
-    if (itemReviews[menuItemId]) return;
-    try {
-      const reviews = await publicService.getReviewsByMenuItem(restaurantId, menuItemId);
-      setItemReviews(prev => ({ ...prev, [menuItemId]: reviews }));
-    } catch (error) {
-      console.error('Error loading reviews:', error);
     }
   };
 
@@ -307,15 +299,15 @@ export const PublicMenu = () => {
       };
 
       await publicService.placeOrder(restaurantId, orderData);
+      setLastOrderCustomer({ name: customerName.trim(), mobile: customerMobile.trim() });
       setCart([]);
       setShowCart(false);
       setCustomerName('');
       setCustomerMobile('');
       setOrderPlaced(true);
-
-      setTimeout(() => {
-        setOrderPlaced(false);
-      }, 5000);
+      setReviewRating(0);
+      setReviewComment('');
+      setReviewSubmitted(false);
     } catch (error) {
       console.error('Error placing order:', error);
       toast.error('Failed to place order. Please try again.');
@@ -347,17 +339,18 @@ export const PublicMenu = () => {
     }
   };
 
-  const handleSubmitReview = async (reviewData) => {
+  const handleSubmitReview = async () => {
+    if (!reviewRating) return;
     try {
-      await publicService.submitReview(restaurantId, reviewData);
-      // Reload reviews for this item
-      const reviews = await publicService.getReviewsByMenuItem(restaurantId, reviewData.menuItemId);
-      setItemReviews(prev => ({ ...prev, [reviewData.menuItemId]: reviews }));
-      // Reload menu to get updated rating
-      await loadMenuData();
+      await publicService.submitReview(restaurantId, {
+        customerName: lastOrderCustomer.name || 'Guest',
+        customerMobile: lastOrderCustomer.mobile || null,
+        rating: reviewRating,
+        comment: reviewComment || '',
+      });
+      setReviewSubmitted(true);
     } catch (error) {
       console.error('Error submitting review:', error);
-      throw error;
     }
   };
 
@@ -406,7 +399,6 @@ export const PublicMenu = () => {
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
-    loadItemReviews(item.id);
   };
 
   if (loading) {
@@ -443,9 +435,56 @@ export const PublicMenu = () => {
   return (
     <div className="public-menu-container bare-controls">
       {orderPlaced && (
-        <div className="order-success-banner">
-          <Icon icon="mdi:check-circle" width={20} />
-          <span>Order placed successfully! The restaurant will process your order shortly.</span>
+        <div className="post-order-overlay">
+          <div className="post-order-card">
+            <div className="post-order-success">
+              <Icon icon="mdi:check-circle" width={32} />
+              <h3>Order placed successfully!</h3>
+              <p>The restaurant will process your order shortly.</p>
+            </div>
+
+            {!reviewSubmitted ? (
+              <div className="post-order-review">
+                <h4>How was your experience?</h4>
+                <div className="review-stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`review-star ${star <= reviewRating ? 'active' : ''}`}
+                      onClick={() => setReviewRating(star)}
+                    >
+                      <Icon icon={star <= reviewRating ? 'mdi:star' : 'mdi:star-outline'} width={36} />
+                    </button>
+                  ))}
+                </div>
+                {reviewRating > 0 && (
+                  <>
+                    <input
+                      type="text"
+                      className="review-comment-input"
+                      placeholder="Tell us more... (optional)"
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                    />
+                    <button className="review-submit-btn" onClick={handleSubmitReview}>
+                      Submit Review
+                    </button>
+                  </>
+                )}
+                <button className="review-skip-btn" onClick={() => setOrderPlaced(false)}>
+                  Skip
+                </button>
+              </div>
+            ) : (
+              <div className="post-order-thanks">
+                <Icon icon="mdi:heart" width={24} />
+                <p>Thank you for your feedback!</p>
+                <button className="review-skip-btn" onClick={() => setOrderPlaced(false)}>
+                  Back to Menu
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -763,16 +802,6 @@ export const PublicMenu = () => {
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
-              </div>
-
-              {/* Reviews Section */}
-              <div className="item-reviews-section">
-                <h3>Reviews</h3>
-                <ReviewSection
-                  reviews={itemReviews[selectedItem.id] || []}
-                  menuItemId={selectedItem.id}
-                  onSubmitReview={handleSubmitReview}
-                />
               </div>
 
               <div className="swiggy-detail-footer">

@@ -354,14 +354,15 @@ model Settings {
 }
 
 model Review {
-  id           String     @id @default(cuid())
-  restaurantId String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  menuItemId   String
-  menuItem     MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  customerName String
-  rating       Int
-  comment      String?
+  id             String     @id @default(cuid())
+  restaurantId   String
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  menuItemId     String?
+  menuItem       MenuItem?  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  customerName   String
+  customerMobile String?
+  rating         Int
+  comment        String?
 
   createdAt DateTime @default(now())
 
