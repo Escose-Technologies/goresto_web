@@ -6,17 +6,19 @@ const noop = (_req, _res, next) => next();
 
 export const generalLimiter = isDev ? noop : rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
-  max: env.RATE_LIMIT_MAX_REQUESTS,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => `admin:${req.ip}`,
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests, please try again later' } },
 });
 
 export const authLimiter = isDev ? noop : rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
-  max: env.AUTH_RATE_LIMIT_MAX,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => `auth:${req.ip}`,
   message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many login attempts, please try again later' } },
 });
 
