@@ -40,6 +40,7 @@ export const PublicMenu = () => {
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
   const [showStatusCheck, setShowStatusCheck] = useState(false);
+  const [cookingRequest, setCookingRequest] = useState('');
   const [statusCheckName, setStatusCheckName] = useState('');
   const [statusCheckMobile, setStatusCheckMobile] = useState('');
   const [customerOrders, setCustomerOrders] = useState([]);
@@ -569,14 +570,17 @@ export const PublicMenu = () => {
         />
       </div>
 
-      {/* Cart Button */}
+      {/* Swiggy-style Cart Bar */}
       {cart.length > 0 && (
-        <div className="cart-button-container">
-          <button className="cart-button" onClick={() => setShowCart(true)}>
-            <Icon icon="mdi:cart-outline" width={24} />
-            <span>Cart ({getCartItemCount()})</span>
-            <span className="cart-total">{getCurrencySymbol()}{getCartTotal().toFixed(2)}</span>
-          </button>
+        <div className="swiggy-cart-bar" onClick={() => setShowCart(true)}>
+          <div className="swiggy-cart-bar-left">
+            <Icon icon="mdi:silverware-fork-knife" width={20} />
+            <span>{getCartItemCount()} item{getCartItemCount() > 1 ? 's' : ''} added</span>
+          </div>
+          <div className="swiggy-cart-bar-right">
+            <span>Continue</span>
+            <Icon icon="mdi:chevron-right" width={20} />
+          </div>
         </div>
       )}
 
@@ -630,81 +634,57 @@ export const PublicMenu = () => {
         ) : (
           <div className="menu-items-list">
             {filteredItems.map((item) => {
-              const cartItem = cart.find(cartItem => cartItem.id === item.id);
+              const cartItem = cart.find(ci => ci.id === item.id);
               const itemQuantity = cartItem ? cartItem.quantity : 0;
+              const hasPopular = item.dietary?.labels?.includes('popular');
+              const hasNew = item.dietary?.labels?.includes('new');
 
               return (
-                <div
-                  key={item.id}
-                  className="public-menu-item"
-                  onClick={() => handleItemClick(item)}
-                >
-                  <div className="public-menu-item-image">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} loading="lazy" />
-                    ) : (
-                      <div className="public-menu-item-image-placeholder">
-                        <Icon icon="mdi:silverware-fork-knife" width={24} />
+                <div key={item.id} className="swiggy-card" onClick={() => handleItemClick(item)}>
+                  <div className="swiggy-card-info">
+                    <DietaryBadge type={item.dietary?.type} size="small" />
+                    <h3 className="swiggy-card-name">{item.name}</h3>
+                    {(hasPopular || hasNew) && (
+                      <div className="swiggy-card-badges">
+                        {hasPopular && <span className="swiggy-badge swiggy-badge--popular"><Icon icon="mdi:thumb-up" width={12} /> Popular</span>}
+                        {hasNew && <span className="swiggy-badge swiggy-badge--new"><Icon icon="mdi:sparkles" width={12} /> New</span>}
+                      </div>
+                    )}
+                    <span className="swiggy-card-price">{getCurrencySymbol()}{item.price.toFixed(2)}</span>
+                    {item.description && (
+                      <p className="swiggy-card-desc">
+                        {item.description.length > 80 ? `${item.description.slice(0, 80)}...` : item.description}
+                        {item.description.length > 80 && (
+                          <span className="swiggy-more" onClick={(e) => { e.stopPropagation(); handleItemClick(item); }}> more</span>
+                        )}
+                      </p>
+                    )}
+                    {item.rating > 0 && (
+                      <div className="swiggy-card-rating">
+                        <RatingDisplay value={item.rating} reviewCount={item.reviewCount} />
                       </div>
                     )}
                   </div>
-                  <div className="public-menu-item-details">
-                    <div className="public-menu-item-header">
-                      <div className="item-title-row">
-                        <DietaryBadge type={item.dietary?.type} size="small" />
-                        <h3>{item.name}</h3>
-                      </div>
-                      <span className="public-menu-item-price">
-                        {getCurrencySymbol()}{item.price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="item-meta">
-                      {item.rating > 0 && (
-                        <RatingDisplay value={item.rating} reviewCount={item.reviewCount} />
-                      )}
-                      {item.dietary?.spiceLevel > 0 && (
-                        <SpiceIndicator level={item.dietary.spiceLevel} />
+                  <div className="swiggy-card-image-wrap">
+                    <div className="swiggy-card-image">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} loading="lazy" />
+                      ) : (
+                        <div className="swiggy-card-image-placeholder">
+                          <Icon icon="mdi:silverware-fork-knife" width={28} />
+                        </div>
                       )}
                     </div>
-
-                    {item.dietary?.labels?.length > 0 && (
-                      <DietaryLabels labels={item.dietary.labels} size="small" />
-                    )}
-
-                    {item.description && (
-                      <p className="public-menu-item-description">{item.description}</p>
-                    )}
-
-                    <div
-                      className="public-menu-item-actions"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="swiggy-card-action" onClick={(e) => e.stopPropagation()}>
                       {itemQuantity > 0 ? (
-                        <div className="item-quantity-controls">
-                          <button
-                            className="item-qty-btn"
-                            onClick={() => updateCartQuantity(item.id, -1)}
-                            aria-label="Decrease quantity"
-                          >
-                            -
-                          </button>
-                          <span className="item-qty-display">{itemQuantity}</span>
-                          <button
-                            className="item-qty-btn"
-                            onClick={() => updateCartQuantity(item.id, 1)}
-                            aria-label="Increase quantity"
-                          >
-                            +
-                          </button>
+                        <div className="swiggy-qty">
+                          <button onClick={() => updateCartQuantity(item.id, -1)}>−</button>
+                          <span>{itemQuantity}</span>
+                          <button onClick={() => updateCartQuantity(item.id, 1)}>+</button>
                         </div>
                       ) : (
-                        <button
-                          className="btn-add-to-cart-inline"
-                          onClick={() => addToCart(item)}
-                        >
-                          <Icon icon="mdi:plus" width={18} />
-                          Add
+                        <button className="swiggy-add-btn" onClick={() => addToCart(item)}>
+                          ADD <Icon icon="mdi:plus" width={14} />
                         </button>
                       )}
                     </div>
@@ -719,72 +699,95 @@ export const PublicMenu = () => {
       {/* Item Detail Bottom Sheet */}
       <BottomSheet
         isOpen={!!selectedItem}
-        onClose={() => setSelectedItem(null)}
-        title={selectedItem?.name}
+        onClose={() => { setSelectedItem(null); setCookingRequest(''); }}
+        title=""
       >
-        {selectedItem && (
-          <div className="item-detail-content">
-            <div className="item-detail-image">
-              {selectedItem.image ? (
-                <img src={selectedItem.image} alt={selectedItem.name} />
-              ) : (
-                <div className="item-detail-image-placeholder">
-                  <Icon icon="mdi:silverware-fork-knife" width={32} />
+        {selectedItem && (() => {
+          const detailCartItem = cart.find(ci => ci.id === selectedItem.id);
+          const detailQty = detailCartItem ? detailCartItem.quantity : 0;
+          return (
+            <div className="swiggy-detail">
+              <div className="swiggy-detail-image">
+                {selectedItem.image ? (
+                  <img src={selectedItem.image} alt={selectedItem.name} />
+                ) : (
+                  <div className="swiggy-detail-image-placeholder">
+                    <Icon icon="mdi:silverware-fork-knife" width={40} />
+                  </div>
+                )}
+              </div>
+
+              <div className="swiggy-detail-body">
+                <DietaryBadge type={selectedItem.dietary?.type} size="small" />
+                <div className="swiggy-detail-title-row">
+                  <h2 className="swiggy-detail-name">{selectedItem.name}</h2>
                 </div>
-              )}
-            </div>
 
-            <div className="item-detail-info">
-              <div className="item-detail-header">
-                <DietaryBadge type={selectedItem.dietary?.type} showLabel />
-                <span className="item-detail-price">
-                  {getCurrencySymbol()}{selectedItem.price.toFixed(2)}
-                </span>
-              </div>
+                {selectedItem.dietary?.labels?.length > 0 && (
+                  <DietaryLabels labels={selectedItem.dietary.labels} />
+                )}
 
-              <div className="item-detail-meta">
                 {selectedItem.rating > 0 && (
-                  <RatingDisplay value={selectedItem.rating} reviewCount={selectedItem.reviewCount} />
+                  <div className="swiggy-detail-meta">
+                    <RatingDisplay value={selectedItem.rating} reviewCount={selectedItem.reviewCount} />
+                    {selectedItem.dietary?.spiceLevel > 0 && (
+                      <SpiceIndicator level={selectedItem.dietary.spiceLevel} />
+                    )}
+                  </div>
                 )}
-                {selectedItem.dietary?.spiceLevel > 0 && (
-                  <SpiceIndicator level={selectedItem.dietary.spiceLevel} />
+
+                {selectedItem.description && (
+                  <p className="swiggy-detail-desc">{selectedItem.description}</p>
                 )}
+
+                {selectedItem.dietary?.allergens?.length > 0 && (
+                  <AllergenLabels allergens={selectedItem.dietary.allergens} />
+                )}
+
+                <div className="swiggy-cooking-request">
+                  <div className="swiggy-cooking-request-header">
+                    <span>Add a cooking request (optional)</span>
+                    <Icon icon="mdi:information-outline" width={16} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. Don't make it too spicy"
+                    value={cookingRequest}
+                    onChange={(e) => setCookingRequest(e.target.value)}
+                    className="swiggy-cooking-input"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
               </div>
 
-              {selectedItem.dietary?.labels?.length > 0 && (
-                <DietaryLabels labels={selectedItem.dietary.labels} />
-              )}
+              {/* Reviews Section */}
+              <div className="item-reviews-section">
+                <h3>Reviews</h3>
+                <ReviewSection
+                  reviews={itemReviews[selectedItem.id] || []}
+                  menuItemId={selectedItem.id}
+                  onSubmitReview={handleSubmitReview}
+                />
+              </div>
 
-              {selectedItem.description && (
-                <p className="item-detail-description">{selectedItem.description}</p>
-              )}
-
-              {selectedItem.dietary?.allergens?.length > 0 && (
-                <AllergenLabels allergens={selectedItem.dietary.allergens} />
-              )}
-
-              <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                onClick={() => addToCart(selectedItem)}
-                sx={{ mt: 2 }}
-              >
-                Add to Cart - {getCurrencySymbol()}{selectedItem.price.toFixed(2)}
-              </Button>
+              <div className="swiggy-detail-footer">
+                {detailQty > 0 ? (
+                  <div className="swiggy-detail-qty">
+                    <button onClick={() => updateCartQuantity(selectedItem.id, -1)}>−</button>
+                    <span>{detailQty}</span>
+                    <button onClick={() => updateCartQuantity(selectedItem.id, 1)}>+</button>
+                  </div>
+                ) : null}
+                <button
+                  className="swiggy-detail-add-btn"
+                  onClick={() => { addToCart(selectedItem); }}
+                >
+                  {detailQty > 0 ? `Update item` : `Add item`} - {getCurrencySymbol()}{(selectedItem.price * Math.max(detailQty, 1)).toFixed(2)}
+                </button>
+              </div>
             </div>
-
-            {/* Reviews Section */}
-            <div className="item-reviews-section">
-              <h3>Reviews</h3>
-              <ReviewSection
-                reviews={itemReviews[selectedItem.id] || []}
-                menuItemId={selectedItem.id}
-                onSubmitReview={handleSubmitReview}
-              />
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </BottomSheet>
 
       {/* Cart Bottom Sheet */}

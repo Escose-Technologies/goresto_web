@@ -1743,3 +1743,554 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* =================================
+   SWIGGY-STYLE REDESIGN
+   ================================= */
+
+/* --- Theme Variables --- */
+.public-menu-container {
+  --pm-bg: #F9FAFB;
+  --pm-card-bg: #ffffff;
+  --pm-text: #1F2937;
+  --pm-text-secondary: #6B7280;
+  --pm-text-muted: #9CA3AF;
+  --pm-border: #E5E7EB;
+  --pm-divider: #F3F4F6;
+  --pm-badge-popular-bg: #ECFDF5;
+  --pm-badge-popular-text: #059669;
+  --pm-badge-new-bg: #FEF3C7;
+  --pm-badge-new-text: #D97706;
+  --pm-add-btn-bg: #ffffff;
+  --pm-add-btn-text: #059669;
+  --pm-add-btn-border: #059669;
+  --pm-qty-bg: #059669;
+  --pm-qty-text: #ffffff;
+  --pm-cart-bar-bg: #059669;
+  --pm-cart-bar-text: #ffffff;
+  --pm-detail-footer-bg: #ffffff;
+  --pm-input-bg: #F9FAFB;
+  --pm-placeholder-bg: #F3F4F6;
+  --pm-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .public-menu-container {
+    --pm-bg: #1a1a1a;
+    --pm-card-bg: #262626;
+    --pm-text: #F3F4F6;
+    --pm-text-secondary: #9CA3AF;
+    --pm-text-muted: #6B7280;
+    --pm-border: #404040;
+    --pm-divider: #333333;
+    --pm-badge-popular-bg: #064E3B;
+    --pm-badge-popular-text: #6EE7B7;
+    --pm-badge-new-bg: #78350F;
+    --pm-badge-new-text: #FCD34D;
+    --pm-add-btn-bg: #262626;
+    --pm-add-btn-text: #6EE7B7;
+    --pm-add-btn-border: #059669;
+    --pm-qty-bg: #059669;
+    --pm-qty-text: #ffffff;
+    --pm-cart-bar-bg: #E8596B;
+    --pm-cart-bar-text: #ffffff;
+    --pm-detail-footer-bg: #262626;
+    --pm-input-bg: #333333;
+    --pm-placeholder-bg: #333333;
+    --pm-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    background: var(--pm-bg) !important;
+    color: var(--pm-text);
+  }
+}
+
+/* --- Override old card styles --- */
+.menu-items-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  padding: 0 1rem;
+}
+
+/* --- Swiggy Card (horizontal: text left, image right) --- */
+.swiggy-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--pm-divider);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.swiggy-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.swiggy-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--pm-text);
+  margin: 0.125rem 0 0;
+  line-height: 1.3;
+}
+
+.swiggy-card-badges {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  margin-top: 0.125rem;
+}
+
+.swiggy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.swiggy-badge--popular {
+  background: var(--pm-badge-popular-bg);
+  color: var(--pm-badge-popular-text);
+}
+
+.swiggy-badge--new {
+  background: var(--pm-badge-new-bg);
+  color: var(--pm-badge-new-text);
+}
+
+.swiggy-card-price {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--pm-text);
+  margin-top: 0.125rem;
+}
+
+.swiggy-card-desc {
+  font-size: 0.8125rem;
+  color: var(--pm-text-secondary);
+  line-height: 1.4;
+  margin: 0.25rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.swiggy-more {
+  color: var(--pm-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.swiggy-card-rating {
+  margin-top: 0.25rem;
+}
+
+/* --- Card Image + Action --- */
+.swiggy-card-image-wrap {
+  flex-shrink: 0;
+  width: 136px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.swiggy-card-image {
+  width: 136px;
+  height: 136px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--pm-placeholder-bg);
+}
+
+.swiggy-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swiggy-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pm-text-muted);
+}
+
+.swiggy-card-action {
+  margin-top: -1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.swiggy-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  background: var(--pm-add-btn-bg);
+  color: var(--pm-add-btn-text);
+  border: 1.5px solid var(--pm-add-btn-border);
+  border-radius: 0.5rem;
+  padding: 0.375rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  box-shadow: var(--pm-shadow);
+}
+
+.swiggy-qty {
+  display: inline-flex;
+  align-items: center;
+  background: var(--pm-qty-bg);
+  color: var(--pm-qty-text);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: var(--pm-shadow);
+}
+
+.swiggy-qty button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swiggy-qty span {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+/* --- Swiggy Cart Bar --- */
+.swiggy-cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--pm-cart-bar-bg);
+  color: var(--pm-cart-bar-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  padding-bottom: calc(0.875rem + env(safe-area-inset-bottom, 0px));
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.swiggy-cart-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.swiggy-cart-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+/* --- Swiggy Detail Bottom Sheet --- */
+.swiggy-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.swiggy-detail-image {
+  width: 100%;
+  height: clamp(200px, 50vw, 320px);
+  overflow: hidden;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: var(--pm-placeholder-bg);
+}
+
+.swiggy-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swiggy-detail-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pm-text-muted);
+}
+
+.swiggy-detail-body {
+  padding: 1rem 1.25rem;
+}
+
+.swiggy-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+
+.swiggy-detail-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pm-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.swiggy-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.swiggy-detail-desc {
+  font-size: 0.875rem;
+  color: var(--pm-text-secondary);
+  line-height: 1.6;
+  margin: 0.75rem 0 0;
+}
+
+/* --- Cooking Request --- */
+.swiggy-cooking-request {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pm-divider);
+}
+
+.swiggy-cooking-request-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pm-text);
+  margin-bottom: 0.5rem;
+}
+
+.swiggy-cooking-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--pm-border);
+  border-radius: 0.5rem;
+  background: var(--pm-input-bg);
+  color: var(--pm-text);
+  font-size: 0.8125rem;
+}
+
+.swiggy-cooking-input::placeholder {
+  color: var(--pm-text-muted);
+}
+
+/* --- Detail Footer (sticky CTA) --- */
+.swiggy-detail-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--pm-detail-footer-bg);
+  padding: 0.75rem 1.25rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid var(--pm-divider);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+}
+
+.swiggy-detail-qty {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--pm-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.swiggy-detail-qty button {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--pm-text);
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swiggy-detail-qty span {
+  min-width: 1.75rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--pm-text);
+}
+
+.swiggy-detail-add-btn {
+  flex: 1;
+  background: var(--pm-cart-bar-bg);
+  color: var(--pm-cart-bar-text);
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* --- Dark theme overrides for existing components --- */
+@media (prefers-color-scheme: dark) {
+  .public-menu-container {
+    background: var(--pm-bg) !important;
+  }
+
+  .public-menu-container .search-bar-input {
+    background: var(--pm-card-bg);
+    border-color: var(--pm-border);
+    color: var(--pm-text);
+  }
+
+  .public-menu-container .search-bar-icon {
+    color: var(--pm-text-muted);
+  }
+
+  .public-menu-container .MuiChip-root {
+    background: var(--pm-card-bg);
+    color: var(--pm-text);
+    border-color: var(--pm-border);
+  }
+
+  .public-menu-container .MuiChip-root.MuiChip-colorPrimary {
+    background: var(--pm-qty-bg);
+    color: #fff;
+  }
+
+  .public-menu-container .restaurant-header,
+  .public-menu-container .restaurant-info-section {
+    color: var(--pm-text);
+  }
+
+  .public-menu-container h1,
+  .public-menu-container h2,
+  .public-menu-container h3 {
+    color: var(--pm-text);
+  }
+
+  .public-menu-container .table-badge {
+    background: var(--pm-card-bg);
+    color: var(--pm-text);
+  }
+
+  .public-menu-container .contact-detail {
+    color: var(--pm-text-secondary);
+  }
+
+  .public-menu-container .filter-pill {
+    background: var(--pm-card-bg);
+    color: var(--pm-text);
+    border-color: var(--pm-border);
+  }
+
+  .public-menu-container .category-section {
+    background: var(--pm-bg);
+  }
+
+  .item-reviews-section {
+    background: var(--pm-card-bg);
+    color: var(--pm-text);
+  }
+
+  .item-reviews-section h3 {
+    color: var(--pm-text);
+  }
+
+  .bottom-sheet-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .public-menu-container .bottom-sheet-content {
+    background: var(--pm-card-bg) !important;
+    color: var(--pm-text);
+  }
+
+  .public-menu-container .bottom-sheet {
+    background: var(--pm-card-bg);
+  }
+
+  .public-menu-container .bottom-sheet-close {
+    background: var(--pm-input-bg);
+    color: var(--pm-text-secondary);
+  }
+
+  .public-menu-container .bottom-sheet-handle-bar {
+    background: var(--pm-border);
+  }
+
+  .public-menu-container .bottom-sheet-header {
+    border-color: var(--pm-border);
+  }
+}
+
+/* --- Tablet+ responsive --- */
+@media (min-width: 640px) {
+  .swiggy-card-image-wrap {
+    width: 160px;
+  }
+
+  .swiggy-card-image {
+    width: 160px;
+    height: 160px;
+  }
+
+  .swiggy-card-name {
+    font-size: 1.0625rem;
+  }
+
+  .swiggy-cart-bar {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0.75rem;
+    bottom: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .menu-items-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0 2rem !important;
+  }
+
+  .swiggy-card {
+    padding: 1.5rem 0;
+  }
+
+  .swiggy-cart-bar {
+    max-width: 480px;
+  }
+}
