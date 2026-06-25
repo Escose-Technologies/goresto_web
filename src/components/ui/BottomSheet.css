@@ -15,7 +15,7 @@
 }
 
 .bottom-sheet {
-  background: var(--color-bg-primary);
+  background: var(--pm-card-bg, var(--color-bg-primary));
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   width: 100%;
   max-width: 100%;
@@ -47,7 +47,7 @@
 .bottom-sheet-handle-bar {
   width: 40px;
   height: 4px;
-  background: var(--color-border);
+  background: var(--pm-border, var(--color-border));
   border-radius: var(--radius-full);
 }
 
@@ -56,13 +56,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 var(--spacing-lg) var(--spacing-lg);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--pm-border, var(--color-border));
 }
 
 .bottom-sheet-title {
   font-size: var(--font-lg);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--pm-text, var(--color-text-primary));
   margin: 0;
 }
 
@@ -72,15 +72,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-tertiary);
+  background: var(--pm-divider, var(--color-bg-tertiary));
   border-radius: var(--radius-full);
-  color: var(--color-text-secondary);
+  color: var(--pm-text-secondary, var(--color-text-secondary));
   transition: all var(--animation-fast);
 }
 
 .bottom-sheet-close:hover {
-  background: var(--color-border);
-  color: var(--color-text-primary);
+  background: var(--pm-border, var(--color-border));
+  color: var(--pm-text, var(--color-text-primary));
 }
 
 .bottom-sheet-content {

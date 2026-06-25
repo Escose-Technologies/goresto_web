@@ -51,7 +51,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const menuItemIds = items.map(i => i.menuItemId);
   const menuItems = await prisma.menuItem.findMany({
     where: { id: { in: menuItemIds }, restaurantId },
-    select: { id: true, price: true, name: true, available: true, priceIncludesGst: true },
+    select: { id: true, price: true, name: true, available: true, priceIncludesGst: true, variants: true },
   });
 
   const menuItemMap = new Map(menuItems.map(m => [m.id, m]));
@@ -71,11 +71,32 @@ export const placeOrder = asyncHandler(async (req, res) => {
         error: { code: 'VALIDATION_ERROR', message: `Item unavailable: ${dbItem.name}` },
       });
     }
+
+    // Resolve the variant server-side so price and name reflect the customer's
+    // selection everywhere (orders list, kitchen, bill) — never trust client price.
+    const variantOptions = dbItem.variants?.options || [];
+    let price = dbItem.price;
+    let name = dbItem.name;
+    let variant = null;
+    if (variantOptions.length) {
+      const chosen = variantOptions.find((o) => o.label === item.variantLabel);
+      if (!chosen) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: `Please select a valid option for: ${dbItem.name}` },
+        });
+      }
+      price = chosen.price;
+      name = `${dbItem.name} (${chosen.label})`;
+      variant = chosen.label;
+    }
+
     verifiedItems.push({
       menuItemId: item.menuItemId,
-      name: dbItem.name,
+      name,
+      variant,
       quantity: item.quantity,
-      price: dbItem.price,
+      price,
       priceIncludesGst: dbItem.priceIncludesGst,
     });
   }

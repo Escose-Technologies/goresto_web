@@ -13,6 +13,7 @@ const publicOrderSchema = z.object({
   items: z.array(z.object({
     menuItemId: z.string().min(1),
     name: z.string().min(1).max(200),
+    variantLabel: z.string().max(50).optional().nullable(),
     quantity: z.number().int().positive().max(100),
     price: z.number().nonnegative().max(99999.99),
   })).min(1).max(50),

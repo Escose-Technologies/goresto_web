@@ -294,6 +294,7 @@ export const PublicMenu = () => {
         items: cart.map(item => ({
           menuItemId: item.id,
           name: item.selectedVariant ? `${item.name} (${item.selectedVariant.label})` : item.name,
+          variantLabel: item.selectedVariant?.label || null,
           quantity: item.quantity,
           price: item.price,
         })),

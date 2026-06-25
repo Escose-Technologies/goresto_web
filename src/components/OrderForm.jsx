@@ -28,7 +28,11 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
 
   const [saving, setSaving] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState('');
+  const [selectedVariant, setSelectedVariant] = useState('');
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+
+  const selectedMenuItemObj = menuItems.find((item) => item.id === selectedMenuItem);
+  const selectedVariantOptions = selectedMenuItemObj?.variants?.options || [];
 
   useEffect(() => {
     if (order) {
@@ -49,8 +53,19 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
     const menuItem = menuItems.find((item) => item.id === selectedMenuItem);
     if (!menuItem) return;
 
+    // Resolve the chosen variant so name/price match what the customer is charged.
+    const variantOptions = menuItem.variants?.options || [];
+    let chosen = null;
+    if (variantOptions.length) {
+      chosen = variantOptions.find((o) => o.label === selectedVariant);
+      if (!chosen) return;
+    }
+    const lineVariant = chosen ? chosen.label : null;
+    const lineName = chosen ? `${menuItem.name} (${chosen.label})` : menuItem.name;
+    const linePrice = chosen ? chosen.price : menuItem.price;
+
     const existingItemIndex = formData.items.findIndex(
-      (item) => item.menuItemId === selectedMenuItem
+      (item) => item.menuItemId === selectedMenuItem && (item.variant || null) === lineVariant
     );
 
     let newItems;
@@ -62,15 +77,17 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
         ...formData.items,
         {
           menuItemId: menuItem.id,
-          name: menuItem.name,
+          name: lineName,
+          variant: lineVariant,
           quantity: selectedQuantity,
-          price: menuItem.price,
+          price: linePrice,
         },
       ];
     }
 
     setFormData({ ...formData, items: newItems });
     setSelectedMenuItem('');
+    setSelectedVariant('');
     setSelectedQuantity(1);
   };
 
@@ -163,7 +180,11 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
           <TextField
             select
             value={selectedMenuItem}
-            onChange={(e) => setSelectedMenuItem(e.target.value)}
+            onChange={(e) => {
+              setSelectedMenuItem(e.target.value);
+              const mi = menuItems.find((m) => m.id === e.target.value);
+              setSelectedVariant(mi?.variants?.options?.[0]?.label || '');
+            }}
             fullWidth
             size="small"
             placeholder="Select Menu Item"
@@ -174,10 +195,26 @@ export const OrderForm = ({ order, tables, menuItems, onSave, onCancel, onDelete
               .filter((item) => item.available)
               .map((item) => (
                 <MenuItem key={item.id} value={item.id}>
-                  {item.name} - {cur}{item.price.toFixed(2)}
+                  {item.name} - {item.variants?.options?.length ? 'from ' : ''}{cur}{item.price.toFixed(2)}
                 </MenuItem>
               ))}
           </TextField>
+          {selectedVariantOptions.length > 0 && (
+            <TextField
+              select
+              value={selectedVariant}
+              onChange={(e) => setSelectedVariant(e.target.value)}
+              size="small"
+              label="Option"
+              sx={{ width: { xs: '100%', sm: 160 }, flexShrink: 0 }}
+            >
+              {selectedVariantOptions.map((o) => (
+                <MenuItem key={o.label} value={o.label}>
+                  {o.label} - {cur}{o.price.toFixed(2)}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <TextField
             type="number"
             value={selectedQuantity}
