@@ -965,7 +965,7 @@ export const PublicMenu = () => {
               <div key={order.id} className="customer-order-card">
                 <div className="customer-order-header">
                   <div>
-                    <h4>Order #{order.id.split('-')[1]}</h4>
+                    <h4>Order #{order.orderNumber || order.id.slice(-6)}</h4>
                     <p className="order-date">
                       {new Date(order.createdAt).toLocaleString()}
                     </p>

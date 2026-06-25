@@ -43,10 +43,20 @@ export const getByCustomer = async (restaurantId, customerName, customerMobile) 
 
 export const create = async (restaurantId, data) => {
   const { status, ...rest } = data;
+
+  const lastOrder = await prisma.order.findFirst({
+    where: { restaurantId, orderNumber: { not: null } },
+    orderBy: { createdAt: 'desc' },
+    select: { orderNumber: true },
+  });
+  const nextNum = lastOrder?.orderNumber ? parseInt(lastOrder.orderNumber, 10) + 1 : 1;
+  const orderNumber = String(nextNum).padStart(6, '0');
+
   const order = await prisma.order.create({
     data: {
       ...rest,
       restaurantId,
+      orderNumber,
       status: toEnum(status || 'pending'),
     },
   });

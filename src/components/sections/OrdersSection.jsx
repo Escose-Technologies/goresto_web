@@ -245,7 +245,7 @@ const OrderCard = ({ order, cur, onOpen }) => {
     >
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1}>
         <Typography variant="subtitle1" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-          #{order.id.slice(-6)}
+          #{order.orderNumber || order.id.slice(-6)}
         </Typography>
         <Chip size="small" color={STATUS_COLOR[order.status] || 'default'} label={getOrderStatusLabel(order.status)} />
       </Stack>
