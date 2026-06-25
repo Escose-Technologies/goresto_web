@@ -31,6 +31,8 @@ export const formatMenuItem = (item) => {
       allergens: item.allergens,
       labels: item.labels,
     },
+    priceIncludesGst: item.priceIncludesGst,
+    variants: item.variants || null,
     rating: item.rating,
     reviewCount: item.reviewCount,
     createdAt: item.createdAt?.toISOString(),

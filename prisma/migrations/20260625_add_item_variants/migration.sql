@@ -1,0 +1,1 @@
+ALTER TABLE "MenuItem" ADD COLUMN IF NOT EXISTS "variants" JSONB;

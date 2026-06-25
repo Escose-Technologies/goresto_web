@@ -2475,6 +2475,68 @@
   }
 }
 
+/* --- "from" price label --- */
+.swiggy-from {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--pm-text-muted, #9CA3AF);
+}
+
+/* --- Variant Selector (detail sheet) --- */
+.variant-selector {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--pm-divider, #E5E7EB);
+}
+
+.variant-selector-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pm-text, #1F2937);
+  margin: 0 0 0.625rem;
+}
+
+.variant-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variant-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  border: 1.5px solid var(--pm-border, #E5E7EB);
+  border-radius: 0.625rem;
+  background: var(--pm-card-bg, #ffffff);
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 72px;
+}
+
+.variant-pill.active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.variant-pill-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pm-text, #1F2937);
+}
+
+.variant-pill-price {
+  font-size: 0.75rem;
+  color: var(--pm-text-secondary, #6B7280);
+  margin-top: 0.125rem;
+}
+
+.variant-pill.active .variant-pill-label,
+.variant-pill.active .variant-pill-price {
+  color: var(--color-primary);
+}
+
 /* --- Post-Order Review --- */
 .post-order-overlay {
   position: fixed;

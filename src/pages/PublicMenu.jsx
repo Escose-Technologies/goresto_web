@@ -40,6 +40,7 @@ export const PublicMenu = () => {
   const [customerMobile, setCustomerMobile] = useState('');
   const [showStatusCheck, setShowStatusCheck] = useState(false);
   const [cookingRequest, setCookingRequest] = useState('');
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [statusCheckName, setStatusCheckName] = useState('');
   const [statusCheckMobile, setStatusCheckMobile] = useState('');
   const [customerOrders, setCustomerOrders] = useState([]);
@@ -231,20 +232,23 @@ export const PublicMenu = () => {
   };
 
   const addToCart = (item) => {
-    const existingItemIndex = cart.findIndex(cartItem => cartItem.id === item.id);
-    if (existingItemIndex >= 0) {
+    const variant = selectedVariant;
+    const cartKey = variant ? `${item.id}__${variant.label}` : item.id;
+    const price = variant?.price || item.price;
+    const existingIdx = cart.findIndex(ci => ci.cartKey === cartKey);
+    if (existingIdx >= 0) {
       const newCart = [...cart];
-      newCart[existingItemIndex].quantity += 1;
+      newCart[existingIdx].quantity += 1;
       setCart(newCart);
     } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
+      setCart([...cart, { ...item, cartKey, price, selectedVariant: variant || null, quantity: 1 }]);
     }
     setSelectedItem(null);
   };
 
   const updateCartQuantity = (itemId, change) => {
     const newCart = cart.map(item => {
-      if (item.id === itemId) {
+      if ((item.cartKey || item.id) === itemId) {
         const newQuantity = item.quantity + change;
         if (newQuantity <= 0) return null;
         return { ...item, quantity: newQuantity };
@@ -255,7 +259,7 @@ export const PublicMenu = () => {
   };
 
   const removeFromCart = (itemId) => {
-    setCart(cart.filter(item => item.id !== itemId));
+    setCart(cart.filter(item => (item.cartKey || item.id) !== itemId));
   };
 
   const getCartTotal = () => {
@@ -287,7 +291,7 @@ export const PublicMenu = () => {
         tableNumber: tableNumber,
         items: cart.map(item => ({
           menuItemId: item.id,
-          name: item.name,
+          name: item.selectedVariant ? `${item.name} (${item.selectedVariant.label})` : item.name,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -399,6 +403,7 @@ export const PublicMenu = () => {
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
+    setSelectedVariant(item.variants?.options?.[0] || null);
   };
 
   if (loading) {
@@ -694,7 +699,10 @@ export const PublicMenu = () => {
                         {hasNew && <span className="swiggy-badge swiggy-badge--new"><Icon icon="mdi:sparkles" width={12} /> New</span>}
                       </div>
                     )}
-                    <span className="swiggy-card-price">{getCurrencySymbol()}{item.price.toFixed(2)}</span>
+                    <span className="swiggy-card-price">
+                      {item.variants?.options?.length > 1 && <span className="swiggy-from">from </span>}
+                      {getCurrencySymbol()}{item.price.toFixed(2)}
+                    </span>
                     {item.description && (
                       <p className="swiggy-card-desc">
                         {item.description.length > 80 ? `${item.description.slice(0, 80)}...` : item.description}
@@ -788,6 +796,24 @@ export const PublicMenu = () => {
                   <AllergenLabels allergens={selectedItem.dietary.allergens} />
                 )}
 
+                {selectedItem.variants?.options?.length > 0 && (
+                  <div className="variant-selector">
+                    <h4 className="variant-selector-title">{selectedItem.variants.type === 'portion' ? 'Select Portion' : selectedItem.variants.type === 'size' ? 'Select Size' : selectedItem.variants.type === 'weight' ? 'Select Weight' : selectedItem.variants.type === 'volume' ? 'Select Volume' : 'Select Option'}</h4>
+                    <div className="variant-pills">
+                      {selectedItem.variants.options.map((opt) => (
+                        <button
+                          key={opt.label}
+                          className={`variant-pill ${selectedVariant?.label === opt.label ? 'active' : ''}`}
+                          onClick={() => setSelectedVariant(opt)}
+                        >
+                          <span className="variant-pill-label">{opt.label}</span>
+                          <span className="variant-pill-price">{getCurrencySymbol()}{opt.price.toFixed(2)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="swiggy-cooking-request">
                   <div className="swiggy-cooking-request-header">
                     <span>Add a cooking request (optional)</span>
@@ -816,7 +842,7 @@ export const PublicMenu = () => {
                   className="swiggy-detail-add-btn"
                   onClick={() => { addToCart(selectedItem); }}
                 >
-                  {detailQty > 0 ? `Update item` : `Add item`} - {getCurrencySymbol()}{(selectedItem.price * Math.max(detailQty, 1)).toFixed(2)}
+                  {detailQty > 0 ? `Update item` : `Add item`} - {getCurrencySymbol()}{((selectedVariant?.price || selectedItem.price) * Math.max(detailQty, 1)).toFixed(2)}
                 </button>
               </div>
             </div>
@@ -844,9 +870,9 @@ export const PublicMenu = () => {
           <>
             <div className="cart-items">
               {cart.map((item) => (
-                <div key={item.id} className="cart-item">
+                <div key={item.cartKey || item.id} className="cart-item">
                   <div className="cart-item-info">
-                    <h4>{item.name}</h4>
+                    <h4>{item.name}{item.selectedVariant ? ` (${item.selectedVariant.label})` : ''}</h4>
                     <p className="cart-item-price">
                       {getCurrencySymbol()}{item.price.toFixed(2)} each
                     </p>
@@ -854,14 +880,14 @@ export const PublicMenu = () => {
                   <div className="cart-item-controls">
                     <button
                       className="quantity-btn"
-                      onClick={() => updateCartQuantity(item.id, -1)}
+                      onClick={() => updateCartQuantity(item.cartKey || item.id, -1)}
                     >
                       -
                     </button>
                     <span className="cart-item-quantity">{item.quantity}</span>
                     <button
                       className="quantity-btn"
-                      onClick={() => updateCartQuantity(item.id, 1)}
+                      onClick={() => updateCartQuantity(item.cartKey || item.id, 1)}
                     >
                       +
                     </button>
@@ -870,7 +896,7 @@ export const PublicMenu = () => {
                     </span>
                     <button
                       className="remove-item-btn"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.cartKey || item.id)}
                     >
                       Remove
                     </button>

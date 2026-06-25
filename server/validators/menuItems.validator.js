@@ -14,6 +14,13 @@ export const createMenuItemSchema = z.object({
     allergens: z.array(z.string().max(50)).max(20).default([]),
     labels: z.array(z.string().max(50)).max(20).default([]),
   }).optional().default({}),
+  variants: z.object({
+    type: z.enum(['weight', 'volume', 'pieces', 'portion', 'size']),
+    options: z.array(z.object({
+      label: z.string().min(1).max(50),
+      price: z.number().positive().max(99999.99),
+    })).min(1).max(20),
+  }).optional().nullable(),
 });
 
 export const updateMenuItemSchema = createMenuItemSchema.partial();

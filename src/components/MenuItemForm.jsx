@@ -88,7 +88,9 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     image: '',
     available: true,
     dietary: { type: 'veg', spiceLevel: 0, allergens: [], labels: [] },
+    variants: null,
   });
+  const [hasVariants, setHasVariants] = useState(false);
   const [saving, setSaving] = useState(false);
   const [touched, setTouched] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
@@ -130,7 +132,9 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
           ...(item.dietary || { type: 'veg', spiceLevel: 0, allergens: [], labels: [] }),
           type: allowedDietaryTypes.includes(dietaryType) ? dietaryType : 'veg',
         },
+        variants: item.variants || null,
       });
+      setHasVariants(!!item.variants?.options?.length);
       setImagePreview(item.image || null);
     } else {
       setImagePreview(null);
@@ -206,7 +210,16 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave({ ...formData, price: parseFloat(formData.price), priceIncludesGst: formData.priceIncludesGst });
+      const submitData = { ...formData, price: parseFloat(formData.price), priceIncludesGst: formData.priceIncludesGst };
+      if (submitData.variants?.options?.length) {
+        submitData.variants = {
+          ...submitData.variants,
+          options: submitData.variants.options.map((o) => ({ label: o.label, price: parseFloat(o.price) || 0 })),
+        };
+        const minPrice = Math.min(...submitData.variants.options.map((o) => o.price));
+        if (minPrice > 0) submitData.price = minPrice;
+      }
+      await onSave(submitData);
     } finally {
       setSaving(false);
     }
@@ -275,6 +288,102 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
             </label>
           </Grid>
         </Grid>
+
+        {/* Variants */}
+        <Box mb={2} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem' }}>
+            <input
+              type="checkbox"
+              checked={hasVariants}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setHasVariants(checked);
+                if (checked && !formData.variants) {
+                  setFormData((prev) => ({ ...prev, variants: { type: 'portion', options: [{ label: 'Half', price: '' }, { label: 'Full', price: '' }] } }));
+                }
+                if (!checked) {
+                  setFormData((prev) => ({ ...prev, variants: null }));
+                }
+              }}
+              style={{ accentColor: 'var(--color-primary)' }}
+            />
+            This item has size/quantity variants
+          </label>
+          {hasVariants && formData.variants && (
+            <Box mt={1.5}>
+              <Box mb={1.5} sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                {[
+                  { value: 'portion', label: 'Portion', presets: ['Half', 'Full'] },
+                  { value: 'size', label: 'Size', presets: ['Small', 'Medium', 'Large'] },
+                  { value: 'weight', label: 'Weight', presets: ['250g', '500g', '1kg'] },
+                  { value: 'volume', label: 'Volume', presets: ['250ml', '500ml', '1L'] },
+                  { value: 'pieces', label: 'Pieces', presets: ['1pc', '3pc', '6pc', '12pc'] },
+                ].map((vt) => (
+                  <button
+                    key={vt.value}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, variants: { type: vt.value, options: vt.presets.map((l) => ({ label: l, price: '' })) } }))}
+                    style={{
+                      padding: '0.375rem 0.75rem', borderRadius: '0.375rem', border: '1px solid', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer',
+                      background: formData.variants.type === vt.value ? 'var(--color-primary)' : 'transparent',
+                      color: formData.variants.type === vt.value ? '#fff' : 'inherit',
+                      borderColor: formData.variants.type === vt.value ? 'var(--color-primary)' : '#D1D5DB',
+                    }}
+                  >
+                    {vt.label}
+                  </button>
+                ))}
+              </Box>
+              {formData.variants.options.map((opt, idx) => (
+                <Box key={idx} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.75 }}>
+                  <TextField
+                    size="small"
+                    label="Label"
+                    value={opt.label}
+                    onChange={(e) => {
+                      const opts = [...formData.variants.options];
+                      opts[idx] = { ...opts[idx], label: e.target.value };
+                      setFormData((prev) => ({ ...prev, variants: { ...prev.variants, options: opts } }));
+                    }}
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Price"
+                    type="number"
+                    value={opt.price}
+                    onChange={(e) => {
+                      const opts = [...formData.variants.options];
+                      opts[idx] = { ...opts[idx], price: e.target.value };
+                      setFormData((prev) => ({ ...prev, variants: { ...prev.variants, options: opts } }));
+                    }}
+                    sx={{ width: 100 }}
+                    inputProps={{ min: 0, step: 0.01 }}
+                  />
+                  {formData.variants.options.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const opts = formData.variants.options.filter((_, i) => i !== idx);
+                        setFormData((prev) => ({ ...prev, variants: { ...prev.variants, options: opts } }));
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', fontSize: '1.25rem', fontWeight: 700, padding: '0.25rem' }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </Box>
+              ))}
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, variants: { ...prev.variants, options: [...prev.variants.options, { label: '', price: '' }] } }))}
+                style={{ background: 'none', border: '1px dashed #9CA3AF', borderRadius: '0.375rem', padding: '0.375rem 0.75rem', color: '#6B7280', cursor: 'pointer', fontSize: '0.8125rem', width: '100%' }}
+              >
+                + Add option
+              </button>
+            </Box>
+          )}
+        </Box>
 
         {/* Category */}
         <Box mb={2}>

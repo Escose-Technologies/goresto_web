@@ -227,6 +227,7 @@ model MenuItem {
   allergens    String[]
   labels       String[]
   priceIncludesGst Boolean    @default(false)
+  variants         Json?
   rating       Float       @default(0)
   reviewCount  Int         @default(0)
 
