@@ -2295,14 +2295,44 @@
     background: var(--pm-bg) !important;
   }
 
-  .public-menu-container .search-bar-input {
+  .public-menu-container .search-bar-input-wrapper {
     background: var(--pm-card-bg);
-    border-color: var(--pm-border);
-    color: var(--pm-text);
+    border-radius: var(--radius-lg, 0.75rem);
+  }
+
+  .public-menu-container .search-bar-input {
+    background: var(--pm-card-bg) !important;
+    border-color: var(--pm-border) !important;
+    color: var(--pm-text) !important;
+  }
+
+  .public-menu-container .search-bar-input::placeholder {
+    color: var(--pm-text-muted);
   }
 
   .public-menu-container .search-bar-icon {
     color: var(--pm-text-muted);
+  }
+
+  .public-menu-container .search-bar-clear {
+    color: var(--pm-text-secondary);
+  }
+
+  .public-menu-container .search-bar-filter-btn {
+    color: var(--pm-text-secondary);
+  }
+
+  .public-menu-container .search-filters-section {
+    background: var(--pm-bg) !important;
+    border-color: var(--pm-border) !important;
+  }
+
+  .public-menu-container .filter-pill {
+    border: 1px solid var(--pm-border) !important;
+  }
+
+  .public-menu-container .category-section {
+    background: var(--pm-bg) !important;
   }
 
   .item-reviews-section {
@@ -2312,6 +2342,14 @@
 
   .item-reviews-section h3 {
     color: var(--pm-text);
+  }
+
+  .item-reviews-section p,
+  .item-reviews-section span,
+  .item-reviews-section .review-author,
+  .item-reviews-section .review-date,
+  .item-reviews-section .review-text {
+    color: var(--pm-text-secondary) !important;
   }
 
   .bottom-sheet-overlay {
@@ -2341,12 +2379,48 @@
   }
 
   .swiggy-cooking-input {
-    background: var(--pm-input-bg);
-    border-color: var(--pm-border);
-    color: var(--pm-text);
+    background: var(--pm-input-bg) !important;
+    border-color: var(--pm-border) !important;
+    color: var(--pm-text) !important;
+  }
+
+  .swiggy-cooking-input::placeholder {
+    color: var(--pm-text-muted) !important;
   }
 
   .swiggy-detail-qty button {
+    color: var(--pm-text);
+  }
+
+  /* Rating & meta text contrast */
+  .swiggy-detail-meta span,
+  .swiggy-card-rating span,
+  .rating-display,
+  .rating-count {
+    color: var(--pm-text-secondary) !important;
+  }
+
+  /* Allergen "Contains:" label */
+  .allergen-labels-container span,
+  .allergen-label {
+    color: var(--pm-text-secondary);
+  }
+
+  /* Review form inputs */
+  .review-form input,
+  .review-form textarea {
+    background: var(--pm-input-bg) !important;
+    border-color: var(--pm-border) !important;
+    color: var(--pm-text) !important;
+  }
+
+  .review-form label {
+    color: var(--pm-text-secondary) !important;
+  }
+
+  /* Table badge */
+  .public-menu-container .table-badge {
+    background: var(--pm-card-bg);
     color: var(--pm-text);
   }
 }
