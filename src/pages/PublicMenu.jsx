@@ -50,6 +50,7 @@ export const PublicMenu = () => {
   const [showStatusCheck, setShowStatusCheck] = useState(false);
   const [cookingRequest, setCookingRequest] = useState('');
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [variantPickerItem, setVariantPickerItem] = useState(null);
   const [statusCheckName, setStatusCheckName] = useState('');
   const [statusCheckMobile, setStatusCheckMobile] = useState('');
   const [customerOrders, setCustomerOrders] = useState([]);
@@ -418,6 +419,24 @@ export const PublicMenu = () => {
     setSelectedVariant(item.variants?.options?.[0] || null);
   };
 
+  // Tapping ADD on a card: items with variants open a focused picker so the
+  // customer chooses an option first; items without variants add straight away.
+  const handleQuickAdd = (item) => {
+    if (item.variants?.options?.length) {
+      setSelectedVariant(item.variants.options[0]);
+      setVariantPickerItem(item);
+    } else {
+      addToCart(item);
+    }
+  };
+
+  const confirmVariantAdd = () => {
+    if (!variantPickerItem) return;
+    addToCart(variantPickerItem);
+    setVariantPickerItem(null);
+    setSelectedVariant(null);
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2, bgcolor: 'grey.50' }}>
@@ -750,9 +769,9 @@ export const PublicMenu = () => {
                     </div>
                     <div className="swiggy-card-action" onClick={(e) => e.stopPropagation()}>
                       {hasVariants ? (
-                        // Variant items must pick a variant in the detail sheet, so the
-                        // card ADD/stepper always routes there rather than guessing.
-                        <button className="swiggy-add-btn" onClick={() => handleItemClick(item)}>
+                        // Variant items open a focused picker to choose an option
+                        // before adding (the full card tap still opens item details).
+                        <button className="swiggy-add-btn" onClick={() => handleQuickAdd(item)}>
                           ADD <Icon icon="mdi:plus" width={14} />
                           {itemQuantity > 0 && <span className="swiggy-add-count">{itemQuantity}</span>}
                         </button>
@@ -877,6 +896,42 @@ export const PublicMenu = () => {
             </div>
           );
         })()}
+      </BottomSheet>
+
+      {/* Variant Picker Bottom Sheet — quick "choose an option" before adding */}
+      <BottomSheet
+        isOpen={!!variantPickerItem}
+        onClose={() => { setVariantPickerItem(null); setSelectedVariant(null); }}
+        title={variantPickerItem?.name}
+      >
+        {variantPickerItem && (
+          <div className="variant-picker">
+            <div className="variant-selector">
+              <h4 className="variant-selector-title">
+                {variantPickerItem.variants.type === 'portion' ? 'Select Portion'
+                  : variantPickerItem.variants.type === 'size' ? 'Select Size'
+                  : variantPickerItem.variants.type === 'weight' ? 'Select Weight'
+                  : variantPickerItem.variants.type === 'volume' ? 'Select Volume'
+                  : 'Select Option'}
+              </h4>
+              <div className="variant-pills">
+                {variantPickerItem.variants.options.map((opt) => (
+                  <button
+                    key={opt.label}
+                    className={`variant-pill ${selectedVariant?.label === opt.label ? 'active' : ''}`}
+                    onClick={() => setSelectedVariant(opt)}
+                  >
+                    <span className="variant-pill-label">{opt.label}</span>
+                    <span className="variant-pill-price">{getCurrencySymbol()}{opt.price.toFixed(2)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button className="swiggy-detail-add-btn" onClick={confirmVariantAdd}>
+              Add item - {getCurrencySymbol()}{(selectedVariant?.price || variantPickerItem.price).toFixed(2)}
+            </button>
+          </div>
+        )}
       </BottomSheet>
 
       {/* Cart Bottom Sheet */}

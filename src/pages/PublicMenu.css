@@ -2230,6 +2230,16 @@
   cursor: pointer;
 }
 
+.variant-picker {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.variant-picker .swiggy-detail-add-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
 /* --- Fix: Restaurant name visibility (both themes) --- */
 .restaurant-info h1 {
   color: var(--pm-text, #1F2937) !important;
