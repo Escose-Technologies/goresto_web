@@ -14,6 +14,7 @@ import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
 import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
 import { uploadService } from '../services/apiService';
+import { ImageCropModal } from './ImageCropModal';
 
 const allergenOptions = [
   { id: 'nuts', label: 'Nuts' },
@@ -92,6 +93,8 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
   const [touched, setTouched] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [rawImageSrc, setRawImageSrc] = useState(null);
 
   const errors = {
     name: !formData.name ? 'Item name is required' : '',
@@ -134,26 +137,43 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     }
   }, [item]);
 
-  const handleImageChange = async (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
     if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
-    setIsUploading(true);
     const blobUrl = URL.createObjectURL(file);
-    setImagePreview(blobUrl);
+    setRawImageSrc(blobUrl);
+    setCropModalOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleCropConfirm = async (croppedBlob) => {
+    setCropModalOpen(false);
+    if (rawImageSrc) URL.revokeObjectURL(rawImageSrc);
+    setRawImageSrc(null);
+    setIsUploading(true);
+    const previewUrl = URL.createObjectURL(croppedBlob);
+    setImagePreview(previewUrl);
     try {
+      const file = new File([croppedBlob], 'cropped.jpg', { type: 'image/jpeg' });
       const { url } = await uploadService.uploadImage(file);
-      URL.revokeObjectURL(blobUrl);
+      URL.revokeObjectURL(previewUrl);
       setFormData((prev) => ({ ...prev, image: url }));
       setImagePreview(url);
-      setIsUploading(false);
     } catch (error) {
-      URL.revokeObjectURL(blobUrl);
+      URL.revokeObjectURL(previewUrl);
       toast.error('Error uploading image: ' + error.message);
       setImagePreview(null);
+    } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleCropCancel = () => {
+    setCropModalOpen(false);
+    if (rawImageSrc) URL.revokeObjectURL(rawImageSrc);
+    setRawImageSrc(null);
   };
 
   const handleRemoveImage = () => {
@@ -504,6 +524,13 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
           )}
         </Stack>
       </Box>
+
+      <ImageCropModal
+        open={cropModalOpen}
+        imageSrc={rawImageSrc}
+        onConfirm={handleCropConfirm}
+        onCancel={handleCropCancel}
+      />
     </Box>
   );
 };
