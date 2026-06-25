@@ -7,6 +7,7 @@ export const createMenuItemSchema = z.object({
   category: z.string().min(1, 'Category is required').max(100).trim(),
   image: z.string().optional().nullable().default(''),
   available: z.boolean().default(true),
+  priceIncludesGst: z.boolean().default(false),
   dietary: z.object({
     type: z.enum(['veg', 'non-veg', 'egg']).default('veg'),
     spiceLevel: z.number().int().min(0).max(3).default(0),

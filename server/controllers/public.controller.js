@@ -51,7 +51,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const menuItemIds = items.map(i => i.menuItemId);
   const menuItems = await prisma.menuItem.findMany({
     where: { id: { in: menuItemIds }, restaurantId },
-    select: { id: true, price: true, name: true, available: true },
+    select: { id: true, price: true, name: true, available: true, priceIncludesGst: true },
   });
 
   const menuItemMap = new Map(menuItems.map(m => [m.id, m]));
@@ -76,6 +76,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
       name: dbItem.name,
       quantity: item.quantity,
       price: dbItem.price,
+      priceIncludesGst: dbItem.priceIncludesGst,
     });
   }
 

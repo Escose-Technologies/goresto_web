@@ -75,10 +75,28 @@ export function calculateBill({
   // Step 1 & 2: Process items with item-level discounts
   const processedItems = processItemDiscounts(billItems);
 
+  // Step 2.5: For GST-inclusive items, back-calculate the taxable base price.
+  // Formula: taxableValue = inclusivePrice / (1 + gstRate/100)
+  const gstRate = (settings.gstScheme === 'regular' || !settings.gstScheme)
+    ? (settings.gstRate || 5) : 0;
+  let inclusiveGstAmount = 0;
+  if (gstRate > 0) {
+    for (const item of processedItems) {
+      if (item.priceIncludesGst) {
+        const taxable = round2(item.taxableValue / (1 + gstRate / 100));
+        const gstInItem = round2(item.taxableValue - taxable);
+        item.taxableValue = taxable;
+        item.inclusiveGst = gstInItem;
+        inclusiveGstAmount += gstInItem;
+      }
+    }
+    inclusiveGstAmount = round2(inclusiveGstAmount);
+  }
+
   // Step 3: Subtotals
   const subtotal = round2(processedItems.reduce((s, i) => s + i.lineTotal, 0));
   const totalItemDiscount = round2(processedItems.reduce((s, i) => s + i.itemDiscountAmount, 0));
-  const afterItemDiscount = round2(subtotal - totalItemDiscount);
+  const afterItemDiscount = round2(subtotal - totalItemDiscount - inclusiveGstAmount);
 
   // Step 4: Bill-level discount
   let billDiscountAmount = 0;
@@ -143,6 +161,7 @@ export function calculateBill({
     serviceChargeRate,
     serviceChargeAmount,
     packagingCharge: finalPackagingCharge,
+    inclusiveGstAmount,
     taxableAmount,
     cgstRate,
     cgstAmount,
@@ -183,6 +202,7 @@ export function buildBillItems(orders, itemDiscounts = []) {
         category: item.category || null,
         quantity: item.quantity,
         unitPrice: item.price,
+        priceIncludesGst: item.priceIncludesGst || false,
         itemDiscountType: discount?.discountType || null,
         itemDiscountValue: discount?.discountValue || 0,
         reason: discount?.reason || null,

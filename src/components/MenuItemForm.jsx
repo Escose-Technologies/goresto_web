@@ -81,6 +81,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
   const [formData, setFormData] = useState({
     name: '',
     price: '',
+    priceIncludesGst: false,
     description: '',
     category: '',
     image: '',
@@ -117,6 +118,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
       setFormData({
         name: item.name || '',
         price: item.price || '',
+        priceIncludesGst: item.priceIncludesGst || false,
         description: item.description || '',
         category: item.category || '',
         image: item.image || '',
@@ -184,7 +186,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave({ ...formData, price: parseFloat(formData.price) });
+      await onSave({ ...formData, price: parseFloat(formData.price), priceIncludesGst: formData.priceIncludesGst });
     } finally {
       setSaving(false);
     }
@@ -242,6 +244,15 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
               fullWidth
               slotProps={{ htmlInput: { step: '0.01', min: '0' } }}
             />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginTop: '0.375rem', fontSize: '0.8125rem', color: '#6B7280', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={formData.priceIncludesGst}
+                onChange={(e) => setFormData((prev) => ({ ...prev, priceIncludesGst: e.target.checked }))}
+                style={{ accentColor: 'var(--color-primary)' }}
+              />
+              Price includes GST
+            </label>
           </Grid>
         </Grid>
 

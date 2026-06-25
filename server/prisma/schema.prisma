@@ -226,6 +226,7 @@ model MenuItem {
   spiceLevel   Int         @default(0)
   allergens    String[]
   labels       String[]
+  priceIncludesGst Boolean    @default(false)
   rating       Float       @default(0)
   reviewCount  Int         @default(0)
 

@@ -5,7 +5,7 @@ import { formatMenuItem, toEnum } from '../utils/formatters.js';
 const MENU_ITEM_LIST_SELECT = {
   id: true, name: true, price: true, description: true, category: true,
   available: true, dietaryType: true, spiceLevel: true, allergens: true,
-  labels: true, rating: true, reviewCount: true, image: true, createdAt: true, updatedAt: true,
+  labels: true, priceIncludesGst: true, rating: true, reviewCount: true, image: true, createdAt: true, updatedAt: true,
 };
 
 export const getAll = async (restaurantId, query = {}) => {
