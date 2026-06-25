@@ -1963,6 +1963,21 @@
   box-shadow: var(--pm-shadow);
 }
 
+.swiggy-add-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.375rem;
+  padding: 0 0.25rem;
+  border-radius: 0.75rem;
+  background: var(--pm-add-btn-text);
+  color: var(--pm-add-btn-bg);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .swiggy-qty {
   display: inline-flex;
   align-items: center;
