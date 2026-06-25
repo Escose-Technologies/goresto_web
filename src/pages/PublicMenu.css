@@ -2178,7 +2178,118 @@
   cursor: pointer;
 }
 
-/* --- Dark theme overrides for existing components --- */
+/* --- Fix: Restaurant name visibility (both themes) --- */
+.restaurant-info h1 {
+  color: var(--pm-text, #1F2937) !important;
+}
+
+/* --- Fix: Header respects theme --- */
+.public-menu-header {
+  background: var(--pm-bg, white) !important;
+}
+
+.search-filters-section {
+  background: var(--pm-bg, white) !important;
+  border-color: var(--pm-divider, #E5E7EB) !important;
+}
+
+/* --- Fix: Reduce header dead space --- */
+.restaurant-banner + .public-menu-header {
+  padding-top: 1rem !important;
+}
+
+.restaurant-info {
+  padding-bottom: 0.25rem;
+}
+
+/* --- Fix: Contact details use theme color --- */
+.contact-detail,
+.contact-detail span,
+.action-btn {
+  color: var(--pm-text-secondary, #6B7280);
+}
+
+.action-btn {
+  color: var(--pm-text, #1F2937);
+}
+
+/* --- Fix: Filter pills refined look --- */
+.filter-pill {
+  background: var(--pm-card-bg, #F3F4F6) !important;
+  border-color: var(--pm-border, #E5E7EB) !important;
+  color: var(--pm-text-secondary, #6B7280) !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.filter-pill.active {
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%) !important;
+  border-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+/* --- Fix: Category chips dark-mode aware --- */
+.public-menu-container .MuiChip-root {
+  background: var(--pm-card-bg, #F3F4F6) !important;
+  color: var(--pm-text, #1F2937) !important;
+  border: 1px solid var(--pm-border, #E5E7EB) !important;
+}
+
+.public-menu-container .MuiChip-root.MuiChip-colorPrimary {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* --- Fix: ADD button more contrast --- */
+.swiggy-add-btn {
+  background: var(--pm-card-bg, #ffffff) !important;
+  color: var(--pm-add-btn-text) !important;
+  border: 2px solid var(--pm-add-btn-border) !important;
+  font-size: 0.9375rem !important;
+  font-weight: 800 !important;
+  padding: 0.5rem 1.75rem !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+/* --- Fix: Cart bar uses brand color --- */
+.swiggy-cart-bar {
+  background: var(--color-primary, #059669) !important;
+}
+
+/* --- Fix: No-image placeholder nicer --- */
+.swiggy-card-image-placeholder {
+  background: linear-gradient(135deg, var(--pm-placeholder-bg) 0%, var(--pm-border) 100%);
+  border-radius: 0.75rem;
+}
+
+.swiggy-card-image-placeholder svg {
+  opacity: 0.4;
+}
+
+/* --- Fix: Detail bottom sheet dark mode --- */
+.swiggy-detail {
+  background: var(--pm-card-bg, #ffffff);
+  color: var(--pm-text, #1F2937);
+}
+
+.swiggy-detail-footer {
+  background: var(--pm-card-bg, #ffffff) !important;
+  border-color: var(--pm-divider, #E5E7EB) !important;
+}
+
+.swiggy-detail-add-btn {
+  background: var(--color-primary, #059669) !important;
+}
+
+/* --- Fix: Category section background --- */
+.category-section {
+  background: var(--pm-bg, #F9FAFB);
+}
+
+/* --- Dark theme overrides --- */
 @media (prefers-color-scheme: dark) {
   .public-menu-container {
     background: var(--pm-bg) !important;
@@ -2192,47 +2303,6 @@
 
   .public-menu-container .search-bar-icon {
     color: var(--pm-text-muted);
-  }
-
-  .public-menu-container .MuiChip-root {
-    background: var(--pm-card-bg);
-    color: var(--pm-text);
-    border-color: var(--pm-border);
-  }
-
-  .public-menu-container .MuiChip-root.MuiChip-colorPrimary {
-    background: var(--pm-qty-bg);
-    color: #fff;
-  }
-
-  .public-menu-container .restaurant-header,
-  .public-menu-container .restaurant-info-section {
-    color: var(--pm-text);
-  }
-
-  .public-menu-container h1,
-  .public-menu-container h2,
-  .public-menu-container h3 {
-    color: var(--pm-text);
-  }
-
-  .public-menu-container .table-badge {
-    background: var(--pm-card-bg);
-    color: var(--pm-text);
-  }
-
-  .public-menu-container .contact-detail {
-    color: var(--pm-text-secondary);
-  }
-
-  .public-menu-container .filter-pill {
-    background: var(--pm-card-bg);
-    color: var(--pm-text);
-    border-color: var(--pm-border);
-  }
-
-  .public-menu-container .category-section {
-    background: var(--pm-bg);
   }
 
   .item-reviews-section {
@@ -2269,6 +2339,16 @@
   .public-menu-container .bottom-sheet-header {
     border-color: var(--pm-border);
   }
+
+  .swiggy-cooking-input {
+    background: var(--pm-input-bg);
+    border-color: var(--pm-border);
+    color: var(--pm-text);
+  }
+
+  .swiggy-detail-qty button {
+    color: var(--pm-text);
+  }
 }
 
 /* --- Tablet+ responsive --- */
@@ -2300,6 +2380,8 @@
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0 2rem !important;
+    max-width: 960px;
+    margin: 0 auto;
   }
 
   .swiggy-card {
