@@ -25,7 +25,7 @@
   pointer-events: none;
 }
 
-.search-bar-input {
+.search-bar-input-wrapper .search-bar-input {
   width: 100%;
   padding: var(--spacing-md) var(--spacing-md);
   padding-left: calc(var(--spacing-md) + 36px);
