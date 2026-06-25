@@ -232,7 +232,9 @@ export const PublicMenu = () => {
   };
 
   const addToCart = (item) => {
-    const variant = selectedVariant;
+    // Only attach a variant for items that actually have variants — guards against
+    // stale selectedVariant state bleeding in from a previously opened item.
+    const variant = item.variants?.options?.length ? selectedVariant : null;
     const cartKey = variant ? `${item.id}__${variant.label}` : item.id;
     const price = variant?.price || item.price;
     const existingIdx = cart.findIndex(ci => ci.cartKey === cartKey);
@@ -683,8 +685,11 @@ export const PublicMenu = () => {
         ) : (
           <div className="menu-items-list">
             {filteredItems.map((item) => {
-              const cartItem = cart.find(ci => ci.id === item.id);
-              const itemQuantity = cartItem ? cartItem.quantity : 0;
+              const hasVariants = item.variants?.options?.length > 0;
+              // A variant item can have several cart lines (one per variant) — sum them.
+              const itemQuantity = cart
+                .filter(ci => ci.id === item.id)
+                .reduce((sum, ci) => sum + ci.quantity, 0);
               const hasPopular = item.dietary?.labels?.includes('popular');
               const hasNew = item.dietary?.labels?.includes('new');
 
@@ -728,7 +733,14 @@ export const PublicMenu = () => {
                       )}
                     </div>
                     <div className="swiggy-card-action" onClick={(e) => e.stopPropagation()}>
-                      {itemQuantity > 0 ? (
+                      {hasVariants ? (
+                        // Variant items must pick a variant in the detail sheet, so the
+                        // card ADD/stepper always routes there rather than guessing.
+                        <button className="swiggy-add-btn" onClick={() => handleItemClick(item)}>
+                          ADD <Icon icon="mdi:plus" width={14} />
+                          {itemQuantity > 0 && <span className="swiggy-add-count">{itemQuantity}</span>}
+                        </button>
+                      ) : itemQuantity > 0 ? (
                         <div className="swiggy-qty">
                           <button onClick={() => updateCartQuantity(item.id, -1)}>−</button>
                           <span>{itemQuantity}</span>
@@ -751,11 +763,12 @@ export const PublicMenu = () => {
       {/* Item Detail Bottom Sheet */}
       <BottomSheet
         isOpen={!!selectedItem}
-        onClose={() => { setSelectedItem(null); setCookingRequest(''); }}
+        onClose={() => { setSelectedItem(null); setSelectedVariant(null); setCookingRequest(''); }}
         title=""
       >
         {selectedItem && (() => {
-          const detailCartItem = cart.find(ci => ci.id === selectedItem.id);
+          const detailCartKey = selectedVariant ? `${selectedItem.id}__${selectedVariant.label}` : selectedItem.id;
+          const detailCartItem = cart.find(ci => (ci.cartKey || ci.id) === detailCartKey);
           const detailQty = detailCartItem ? detailCartItem.quantity : 0;
           return (
             <div className="swiggy-detail">
@@ -833,9 +846,9 @@ export const PublicMenu = () => {
               <div className="swiggy-detail-footer">
                 {detailQty > 0 ? (
                   <div className="swiggy-detail-qty">
-                    <button onClick={() => updateCartQuantity(selectedItem.id, -1)}>−</button>
+                    <button onClick={() => updateCartQuantity(detailCartKey, -1)}>−</button>
                     <span>{detailQty}</span>
-                    <button onClick={() => updateCartQuantity(selectedItem.id, 1)}>+</button>
+                    <button onClick={() => updateCartQuantity(detailCartKey, 1)}>+</button>
                   </div>
                 ) : null}
                 <button
