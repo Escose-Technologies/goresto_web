@@ -50,7 +50,6 @@ export const PublicMenu = () => {
   const [showStatusCheck, setShowStatusCheck] = useState(false);
   const [cookingRequest, setCookingRequest] = useState('');
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [variantPickerItem, setVariantPickerItem] = useState(null);
   const [statusCheckName, setStatusCheckName] = useState('');
   const [statusCheckMobile, setStatusCheckMobile] = useState('');
   const [customerOrders, setCustomerOrders] = useState([]);
@@ -419,24 +418,6 @@ export const PublicMenu = () => {
     setSelectedVariant(item.variants?.options?.[0] || null);
   };
 
-  // Tapping ADD on a card: items with variants open a focused picker so the
-  // customer chooses an option first; items without variants add straight away.
-  const handleQuickAdd = (item) => {
-    if (item.variants?.options?.length) {
-      setSelectedVariant(item.variants.options[0]);
-      setVariantPickerItem(item);
-    } else {
-      addToCart(item);
-    }
-  };
-
-  const confirmVariantAdd = () => {
-    if (!variantPickerItem) return;
-    addToCart(variantPickerItem);
-    setVariantPickerItem(null);
-    setSelectedVariant(null);
-  };
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2, bgcolor: 'grey.50' }}>
@@ -769,9 +750,9 @@ export const PublicMenu = () => {
                     </div>
                     <div className="swiggy-card-action" onClick={(e) => e.stopPropagation()}>
                       {hasVariants ? (
-                        // Variant items open a focused picker to choose an option
-                        // before adding (the full card tap still opens item details).
-                        <button className="swiggy-add-btn" onClick={() => handleQuickAdd(item)}>
+                        // Variant items open the full detail sheet to choose an
+                        // option (and see all variants) before adding.
+                        <button className="swiggy-add-btn" onClick={() => handleItemClick(item)}>
                           ADD <Icon icon="mdi:plus" width={14} />
                           {itemQuantity > 0 && <span className="swiggy-add-count">{itemQuantity}</span>}
                         </button>
@@ -898,42 +879,6 @@ export const PublicMenu = () => {
         })()}
       </BottomSheet>
 
-      {/* Variant Picker Bottom Sheet — quick "choose an option" before adding */}
-      <BottomSheet
-        isOpen={!!variantPickerItem}
-        onClose={() => { setVariantPickerItem(null); setSelectedVariant(null); }}
-        title={variantPickerItem?.name}
-      >
-        {variantPickerItem && (
-          <div className="variant-picker">
-            <div className="variant-selector">
-              <h4 className="variant-selector-title">
-                {variantPickerItem.variants.type === 'portion' ? 'Select Portion'
-                  : variantPickerItem.variants.type === 'size' ? 'Select Size'
-                  : variantPickerItem.variants.type === 'weight' ? 'Select Weight'
-                  : variantPickerItem.variants.type === 'volume' ? 'Select Volume'
-                  : 'Select Option'}
-              </h4>
-              <div className="variant-pills">
-                {variantPickerItem.variants.options.map((opt) => (
-                  <button
-                    key={opt.label}
-                    className={`variant-pill ${selectedVariant?.label === opt.label ? 'active' : ''}`}
-                    onClick={() => setSelectedVariant(opt)}
-                  >
-                    <span className="variant-pill-label">{opt.label}</span>
-                    <span className="variant-pill-price">{getCurrencySymbol()}{opt.price.toFixed(2)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button className="swiggy-detail-add-btn" onClick={confirmVariantAdd}>
-              Add item - {getCurrencySymbol()}{(selectedVariant?.price || variantPickerItem.price).toFixed(2)}
-            </button>
-          </div>
-        )}
-      </BottomSheet>
-
       {/* Cart Bottom Sheet */}
       <BottomSheet
         isOpen={showCart}
@@ -962,27 +907,32 @@ export const PublicMenu = () => {
                     </p>
                   </div>
                   <div className="cart-item-controls">
-                    <button
-                      className="quantity-btn"
-                      onClick={() => updateCartQuantity(item.cartKey || item.id, -1)}
-                    >
-                      -
-                    </button>
-                    <span className="cart-item-quantity">{item.quantity}</span>
-                    <button
-                      className="quantity-btn"
-                      onClick={() => updateCartQuantity(item.cartKey || item.id, 1)}
-                    >
-                      +
-                    </button>
+                    <div className="cart-stepper">
+                      <button
+                        className="quantity-btn"
+                        aria-label="Decrease quantity"
+                        onClick={() => updateCartQuantity(item.cartKey || item.id, -1)}
+                      >
+                        −
+                      </button>
+                      <span className="cart-item-quantity">{item.quantity}</span>
+                      <button
+                        className="quantity-btn"
+                        aria-label="Increase quantity"
+                        onClick={() => updateCartQuantity(item.cartKey || item.id, 1)}
+                      >
+                        +
+                      </button>
+                    </div>
                     <span className="cart-item-total">
                       {getCurrencySymbol()}{(item.price * item.quantity).toFixed(2)}
                     </span>
                     <button
                       className="remove-item-btn"
+                      aria-label="Remove item"
                       onClick={() => removeFromCart(item.cartKey || item.id)}
                     >
-                      Remove
+                      <Icon icon="mdi:trash-can-outline" width={18} />
                     </button>
                   </div>
                 </div>
@@ -1009,21 +959,29 @@ export const PublicMenu = () => {
                 />
               </Stack>
               <div className="cart-total-section">
-                <strong>Total: {getCurrencySymbol()}{getCartTotal().toFixed(2)}</strong>
+                <span className="cart-total-label">
+                  {cart.reduce((n, i) => n + i.quantity, 0)} {cart.reduce((n, i) => n + i.quantity, 0) === 1 ? 'item' : 'items'} · Total
+                </span>
+                <strong className="cart-total-amount">{getCurrencySymbol()}{getCartTotal().toFixed(2)}</strong>
               </div>
               {!tableNumber && (
                 <div className="cart-warning">
                   <p>Table number is required to place an order. Please access this menu through a table QR code.</p>
                 </div>
               )}
-              <div className="cart-action-row">
-                <button className="cart-btn cart-btn--outline" onClick={() => setShowCart(false)}>
-                  Continue Shopping
-                </button>
-                <button className="cart-btn cart-btn--primary" onClick={handlePlaceOrder} disabled={!tableNumber}>
+              <button className="place-order-btn" onClick={handlePlaceOrder} disabled={!tableNumber}>
+                <span className="place-order-btn-label">
+                  <Icon icon="mdi:cart-check" width={20} />
                   Place Order
-                </button>
-              </div>
+                </span>
+                <span className="place-order-btn-amount">
+                  {getCurrencySymbol()}{getCartTotal().toFixed(2)}
+                  <Icon icon="mdi:arrow-right" width={18} />
+                </span>
+              </button>
+              <button className="cart-continue-link" onClick={() => setShowCart(false)}>
+                Continue Shopping
+              </button>
             </div>
           </>
         )}
