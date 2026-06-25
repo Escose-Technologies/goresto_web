@@ -19,6 +19,15 @@ import { SpiceIndicator } from '../components/menu/SpiceLevel';
 import { RatingDisplay } from '../components/menu/Rating';
 import './PublicMenu.css';
 
+// Customer-facing label + style for the restaurant's food type (set by the admin).
+const FOOD_TYPE_BADGE = {
+  pure_veg: { label: 'Pure Veg', variant: 'veg' },
+  egg: { label: 'Veg & Egg', variant: 'egg' },
+  veg_egg: { label: 'Veg & Egg', variant: 'egg' },
+  non_veg: { label: 'Non-Veg', variant: 'nonveg' },
+  both: { label: 'Veg & Non-Veg', variant: 'both' },
+};
+
 export const PublicMenu = () => {
   const toast = useToast();
   const { restaurantId } = useParams();
@@ -511,6 +520,12 @@ export const PublicMenu = () => {
       <header className="public-menu-header">
         <div className="restaurant-info">
           <h1>{settings?.restaurantName || restaurant.name}</h1>
+          {FOOD_TYPE_BADGE[restaurant.foodType] && (
+            <span className={`food-type-badge food-type-badge--${FOOD_TYPE_BADGE[restaurant.foodType].variant}`}>
+              <span className="food-type-badge-dot" />
+              {FOOD_TYPE_BADGE[restaurant.foodType].label}
+            </span>
+          )}
           {tableNumber && (
             <div className={`table-badge ${tableStatus ? `table-badge--${tableStatus}` : ''}`}>
               Table {tableNumber}

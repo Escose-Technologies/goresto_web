@@ -134,6 +134,43 @@
   line-height: 1.2;
 }
 
+.food-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-card-bg);
+  color: var(--pm-text-secondary);
+}
+
+.food-type-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.food-type-badge--veg { border-color: #22C55E; color: #15803D; }
+.food-type-badge--veg .food-type-badge-dot { background: #22C55E; }
+.food-type-badge--nonveg { border-color: #EF4444; color: #B91C1C; }
+.food-type-badge--nonveg .food-type-badge-dot { background: #EF4444; }
+.food-type-badge--egg { border-color: #EAB308; color: #A16207; }
+.food-type-badge--egg .food-type-badge-dot { background: #EAB308; }
+.food-type-badge--both .food-type-badge-dot {
+  background: linear-gradient(90deg, #22C55E 50%, #EF4444 50%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .food-type-badge--veg { color: #4ADE80; }
+  .food-type-badge--nonveg { color: #F87171; }
+  .food-type-badge--egg { color: #FACC15; }
+}
+
 .table-badge {
   display: inline-flex;
   align-items: center;

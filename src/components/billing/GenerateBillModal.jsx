@@ -154,6 +154,7 @@ export const GenerateBillModal = ({
         orderType,
         itemDiscounts: itemDiscounts.filter(d => d.discountValue > 0).map(d => ({
           menuItemId: d.menuItemId,
+          variant: d.variant || null,
           discountType: d.discountType,
           discountValue: d.discountValue,
           reason: d.reason || '',

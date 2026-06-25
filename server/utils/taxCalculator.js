@@ -181,10 +181,14 @@ export function calculateBill({
  * @param {Array} [itemDiscounts] - [{menuItemId, discountType, discountValue, reason}]
  * @returns {Array} Bill items ready for calculateBill()
  */
+// Key item discounts by menu item + variant so a discount on one variant
+// (e.g. "Pizza (Large)") never bleeds onto another (e.g. "Pizza (Small)").
+const lineKey = (menuItemId, variant) => `${menuItemId}__${variant || ''}`;
+
 export function buildBillItems(orders, itemDiscounts = []) {
   const discountMap = new Map();
   for (const disc of itemDiscounts) {
-    discountMap.set(disc.menuItemId, disc);
+    discountMap.set(lineKey(disc.menuItemId, disc.variant), disc);
   }
 
   const billItems = [];
@@ -193,12 +197,13 @@ export function buildBillItems(orders, itemDiscounts = []) {
     const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
 
     for (const item of items) {
-      const discount = discountMap.get(item.menuItemId);
+      const discount = discountMap.get(lineKey(item.menuItemId, item.variant));
 
       billItems.push({
         orderId: order.id,
         menuItemId: item.menuItemId,
         name: item.name,
+        variant: item.variant || null,
         category: item.category || null,
         quantity: item.quantity,
         unitPrice: item.price,

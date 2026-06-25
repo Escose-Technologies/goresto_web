@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 const itemDiscountSchema = z.object({
   menuItemId: z.string().min(1),
+  variant: z.string().max(50).optional().nullable(),
   discountType: z.enum(['percentage', 'flat']),
   discountValue: z.number().min(0).max(99999.99),
   reason: z.string().max(500).optional().default(''),

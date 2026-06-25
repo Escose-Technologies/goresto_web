@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
+// A bill line is unique per order + menu item + variant, so a discount on one
+// variant doesn't apply to a different variant of the same item.
+const sameLine = (d, item) =>
+  d.menuItemId === item.menuItemId &&
+  (d.variant || null) === (item.variant || null) &&
+  d.orderId === item.orderId;
+
 const DISCOUNT_OPTIONS = [
   { value: '', label: 'None' },
   { value: '5', label: '5% off' },
@@ -25,6 +32,7 @@ export const BillItemsEditor = ({
         items.push({
           menuItemId: item.menuItemId || item.id,
           name: item.name,
+          variant: item.variant || null,
           quantity: item.quantity,
           unitPrice: item.price || item.unitPrice,
           orderId: order.id,
@@ -39,7 +47,7 @@ export const BillItemsEditor = ({
   const processedItems = useMemo(() => {
     return consolidatedItems.map(item => {
       const lineTotal = (item.unitPrice || 0) * (item.quantity || 0);
-      const discount = itemDiscounts.find(d => d.menuItemId === item.menuItemId && d.orderId === item.orderId);
+      const discount = itemDiscounts.find(d => sameLine(d, item));
       let discountAmount = 0;
       let discountValue = 0;
 
@@ -64,13 +72,12 @@ export const BillItemsEditor = ({
 
   const handleDiscountChange = (item, value) => {
     const numValue = value === '' ? 0 : parseFloat(value);
-    const existing = itemDiscounts.filter(
-      d => !(d.menuItemId === item.menuItemId && d.orderId === item.orderId)
-    );
+    const existing = itemDiscounts.filter(d => !sameLine(d, item));
 
     if (numValue > 0) {
       existing.push({
         menuItemId: item.menuItemId,
+        variant: item.variant || null,
         orderId: item.orderId,
         discountType: 'percentage',
         discountValue: numValue,
@@ -82,7 +89,7 @@ export const BillItemsEditor = ({
   };
 
   const getDiscountSelectValue = (item) => {
-    const discount = itemDiscounts.find(d => d.menuItemId === item.menuItemId && d.orderId === item.orderId);
+    const discount = itemDiscounts.find(d => sameLine(d, item));
     if (!discount || !discount.discountValue) return '';
     return String(discount.discountValue);
   };
