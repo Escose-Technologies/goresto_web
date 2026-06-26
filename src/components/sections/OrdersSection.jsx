@@ -18,7 +18,7 @@ import { OrderForm } from '../OrderForm';
 import { OrderDetailsModal } from '../OrderDetailsModal';
 import { getOrderStatusLabel } from '../../utils/statusLabels';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { STATUS_COLOR, STATUS_DOT, isFinished, URGENCY, money, timeAgo } from '../../utils/orderStatus';
+import { STATUS_COLOR, STATUS_DOT, isFinished, money, timeAgo } from '../../utils/orderStatus';
 
 // Status buckets surfaced in the summary strip (doubles as a quick filter).
 const SUMMARY = [
@@ -58,7 +58,8 @@ const OrdersSection = ({
     return c;
   }, [orders]);
 
-  // Search + status filter, then sort active-first (by urgency, then oldest), finished last.
+  // Search + status filter, then sort strictly by creation time (newest first).
+  // Status changes update updatedAt but must NOT reorder the list.
   const visible = useMemo(() => {
     const q = orderSearchQuery.trim().toLowerCase();
     const filtered = orders.filter((o) => {
@@ -71,13 +72,7 @@ const OrdersSection = ({
         String(o.tableNumber || '').toLowerCase().includes(q)
       );
     });
-    return filtered.sort((a, b) => {
-      const af = isFinished(a.status);
-      const bf = isFinished(b.status);
-      if (af !== bf) return af ? 1 : -1;
-      if (af) return new Date(b.updatedAt) - new Date(a.updatedAt);
-      return (URGENCY[a.status] ?? 9) - (URGENCY[b.status] ?? 9) || new Date(a.createdAt) - new Date(b.createdAt);
-    });
+    return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [orders, orderSearchQuery, orderStatusFilter]);
 
   const activeCount = useMemo(() => orders.filter((o) => !isFinished(o.status)).length, [orders]);
