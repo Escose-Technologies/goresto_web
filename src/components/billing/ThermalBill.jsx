@@ -28,6 +28,9 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
   const isComposition = settings?.gstScheme === 'composition';
   const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
   const items = bill.billItems || [];
+  const orderNos = (bill.orders || [])
+    .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
+    .filter(Boolean);
   const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
   const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
   const itemDiscLabel = (it) => {
@@ -75,6 +78,9 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
       <div className="thermal-bill-info">
         <div className="thermal-bill-title">{billTitle}</div>
         <div>Bill No: {bill.billNumber}</div>
+        {orderNos.length > 0 && (
+          <div>{orderNos.length > 1 ? 'Orders' : 'Order No'}: {orderNos.join(', ')}</div>
+        )}
         <div>Date: {formatDate(bill.createdAt)}</div>
         <div>Table: {bill.tableNumber} | Type: {ORDER_TYPE_LABELS[bill.orderType] || bill.orderType}</div>
       </div>

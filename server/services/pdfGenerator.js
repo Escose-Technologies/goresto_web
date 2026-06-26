@@ -165,8 +165,13 @@ export function generateBillPdf(bill) {
 
   // ─── Meta Grid ──────────────────────────────────
 
+  const orderNos = (bill.orders || [])
+    .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
+    .filter(Boolean);
+
   const metaLeft = [
     `Bill No: ${bill.billNumber}`,
+    ...(orderNos.length ? [`${orderNos.length > 1 ? 'Orders' : 'Order No'}: ${orderNos.join(', ')}`] : []),
     `Date: ${fmtDate(bill.createdAt)}  ${fmtTime(bill.createdAt)}`,
     `Table: ${bill.tableNumber}`,
     `Type: ${ORDER_TYPE_LABELS[bill.orderType] || bill.orderType}`,
