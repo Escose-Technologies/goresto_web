@@ -1,22 +1,31 @@
 import { prisma } from '../config/database.js';
 
-export const getAnalytics = async (restaurantId) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+export const getAnalytics = async (restaurantId, opts = {}) => {
+  // "Today" window: prefer the client's local-day boundaries (so it matches the
+  // Billing tab exactly). Fall back to the server's local midnight.
+  const serverMidnight = new Date();
+  serverMidnight.setHours(0, 0, 0, 0);
+  const todayStart = opts.todayStart ? new Date(opts.todayStart) : serverMidnight;
+  const todayEnd = opts.todayEnd ? new Date(opts.todayEnd) : null;
+  const todayCreatedAt = { gte: todayStart, ...(todayEnd ? { lte: todayEnd } : {}) };
 
-  // Use DB aggregations instead of loading all orders into memory
-  const [totalAgg, todayAgg, ordersByStatus, recentOrders, reviewAgg] = await Promise.all([
-    // Total order stats
-    prisma.order.aggregate({
-      where: { restaurantId },
+  // Revenue mirrors the Billing tab: sum of grandTotal over non-cancelled bills.
+  const notCancelled = { not: 'cancelled' };
+
+  const [ordersTotalCount, ordersTodayCount, billTotalAgg, billTodayAgg, ordersByStatus, recentOrders, reviewAgg] = await Promise.all([
+    // Order counts (orders placed — distinct metric from billed revenue)
+    prisma.order.count({ where: { restaurantId } }),
+    prisma.order.count({ where: { restaurantId, createdAt: todayCreatedAt } }),
+    // Billed revenue — all time
+    prisma.bill.aggregate({
+      where: { restaurantId, paymentStatus: notCancelled },
       _count: { id: true },
-      _sum: { total: true },
+      _sum: { grandTotal: true },
     }),
-    // Today's order stats
-    prisma.order.aggregate({
-      where: { restaurantId, createdAt: { gte: today } },
-      _count: { id: true },
-      _sum: { total: true },
+    // Billed revenue — today
+    prisma.bill.aggregate({
+      where: { restaurantId, paymentStatus: notCancelled, createdAt: todayCreatedAt },
+      _sum: { grandTotal: true },
     }),
     // Orders grouped by status
     prisma.order.groupBy({
@@ -39,11 +48,13 @@ export const getAnalytics = async (restaurantId) => {
     }),
   ]);
 
-  const ordersTotal = totalAgg._count.id;
-  const revenueTotal = totalAgg._sum.total || 0;
-  const ordersToday = todayAgg._count.id;
-  const revenueToday = todayAgg._sum.total || 0;
-  const averageOrderValue = ordersTotal > 0 ? Math.round((revenueTotal / ordersTotal) * 100) / 100 : 0;
+  const ordersTotal = ordersTotalCount;
+  const ordersToday = ordersTodayCount;
+  const billCount = billTotalAgg._count.id;
+  const revenueTotal = billTotalAgg._sum.grandTotal || 0;
+  const revenueToday = billTodayAgg._sum.grandTotal || 0;
+  // Average bill value, consistent with the Billing summary's averageBillValue.
+  const averageOrderValue = billCount > 0 ? Math.round((revenueTotal / billCount) * 100) / 100 : 0;
 
   // Popular items (top 5 by quantity from recent 500 orders)
   const itemCounts = {};

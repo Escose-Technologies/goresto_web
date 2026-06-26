@@ -81,13 +81,19 @@
 }
 
 .thermal-item-qty-col {
-  width: 32px;
+  width: 28px;
   text-align: center;
   flex-shrink: 0;
 }
 
+.thermal-item-rate-col {
+  width: 56px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 .thermal-item-amt-col {
-  width: 72px;
+  width: 64px;
   text-align: right;
   flex-shrink: 0;
 }

@@ -541,7 +541,14 @@ export const analyticsService = {
   },
 
   async getAnalytics(restaurantId) {
-    return get(`/restaurants/${restaurantId}/analytics`);
+    // Send the client's local "today" boundaries so Revenue Today matches the
+    // Billing tab's Today window regardless of server timezone.
+    const { presetRange } = await import('../utils/dateRange');
+    const { from, to } = presetRange('today');
+    const params = new URLSearchParams();
+    if (from) params.set('todayStart', from);
+    if (to) params.set('todayEnd', to);
+    return get(`/restaurants/${restaurantId}/analytics?${params.toString()}`);
   },
 };
 

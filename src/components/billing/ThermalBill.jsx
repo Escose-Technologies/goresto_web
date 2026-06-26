@@ -28,6 +28,14 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
   const isComposition = settings?.gstScheme === 'composition';
   const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
   const items = bill.billItems || [];
+  const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
+  const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
+  const itemDiscLabel = (it) => {
+    const type = it.itemDiscountType ?? it.discountType;
+    const val = it.itemDiscountValue ?? it.discountValue ?? 0;
+    if (type === 'flat') return 'Disc';
+    return val >= 100 ? 'Comp' : `Disc (${val}%)`;
+  };
   const hasItemDiscounts = bill.totalItemDiscount > 0;
   const hasBillDiscount = bill.billDiscountAmount > 0;
   const hasServiceCharge = bill.serviceChargeAmount > 0;
@@ -77,27 +85,33 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
       <div className="thermal-items-header">
         <span className="thermal-item-name-col">Item</span>
         <span className="thermal-item-qty-col">Qty</span>
+        <span className="thermal-item-rate-col">Rate</span>
         <span className="thermal-item-amt-col">Amount</span>
       </div>
       <div className="thermal-divider" />
 
       {/* Items */}
       <div className="thermal-items">
-        {items.map((item, i) => (
-          <div key={i}>
-            <div className="thermal-item-row">
-              <span className="thermal-item-name-col">{item.name}</span>
-              <span className="thermal-item-qty-col">{item.quantity}</span>
-              <span className="thermal-item-amt-col">{formatCurrency((item.unitPrice || item.price || 0) * item.quantity)}</span>
-            </div>
-            {item.discountAmount > 0 && (
-              <div className="thermal-item-discount">
-                {item.discountType === 'comp' ? '  Comp' : `  Disc (${item.discountValue}%)`}
-                <span>-{formatCurrency(item.discountAmount)}</span>
+        {items.map((item, i) => {
+          const rate = itemRate(item);
+          const discAmt = itemDisc(item);
+          return (
+            <div key={i}>
+              <div className="thermal-item-row">
+                <span className="thermal-item-name-col">{item.name}</span>
+                <span className="thermal-item-qty-col">{item.quantity}</span>
+                <span className="thermal-item-rate-col">{formatCurrency(rate)}</span>
+                <span className="thermal-item-amt-col">{formatCurrency(rate * item.quantity)}</span>
               </div>
-            )}
-          </div>
-        ))}
+              {discAmt > 0 && (
+                <div className="thermal-item-discount">
+                  {'  ' + itemDiscLabel(item)}
+                  <span>-{formatCurrency(discAmt)}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="thermal-divider" />

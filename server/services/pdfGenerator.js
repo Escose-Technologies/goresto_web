@@ -76,7 +76,15 @@ export function generateBillPdf(bill) {
   const items = bill.billItems || [];
   const isComposition = settings.gstScheme === 'composition';
   const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
-  const hasItemDiscounts = items.some(it => (it.discountAmount || 0) > 0);
+  const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
+  const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
+  const itemDiscLabel = (it) => {
+    const type = it.itemDiscountType ?? it.discountType;
+    const val = it.itemDiscountValue ?? it.discountValue ?? 0;
+    if (type === 'flat') return '';
+    return val >= 100 ? ' (Comp)' : ` (${val}%)`;
+  };
+  const hasItemDiscounts = items.some(it => itemDisc(it) > 0);
   const hasBillDiscount = (bill.billDiscountAmount || 0) > 0;
   const hasServiceCharge = (bill.serviceChargeAmount || 0) > 0;
   const hasPackaging = (bill.packagingCharge || 0) > 0;
@@ -217,18 +225,20 @@ export function generateBillPdf(bill) {
       y = doc.page.margins.top;
     }
 
-    const lineTotal = item.price * item.quantity;
-    const afterDisc = lineTotal - (item.discountAmount || 0);
+    const rate = itemRate(item);
+    const discAmt = itemDisc(item);
+    const lineTotal = rate * item.quantity;
+    const afterDisc = lineTotal - discAmt;
 
     x = doc.page.margins.left;
     doc.text(String(i + 1), x + 2, y, { width: colSn, align: 'center' }); x += colSn;
     doc.text(item.name, x + 2, y, { width: colName - 4 }); x += colName;
     doc.text(String(item.quantity), x, y, { width: colQty, align: 'center' }); x += colQty;
-    doc.text(fmt(item.price), x, y, { width: colRate, align: 'right' }); x += colRate;
+    doc.text(fmt(rate), x, y, { width: colRate, align: 'right' }); x += colRate;
     if (hasItemDiscounts) {
-      if (item.discountAmount > 0) {
+      if (discAmt > 0) {
         doc.fillColor(COLOR.red)
-          .text(`-${fmt(item.discountAmount)}`, x, y, { width: colDisc, align: 'right' });
+          .text(`-${fmt(discAmt)}${itemDiscLabel(item)}`, x, y, { width: colDisc, align: 'right' });
         doc.fillColor(COLOR.black);
       } else {
         doc.text('—', x, y, { width: colDisc, align: 'right' });

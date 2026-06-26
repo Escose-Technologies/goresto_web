@@ -52,7 +52,15 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
     : '';
   const billTitle = isComposition ? 'Bill of Supply' : 'Tax Invoice';
   const items = bill.billItems || [];
-  const hasItemDiscounts = items.some(it => it.discountAmount > 0);
+  const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
+  const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
+  const itemDiscLabel = (it) => {
+    const type = it.itemDiscountType ?? it.discountType;
+    const val = it.itemDiscountValue ?? it.discountValue ?? 0;
+    if (type === 'flat') return '';
+    return val >= 100 ? ' (Comp)' : ` (${val}%)`;
+  };
+  const hasItemDiscounts = items.some(it => itemDisc(it) > 0);
   const hasBillDiscount = bill.billDiscountAmount > 0;
   const hasServiceCharge = bill.serviceChargeAmount > 0;
   const hasPackaging = bill.packagingCharge > 0;
@@ -122,22 +130,22 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
         </thead>
         <tbody>
           {items.map((item, i) => {
-            const lineTotal = (item.unitPrice || item.price || 0) * item.quantity;
-            const afterDisc = lineTotal - (item.discountAmount || 0);
+            const rate = itemRate(item);
+            const discAmt = itemDisc(item);
+            const lineTotal = rate * item.quantity;
+            const afterDisc = lineTotal - discAmt;
             return (
               <tr key={i}>
                 <td className="a4-col-sn">{i + 1}</td>
                 <td className="a4-col-name">{item.name}</td>
                 <td className="a4-col-qty">{item.quantity}</td>
-                <td className="a4-col-rate">{formatCurrency(item.unitPrice || item.price || 0)}</td>
+                <td className="a4-col-rate">{formatCurrency(rate)}</td>
                 {hasItemDiscounts && (
                   <td className="a4-col-disc">
-                    {item.discountAmount > 0 ? (
+                    {discAmt > 0 ? (
                       <span className="a4-disc-value">
-                        -{formatCurrency(item.discountAmount)}
-                        <small>
-                          {item.discountType === 'comp' ? ' (Comp)' : ` (${item.discountValue}%)`}
-                        </small>
+                        -{formatCurrency(discAmt)}
+                        <small>{itemDiscLabel(item)}</small>
                       </span>
                     ) : '—'}
                   </td>
