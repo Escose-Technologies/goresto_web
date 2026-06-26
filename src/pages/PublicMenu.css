@@ -1052,6 +1052,34 @@
   color: var(--pm-text, #1F2937);
 }
 
+/* Cart name/mobile fields — compact + theme-aware.
+   Overrides the tall white `.bare-controls input` reset (higher specificity). */
+.cart-footer .MuiOutlinedInput-root {
+  background: var(--pm-bg, #F9FAFB);
+  border-radius: 0.625rem;
+}
+
+.cart-footer .MuiOutlinedInput-input {
+  min-height: 0;
+  padding: 9px 12px;
+  background: transparent;
+  color: var(--pm-text, #1F2937);
+}
+
+.cart-footer .MuiOutlinedInput-notchedOutline {
+  border-color: var(--pm-border, #E5E7EB);
+}
+
+.cart-footer .MuiInputLabel-root {
+  color: var(--pm-text-secondary, #6B7280);
+}
+
+.cart-footer .MuiInputLabel-root.Mui-focused,
+.cart-footer .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  color: var(--pm-cart-bar-bg, #059669);
+  border-color: var(--pm-cart-bar-bg, #059669);
+}
+
 .cart-warning {
   background: #FEF3C7;
   border: 1px solid #FCD34D;
@@ -1127,9 +1155,10 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Keep the order CTA green in dark too — red reads as an alert/danger. */
   .cart-footer .place-order-btn {
-    background: linear-gradient(135deg, #F0697A 0%, #E8596B 60%, #D6485A 100%);
-    box-shadow: 0 8px 22px -6px rgba(232, 89, 107, 0.5);
+    background: linear-gradient(135deg, #34D399 0%, #10B981 55%, #059669 100%);
+    box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.55);
   }
   .cart-footer .place-order-btn:disabled {
     background: linear-gradient(135deg, #4B5563, #374151);

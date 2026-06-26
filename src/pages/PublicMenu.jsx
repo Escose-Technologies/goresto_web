@@ -939,7 +939,7 @@ export const PublicMenu = () => {
               ))}
             </div>
             <div className="cart-footer">
-              <Stack spacing={2} sx={{ mb: 2 }}>
+              <Stack spacing={1.5} sx={{ mb: 1.5 }}>
                 <TextField
                   label="Your Name"
                   value={customerName}
