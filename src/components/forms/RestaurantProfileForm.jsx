@@ -45,6 +45,7 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
 
   const [formData, setFormData] = useState({
     name: '',
+    tagline: '',
     description: '',
     logo: '',
     coverImage: '',
@@ -67,6 +68,7 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
     if (restaurant) {
       setFormData({
         name: restaurant.name || '',
+        tagline: restaurant.tagline || '',
         description: restaurant.description || '',
         logo: restaurant.logo || '',
         coverImage: restaurant.coverImage || '',
@@ -235,7 +237,8 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
           <Grid size={12}>
             <SectionCard icon="mdi:card-text-outline" title="Basics" subtitle="Name, story and what you serve">
               <TextField label="Restaurant Name" value={formData.name} onChange={handleChange('name')} required fullWidth sx={{ mb: 2 }} />
-              <TextField label="Description" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} placeholder="Tell customers about your restaurant…" sx={{ mb: 2 }} />
+              <TextField label="Tagline" value={formData.tagline} onChange={handleChange('tagline')} fullWidth placeholder="A short catchy line — e.g. “Authentic flavours, served fresh”" inputProps={{ maxLength: 120 }} helperText={`${(formData.tagline || '').length}/120 · shown under your name`} sx={{ mb: 2 }} />
+              <TextField label="Description" value={formData.description} onChange={handleChange('description')} fullWidth multiline rows={3} placeholder="Tell customers about your restaurant — your story, specialities, what makes you unique…" sx={{ mb: 2 }} />
               <Typography variant="body2" fontWeight={600} mb={0.5}>Food Type</Typography>
               <Typography variant="caption" color="text.secondary" display="block" mb={1}>{activeFoodType?.desc || 'What type of food do you serve?'}</Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

@@ -159,6 +159,7 @@ model RefreshToken {
 model Restaurant {
   id           String   @id @default(cuid())
   name         String
+  tagline      String?
   description  String?
   address      String?
   phone        String?

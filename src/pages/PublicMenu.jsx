@@ -505,26 +505,37 @@ export const PublicMenu = () => {
         </div>
       )}
 
-      {/* Restaurant Banner Image */}
-      {restaurant.coverImage && (
-        <div className="restaurant-banner">
+      {/* Restaurant Banner — always rendered so the logo has a home even without a cover */}
+      <div className={`restaurant-banner ${restaurant.coverImage ? '' : 'restaurant-banner--plain'}`}>
+        {restaurant.coverImage && (
           <img src={restaurant.coverImage} alt={restaurant.name} className="restaurant-banner-image" />
-          <div className="restaurant-banner-overlay">
-            {restaurant.logo && (
-              <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
-            )}
-          </div>
-        </div>
-      )}
+        )}
+        <div className="restaurant-banner-overlay" />
+      </div>
 
       <header className="public-menu-header">
         <div className="restaurant-info">
+          <div className="restaurant-identity">
+            {restaurant.logo ? (
+              <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
+            ) : (
+              <div className="restaurant-logo restaurant-logo--placeholder" aria-hidden="true">
+                <Icon icon="mdi:silverware-fork-knife" width={44} />
+              </div>
+            )}
+          </div>
           <h1>{settings?.restaurantName || restaurant.name}</h1>
+          {restaurant.tagline && (
+            <p className="restaurant-tagline">{restaurant.tagline}</p>
+          )}
           {FOOD_TYPE_BADGE[restaurant.foodType] && (
             <span className={`food-type-badge food-type-badge--${FOOD_TYPE_BADGE[restaurant.foodType].variant}`}>
               <span className="food-type-badge-dot" />
               {FOOD_TYPE_BADGE[restaurant.foodType].label}
             </span>
+          )}
+          {restaurant.description && (
+            <p className="restaurant-description">{restaurant.description}</p>
           )}
           {tableNumber && (
             <div className={`table-badge ${tableStatus ? `table-badge--${tableStatus}` : ''}`}>

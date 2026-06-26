@@ -6,7 +6,7 @@ import { emitRestaurantSuspended, emitRestaurantReactivated } from '../utils/soc
 
 // Excludes large base64 columns from list/summary queries
 const RESTAURANT_LIST_SELECT = {
-  id: true, name: true, description: true, address: true,
+  id: true, name: true, tagline: true, description: true, address: true,
   phone: true, email: true, website: true, cuisineTypes: true,
   foodType: true, socialLinks: true, openingHours: true,
   discount: true, qrCode: true, adminId: true, status: true,

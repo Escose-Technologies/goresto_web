@@ -30,6 +30,7 @@ const safeLink = (max) =>
 
 export const createRestaurantSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200).trim(),
+  tagline: z.string().max(120).optional().nullable(),
   description: z.string().max(2000).optional().nullable(),
   address: z.string().max(500).optional().nullable(),
   phone: z.string().max(50).optional().nullable(),
