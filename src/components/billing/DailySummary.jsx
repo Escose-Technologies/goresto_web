@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { billService } from '../../services/apiService';
 import { TouchButton } from '../ui/TouchButton';
+import { presetRange, customRange, localDateStr } from '../../utils/dateRange';
 import './DailySummary.css';
 
 const fmt = (n) => (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -13,30 +14,6 @@ const RANGE_PRESETS = [
   { value: 'month', label: 'This Month' },
   { value: 'custom', label: 'Custom Range' },
 ];
-
-function getDateRange(preset) {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const toISO = (d) => d.toISOString().split('T')[0];
-
-  switch (preset) {
-    case 'today':
-      return { from: toISO(today), to: toISO(today) };
-    case 'yesterday': {
-      const y = new Date(today.getTime() - 86400000);
-      return { from: toISO(y), to: toISO(y) };
-    }
-    case 'week': {
-      const day = today.getDay();
-      const mon = new Date(today.getTime() - ((day === 0 ? 6 : day - 1) * 86400000));
-      return { from: toISO(mon), to: toISO(today) };
-    }
-    case 'month':
-      return { from: toISO(new Date(now.getFullYear(), now.getMonth(), 1)), to: toISO(today) };
-    default:
-      return { from: toISO(today), to: toISO(today) };
-  }
-}
 
 const PAYMENT_LABELS = { cash: 'Cash', card: 'Card', upi: 'UPI', split: 'Split' };
 
@@ -54,9 +31,9 @@ export const DailySummary = ({ restaurantId, toast }) => {
       let range;
       if (preset === 'custom') {
         if (!customFrom || !customTo) return;
-        range = { from: customFrom, to: customTo };
+        range = customRange(customFrom, customTo);
       } else {
-        range = getDateRange(preset);
+        range = presetRange(preset);
       }
       const data = await billService.getSummary(restaurantId, range.from, range.to);
       setSummary(data);
@@ -83,16 +60,14 @@ export const DailySummary = ({ restaurantId, toast }) => {
     if (!summary) return;
     setExporting(true);
     try {
-      let range;
-      if (preset === 'custom') {
-        range = { from: customFrom, to: customTo };
-      } else {
-        range = getDateRange(preset);
-      }
-      // Fetch all bills for the period (no pagination)
+      const range = preset === 'custom' ? customRange(customFrom, customTo) : presetRange(preset);
+      const fromLabel = preset === 'custom' ? customFrom : localDateStr(new Date(range.from));
+      const toLabel = preset === 'custom' ? customTo : localDateStr(new Date(range.to));
+      // Fetch all bills for the period (no pagination). range.{from,to} are
+      // already local-day ISO instants — same window as the summary above.
       const result = await billService.getBills(restaurantId, {
-        from: new Date(range.from + 'T00:00:00').toISOString(),
-        to: new Date(range.to + 'T23:59:59').toISOString(),
+        from: range.from,
+        to: range.to,
         limit: 10000,
       });
       const bills = result.bills || result || [];
@@ -134,7 +109,7 @@ export const DailySummary = ({ restaurantId, toast }) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sales_report_${range.from}_to_${range.to}.csv`;
+      a.download = `sales_report_${fromLabel}_to_${toLabel}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

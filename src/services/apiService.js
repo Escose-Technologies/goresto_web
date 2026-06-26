@@ -585,7 +585,11 @@ export const billService = {
   },
 
   async getSummary(restaurantId, from, to) {
-    return get(`/restaurants/${restaurantId}/bills/summary?from=${from}&to=${to}`);
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    const qs = params.toString();
+    return get(`/restaurants/${restaurantId}/bills/summary${qs ? '?' + qs : ''}`);
   },
 
   async downloadPdf(restaurantId, billId) {

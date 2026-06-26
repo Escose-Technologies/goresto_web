@@ -386,13 +386,22 @@ export const cancel = async (restaurantId, id, data) => {
 // ─── Sales Summary ───────────────────────────────────────
 
 export const getSummary = async (restaurantId, query) => {
-  const fromDate = new Date(query.from + 'T00:00:00.000Z');
-  const toDate = new Date(query.to + 'T23:59:59.999Z');
+  const where = { restaurantId };
 
-  const where = {
-    restaurantId,
-    createdAt: { gte: fromDate, lte: toDate },
-  };
+  // from/to may be full ISO instants (preferred — sent from the client's local
+  // day boundaries so this matches the bill list exactly) or bare YYYY-MM-DD
+  // (fallback → UTC day bounds). Both optional: omit both for an all-time summary.
+  if (query.from || query.to) {
+    where.createdAt = {};
+    if (query.from) {
+      const f = new Date(query.from);
+      where.createdAt.gte = isNaN(f) ? new Date(query.from + 'T00:00:00.000Z') : f;
+    }
+    if (query.to) {
+      const t = new Date(query.to);
+      where.createdAt.lte = isNaN(t) ? new Date(query.to + 'T23:59:59.999Z') : t;
+    }
+  }
 
   // Get all bills in the period
   const bills = await prisma.bill.findMany({

@@ -6,6 +6,7 @@ import { DailySummary } from './DailySummary';
 import { PaymentModeSelector } from './PaymentModeSelector';
 import { TouchButton } from '../ui/TouchButton';
 import { getCurrencySymbol } from '../../utils/currency';
+import { presetRange } from '../../utils/dateRange';
 import './BillingTab.css';
 
 const DATE_PRESETS = [
@@ -15,31 +16,6 @@ const DATE_PRESETS = [
   { value: 'month', label: 'This Month' },
   { value: 'all', label: 'All Time' },
 ];
-
-function getDateRange(preset) {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  switch (preset) {
-    case 'today':
-      return { from: today.toISOString(), to: new Date(today.getTime() + 86400000).toISOString() };
-    case 'yesterday': {
-      const y = new Date(today.getTime() - 86400000);
-      return { from: y.toISOString(), to: today.toISOString() };
-    }
-    case 'week': {
-      const day = today.getDay();
-      const monday = new Date(today.getTime() - ((day === 0 ? 6 : day - 1) * 86400000));
-      return { from: monday.toISOString(), to: new Date(today.getTime() + 86400000).toISOString() };
-    }
-    case 'month': {
-      const first = new Date(now.getFullYear(), now.getMonth(), 1);
-      return { from: first.toISOString(), to: new Date(today.getTime() + 86400000).toISOString() };
-    }
-    default:
-      return {};
-  }
-}
 
 export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, settings }) => {
   const cur = getCurrencySymbol(settings);
@@ -69,7 +45,7 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
   const loadBills = useCallback(async (pageNum = 1, append = false) => {
     try {
       if (!append) setLoading(true);
-      const range = getDateRange(datePreset);
+      const range = presetRange(datePreset);
       const query = {
         page: pageNum,
         limit: 20,
@@ -80,13 +56,13 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
       };
       const result = await billService.getBills(restaurantId, query);
 
-      // API returns { bills, total, page, totalPages } or just an array
+      // API returns { bills, pagination: { total, totalPages } } or just an array
       if (Array.isArray(result)) {
         setBills(append ? prev => [...prev, ...result] : result);
         setTotalCount(result.length);
       } else {
         setBills(append ? prev => [...prev, ...(result.bills || [])] : (result.bills || []));
-        setTotalCount(result.total || 0);
+        setTotalCount(result.pagination?.total ?? result.total ?? 0);
       }
       setPage(pageNum);
     } catch (err) {
@@ -98,11 +74,10 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
 
   const loadStats = useCallback(async () => {
     try {
-      const range = getDateRange(datePreset);
-      if (!range.from) return;
-      const fromDate = range.from.split('T')[0];
-      const toDate = range.to ? range.to.split('T')[0] : fromDate;
-      const data = await billService.getSummary(restaurantId, fromDate, toDate);
+      // Use the SAME window as the bill list (local-day ISO instants). For
+      // "All Time" both are undefined → summary covers every bill.
+      const range = presetRange(datePreset);
+      const data = await billService.getSummary(restaurantId, range.from, range.to);
       setStats(data);
     } catch {
       // Stats are nice-to-have, don't block on failure

@@ -70,8 +70,9 @@ export const billsQuerySchema = z.object({
 });
 
 export const summaryQuerySchema = z.object({
-  from: z.string().min(1, 'Start date is required'),
-  to: z.string().min(1, 'End date is required'),
+  // Optional: omit both for an all-time summary. May be ISO instants or YYYY-MM-DD.
+  from: z.string().min(1).optional(),
+  to: z.string().min(1).optional(),
 });
 
 export const unbilledOrdersQuerySchema = z.object({
