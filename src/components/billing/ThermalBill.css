@@ -75,9 +75,11 @@
 .thermal-item-name-col {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Show the full item name — wrap onto multiple lines instead of truncating. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  padding-right: 4px;
 }
 
 .thermal-item-qty-col {
@@ -104,6 +106,8 @@
 
 .thermal-item-row {
   display: flex;
+  align-items: flex-start;
+  margin-bottom: 2px;
 }
 
 .thermal-item-discount {
