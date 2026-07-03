@@ -25,6 +25,7 @@ export const BillSummaryLive = ({ calculation, settings }) => {
     grandTotal = 0,
   } = calculation;
 
+  const gstOn = settings?.gstEnabled !== false;
   const isComposition = settings?.gstScheme === 'composition';
 
   return (
@@ -83,12 +84,14 @@ export const BillSummaryLive = ({ calculation, settings }) => {
 
       <hr className="bill-summary-divider" />
 
-      <div className="bill-summary-row">
-        <span>Taxable Amount</span>
-        <span>{cur}{taxableAmount.toFixed(2)}</span>
-      </div>
+      {gstOn && (
+        <div className="bill-summary-row">
+          <span>Taxable Amount</span>
+          <span>{cur}{taxableAmount.toFixed(2)}</span>
+        </div>
+      )}
 
-      {!isComposition && (
+      {gstOn && !isComposition && (
         <>
           <div className="bill-summary-row tax">
             <span>CGST ({cgstRate}%)</span>
@@ -121,7 +124,7 @@ export const BillSummaryLive = ({ calculation, settings }) => {
         </div>
       )}
 
-      {isComposition && (
+      {gstOn && isComposition && (
         <div className="bill-summary-scheme-note">
           Composition taxable person, not eligible to collect tax on supplies.
         </div>

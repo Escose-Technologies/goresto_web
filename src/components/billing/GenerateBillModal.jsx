@@ -318,6 +318,7 @@ export const GenerateBillModal = ({
                   </div>
                 )}
 
+                {settings?.gstEnabled !== false && (
                 <div className="bill-extras-row">
                   <label className="bill-extras-label">
                     <input
@@ -338,6 +339,7 @@ export const GenerateBillModal = ({
                     />
                   )}
                 </div>
+                )}
               </div>
 
               <div className="bill-notes">

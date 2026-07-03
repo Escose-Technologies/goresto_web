@@ -25,8 +25,9 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
   if (!bill) return null;
 
   const cur = getCurrencySymbol(settings);
+  const gstOn = settings?.gstEnabled !== false;
   const isComposition = settings?.gstScheme === 'composition';
-  const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
+  const billTitle = !gstOn ? 'BILL' : (isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE');
   const items = bill.billItems || [];
   const orderNos = (bill.orders || [])
     .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
@@ -66,9 +67,9 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
       <div className="thermal-divider" />
 
       {/* GSTIN / FSSAI */}
-      {(settings?.gstin || settings?.fssaiNumber) && (
+      {((gstOn && settings?.gstin) || settings?.fssaiNumber) && (
         <>
-          {settings?.gstin && <div className="thermal-reg-line">GSTIN: {settings.gstin}</div>}
+          {gstOn && settings?.gstin && <div className="thermal-reg-line">GSTIN: {settings.gstin}</div>}
           {settings?.fssaiNumber && <div className="thermal-reg-line">FSSAI: {settings.fssaiNumber}</div>}
           <div className="thermal-divider" />
         </>
@@ -170,7 +171,7 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
           </div>
         )}
 
-        {!isComposition && (
+        {gstOn && !isComposition && (
           <>
             <div className="thermal-total-row">
               <span>Taxable Value</span>
@@ -222,7 +223,7 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
         ) : (
           <div>Payment: {bill.paymentMode?.toUpperCase()}</div>
         )}
-        {!isComposition && <div>SAC Code: 996331</div>}
+        {gstOn && !isComposition && <div>SAC Code: 996331</div>}
       </div>
 
       <div className="thermal-divider" />
@@ -234,13 +235,13 @@ export const ThermalBill = ({ bill, restaurant, settings }) => {
             Customer: {bill.customerName || 'Walk-in'}
             {bill.customerMobile && ` (${bill.customerMobile})`}
           </div>
-          {bill.customerGstin && <div className="thermal-customer">GSTIN: {bill.customerGstin}</div>}
+          {gstOn && bill.customerGstin && <div className="thermal-customer">GSTIN: {bill.customerGstin}</div>}
           <div className="thermal-divider" />
         </>
       )}
 
       {/* Composition disclaimer */}
-      {isComposition && (
+      {gstOn && isComposition && (
         <div className="thermal-disclaimer">
           Composition taxable person, not eligible to collect tax on supplies.
         </div>

@@ -46,11 +46,12 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
   if (!bill) return null;
 
   const cur = getCurrencySymbol(settings);
+  const gstOn = settings?.gstEnabled !== false;
   const isComposition = settings?.gstScheme === 'composition';
   const feedbackUrl = (restaurant?.id || bill?.restaurantId)
     ? `${window.location.origin}/menu/${restaurant?.id || bill.restaurantId}`
     : '';
-  const billTitle = isComposition ? 'Bill of Supply' : 'Tax Invoice';
+  const billTitle = !gstOn ? 'Bill' : (isComposition ? 'Bill of Supply' : 'Tax Invoice');
   const items = bill.billItems || [];
   const orderNos = (bill.orders || [])
     .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
@@ -90,9 +91,9 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
       </div>
 
       {/* Registration */}
-      {(settings?.gstin || settings?.fssaiNumber) && (
+      {((gstOn && settings?.gstin) || settings?.fssaiNumber) && (
         <div className="a4-registration">
-          {settings?.gstin && <span>GSTIN: {settings.gstin}</span>}
+          {gstOn && settings?.gstin && <span>GSTIN: {settings.gstin}</span>}
           {settings?.fssaiNumber && <span>FSSAI: {settings.fssaiNumber}</span>}
         </div>
       )}
@@ -115,8 +116,8 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
         <div className="a4-meta-right">
           {bill.customerName && <div><strong>Customer:</strong> {bill.customerName}</div>}
           {bill.customerMobile && <div><strong>Mobile:</strong> {bill.customerMobile}</div>}
-          {bill.customerGstin && <div><strong>Customer GSTIN:</strong> {bill.customerGstin}</div>}
-          {settings?.placeOfSupply && (
+          {gstOn && bill.customerGstin && <div><strong>Customer GSTIN:</strong> {bill.customerGstin}</div>}
+          {gstOn && settings?.placeOfSupply && (
             <div><strong>Place of Supply:</strong> {settings.placeOfSupply} ({settings.placeOfSupplyCode})</div>
           )}
         </div>
@@ -209,7 +210,7 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
           </div>
         )}
 
-        {!isComposition && (
+        {gstOn && !isComposition && (
           <>
             <div className="a4-summary-row">
               <span>Taxable Value</span>
@@ -260,12 +261,12 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
         ) : (
           <span>{bill.paymentMode?.toUpperCase()}</span>
         )}
-        {!isComposition && <span className="a4-sac"> | SAC: 996331</span>}
+        {gstOn && !isComposition && <span className="a4-sac"> | SAC: 996331</span>}
       </div>
 
       {/* Disclaimers */}
       <div className="a4-disclaimers">
-        {isComposition && (
+        {gstOn && isComposition && (
           <div className="a4-comp-disclaimer">
             Composition taxable person, not eligible to collect tax on supplies.
           </div>

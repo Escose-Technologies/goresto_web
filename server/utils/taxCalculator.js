@@ -75,9 +75,12 @@ export function calculateBill({
   // Step 1 & 2: Process items with item-level discounts
   const processedItems = processItemDiscounts(billItems);
 
+  // Master GST toggle: when disabled, no GST is charged or shown at all.
+  const gstOn = settings.gstEnabled !== false;
+
   // Step 2.5: For GST-inclusive items, back-calculate the taxable base price.
   // Formula: taxableValue = inclusivePrice / (1 + gstRate/100)
-  const gstRate = (settings.gstScheme === 'regular' || !settings.gstScheme)
+  const gstRate = (gstOn && (settings.gstScheme === 'regular' || !settings.gstScheme))
     ? (settings.gstRate || 5) : 0;
   let inclusiveGstAmount = 0;
   if (gstRate > 0) {
@@ -128,7 +131,7 @@ export function calculateBill({
   // Step 8: GST calculation
   let cgstRate = 0, cgstAmount = 0, sgstRate = 0, sgstAmount = 0, totalTax = 0;
 
-  if (settings.gstScheme === 'regular' || !settings.gstScheme) {
+  if (gstOn && (settings.gstScheme === 'regular' || !settings.gstScheme)) {
     const gstRate = settings.gstRate || 5; // default 5%
     const halfRate = gstRate / 2;
     cgstRate = halfRate;

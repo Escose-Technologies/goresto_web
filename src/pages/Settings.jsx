@@ -47,7 +47,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
     secondaryColor: '#589BF3', fontColor: '#1F2937', fontSize: 16, timezone: 'Asia/Kolkata', taxRate: 0.08,
     serviceCharge: 0.1, allowOnlineOrders: true, allowTableReservations: true,
     allowCallStaff: true, notificationEmail: '', discountText: '', kitchenPin: '',
-    gstin: '', gstScheme: 'regular', gstRate: 5, fssaiNumber: '',
+    gstEnabled: true, gstin: '', gstScheme: 'regular', gstRate: 5, fssaiNumber: '',
     placeOfSupply: '', placeOfSupplyCode: '', billPrefix: 'INV',
     showServiceCharge: false, serviceChargeLabel: 'Service Charge',
     enableRoundOff: true, enablePackagingCharge: false, defaultPackagingCharge: 0,
@@ -304,6 +304,22 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
           {active === 'billingTax' && (
             <Box>
               <Typography variant="subtitle2" fontWeight={700} mb={1.5}>GST Registration</Typography>
+              <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', mb: 2 }}>
+                <input
+                  type="checkbox"
+                  checked={formData.gstEnabled !== false}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, gstEnabled: e.target.checked }))}
+                  style={{ accentColor: '#3385F0', width: 18, height: 18 }}
+                />
+                <span>Enable GST on bills</span>
+              </Box>
+              {formData.gstEnabled === false && (
+                <Typography variant="caption" color="text.secondary" mb={2} display="block">
+                  GST is turned off. Bills show no GSTIN or tax breakdown and no GST is charged.
+                </Typography>
+              )}
+              {formData.gstEnabled !== false && (
+              <>
               <Grid container spacing={2} mb={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="body2" fontWeight={500} mb={1}>GST Scheme</Typography>
@@ -354,6 +370,8 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
                   helperText={fieldError('gstin') || 'Required for Tax Invoice. First 2 digits must match your state code.'}
                   sx={{ mb: 2 }}
                 />
+              )}
+              </>
               )}
 
               <TextField

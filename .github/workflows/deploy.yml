@@ -25,9 +25,19 @@ jobs:
             set -euo pipefail
             cd ~/goresto
             BEFORE=$(git rev-parse HEAD)
+            git fetch origin main
+            # Guard against a diverged server checkout: if HEAD has commits that
+            # origin/main does not (e.g. a stray local/feature commit on the box),
+            # --ff-only would fail every future deploy while prod silently stays
+            # stale. Fail loudly with an actionable message instead of a cryptic
+            # git error. Fix on the box: `git reset --hard origin/main`.
+            AHEAD=$(git rev-list --count origin/main..HEAD)
+            if [ "$AHEAD" != "0" ]; then
+              echo "::error::Server checkout has diverged from origin/main ($AHEAD local commit(s) not on origin). Deploy aborted — reconcile on the box with 'git reset --hard origin/main'."
+              exit 1
+            fi
             # --ff-only so a failed/diverged pull aborts the deploy instead of
             # silently rebuilding stale code (with set -e the job then goes red).
-            git fetch origin main
             git pull --ff-only origin main
             AFTER=$(git rev-parse HEAD)
             echo "Deploying ${BEFORE} -> ${AFTER}"

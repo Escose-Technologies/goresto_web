@@ -333,6 +333,7 @@ model Settings {
   kitchenPin             String?  @db.VarChar(72)
 
   // GST Configuration
+  gstEnabled        Boolean       @default(true)     // master on/off for GST on bills
   gstin             String?       // 15-digit GSTIN
   gstScheme         GstScheme     @default(regular)
   gstRate           Float         @default(5)       // total GST rate as percentage (5, 12, 18, 28)

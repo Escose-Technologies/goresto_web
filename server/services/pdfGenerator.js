@@ -74,8 +74,9 @@ export function generateBillPdf(bill) {
   const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: '₹', CAD: 'C$', AUD: 'A$' };
   const cur = SYMBOLS[settings.currency] || '₹';
   const items = bill.billItems || [];
+  const gstOn = settings.gstEnabled !== false;
   const isComposition = settings.gstScheme === 'composition';
-  const billTitle = isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE';
+  const billTitle = !gstOn ? 'BILL' : (isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE');
   const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
   const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
   const itemDiscLabel = (it) => {
@@ -142,7 +143,7 @@ export function generateBillPdf(bill) {
 
   // Registration line
   const regParts = [];
-  if (settings.gstin) regParts.push('GSTIN: ' + settings.gstin);
+  if (settings.gstEnabled !== false && settings.gstin) regParts.push('GSTIN: ' + settings.gstin);
   if (settings.fssaiNumber) regParts.push('FSSAI: ' + settings.fssaiNumber);
   if (regParts.length) {
     drawLine(doc, y, pageWidth);
@@ -307,7 +308,7 @@ export function generateBillPdf(bill) {
     addSumRow('Packaging Charge', fmt(bill.packagingCharge));
   }
 
-  if (!isComposition) {
+  if (gstOn && !isComposition) {
     addSumRow('Taxable Value', fmt(bill.taxableAmount));
     if (bill.cgstAmount > 0) addSumRow(`CGST @ ${bill.cgstRate}%`, fmt(bill.cgstAmount));
     if (bill.sgstAmount > 0) addSumRow(`SGST @ ${bill.sgstRate}%`, fmt(bill.sgstAmount));
@@ -345,7 +346,7 @@ export function generateBillPdf(bill) {
   }
   y = doc.y;
 
-  if (!isComposition) {
+  if (gstOn && !isComposition) {
     doc.font('Helvetica').fontSize(8).fillColor(COLOR.light)
       .text('SAC Code: 996331', doc.page.margins.left, y + 2, { width: pageWidth });
     y = doc.y;
