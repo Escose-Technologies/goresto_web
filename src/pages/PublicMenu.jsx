@@ -238,6 +238,7 @@ export const PublicMenu = () => {
   const handleClearFilters = () => {
     setActiveFilters([]);
     setSearchQuery('');
+    setSelectedCategory('All');
   };
 
   const addToCart = (item) => {
