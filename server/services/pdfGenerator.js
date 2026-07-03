@@ -71,8 +71,10 @@ const COLOR = {
 export function generateBillPdf(bill) {
   const restaurant = bill.restaurant || {};
   const settings = bill.restaurantSettings || {};
-  const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: '₹', CAD: 'C$', AUD: 'A$' };
-  const cur = SYMBOLS[settings.currency] || '₹';
+  // NOTE: pdfkit's built-in Helvetica has no ₹ (U+20B9) glyph and renders it as
+  // garbage, so INR uses the "Rs." text form in the PDF.
+  const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: 'Rs.', CAD: 'C$', AUD: 'A$' };
+  const cur = SYMBOLS[settings.currency] || 'Rs.';
   const items = bill.billItems || [];
   const gstOn = settings.gstEnabled !== false;
   const isComposition = settings.gstScheme === 'composition';
@@ -106,38 +108,44 @@ export function generateBillPdf(bill) {
 
   // ─── Header ──────────────────────────────────────
 
-  // Restaurant logo (if base64)
+  // Restaurant logo (if base64) drawn on the left; name/address/contact
+  // flow in a text column to the right so nothing overlaps the logo.
+  const LOGO_SIZE = 48;
+  const logoTop = y;
+  let hasLogo = false;
   if (restaurant.logo && restaurant.logo.startsWith('data:image')) {
     try {
-      doc.image(restaurant.logo, doc.page.margins.left, y, { width: 48, height: 48 });
-      doc.font('Helvetica-Bold').fontSize(16).fillColor(COLOR.black)
-        .text(restaurant.name || '', doc.page.margins.left + 56, y + 4, { width: pageWidth - 56 });
-      y += 18;
+      doc.image(restaurant.logo, doc.page.margins.left, y, { width: LOGO_SIZE, height: LOGO_SIZE });
+      hasLogo = true;
     } catch {
-      // If image fails, just show name
-      doc.font('Helvetica-Bold').fontSize(16).fillColor(COLOR.black)
-        .text(restaurant.name || '', doc.page.margins.left, y);
-      y = doc.y;
+      // If the image is unusable, fall back to a text-only header.
+      hasLogo = false;
     }
-  } else {
-    doc.font('Helvetica-Bold').fontSize(16).fillColor(COLOR.black)
-      .text(restaurant.name || settings.restaurantName || '', doc.page.margins.left, y);
-    y = doc.y;
   }
+
+  const textX = hasLogo ? doc.page.margins.left + LOGO_SIZE + 8 : doc.page.margins.left;
+  const textW = hasLogo ? pageWidth - LOGO_SIZE - 8 : pageWidth;
+
+  doc.font('Helvetica-Bold').fontSize(16).fillColor(COLOR.black)
+    .text(restaurant.name || settings.restaurantName || '', textX, y, { width: textW });
+  y = doc.y;
 
   // Address + contact
   if (restaurant.address || settings.address) {
     doc.font('Helvetica').fontSize(9).fillColor(COLOR.gray)
-      .text(settings.address || restaurant.address, doc.page.margins.left, y + 2);
+      .text(settings.address || restaurant.address, textX, y + 2, { width: textW });
     y = doc.y;
   }
 
   const contact = [restaurant.phone || settings.phone, restaurant.email || settings.email].filter(Boolean).join('  |  ');
   if (contact) {
     doc.font('Helvetica').fontSize(8).fillColor(COLOR.light)
-      .text(contact, doc.page.margins.left, y + 1);
+      .text(contact, textX, y + 1, { width: textW });
     y = doc.y;
   }
+
+  // Ensure we clear the logo's full height before the next section.
+  if (hasLogo) y = Math.max(y, logoTop + LOGO_SIZE);
 
   y += 6;
 
