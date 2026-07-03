@@ -505,18 +505,7 @@ export const PublicMenu = () => {
         </div>
       )}
 
-      {/* Restaurant logo — shown wide and prominent, above the cover poster */}
-      <div className="restaurant-logo-bar">
-        {restaurant.logo ? (
-          <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
-        ) : (
-          <div className="restaurant-logo restaurant-logo--placeholder" aria-hidden="true">
-            <Icon icon="mdi:silverware-fork-knife" width={56} />
-          </div>
-        )}
-      </div>
-
-      {/* Restaurant Banner (cover poster) */}
+      {/* Restaurant Banner — always rendered so the logo has a home even without a cover */}
       <div className={`restaurant-banner ${restaurant.coverImage ? '' : 'restaurant-banner--plain'}`}>
         {restaurant.coverImage && (
           <img src={restaurant.coverImage} alt={restaurant.name} className="restaurant-banner-image" />
@@ -526,6 +515,15 @@ export const PublicMenu = () => {
 
       <header className="public-menu-header">
         <div className="restaurant-info">
+          <div className="restaurant-identity">
+            {restaurant.logo ? (
+              <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
+            ) : (
+              <div className="restaurant-logo restaurant-logo--placeholder" aria-hidden="true">
+                <Icon icon="mdi:silverware-fork-knife" width={56} />
+              </div>
+            )}
+          </div>
           <h1>{settings?.restaurantName || restaurant.name}</h1>
           {restaurant.tagline && (
             <p className="restaurant-tagline">{restaurant.tagline}</p>
