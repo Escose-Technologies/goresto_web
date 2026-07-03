@@ -28,18 +28,38 @@ const FOOD_TYPE_BADGE = {
   both: { label: 'Veg & Non-Veg', variant: 'both' },
 };
 
+// Persist the last successful menu payload so a page refresh paints real
+// content immediately (revalidated in the background) instead of a blank spinner.
+const cacheKey = (id) => `publicMenu:${id}`;
+const readMenuCache = (id) => {
+  if (!id) return null;
+  try {
+    return JSON.parse(sessionStorage.getItem(cacheKey(id)) || 'null');
+  } catch {
+    return null;
+  }
+};
+const writeMenuCache = (id, data) => {
+  try {
+    sessionStorage.setItem(cacheKey(id), JSON.stringify(data));
+  } catch {
+    /* quota / private mode — cache is best-effort */
+  }
+};
+
 export const PublicMenu = () => {
   const toast = useToast();
   const { restaurantId } = useParams();
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
-  const [restaurant, setRestaurant] = useState(null);
-  const [settings, setSettings] = useState(null);
-  const [menuItems, setMenuItems] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const cached = readMenuCache(restaurantId);
+  const [restaurant, setRestaurant] = useState(cached?.restaurant || null);
+  const [settings, setSettings] = useState(cached?.settings || null);
+  const [menuItems, setMenuItems] = useState(cached?.menuItems || []);
+  const [categories, setCategories] = useState(cached?.categories || []);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cached);
   const [unavailable, setUnavailable] = useState(false);
   const [tableStatus, setTableStatus] = useState(null);
   const [cart, setCart] = useState([]);
@@ -138,18 +158,56 @@ export const PublicMenu = () => {
     return options;
   }, [restaurant?.foodType]);
 
+  // Lock zoom + fit-to-screen ONLY on the customer menu (restored on unmount so
+  // the admin UI keeps its normal, zoomable viewport).
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const prev = meta.getAttribute('content');
+    meta.setAttribute(
+      'content',
+      'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover'
+    );
+    document.body.classList.add('public-menu-body');
+    return () => {
+      if (prev) meta.setAttribute('content', prev);
+      document.body.classList.remove('public-menu-body');
+    };
+  }, []);
+
+  // Paint the cached brand theme instantly so a refresh doesn't flash default colors.
+  useEffect(() => {
+    if (cached?.settings) {
+      applyRestaurantTheme({
+        primaryColor: cached.settings.primaryColor,
+        secondaryColor: cached.settings.secondaryColor,
+        fontColor: cached.settings.fontColor,
+        fontSize: cached.settings.fontSize,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     loadMenuData();
   }, [restaurantId]);
 
   const loadMenuData = async () => {
     try {
-      const restaurantData = await publicService.getRestaurant(restaurantId);
-      if (restaurantData) {
-        setRestaurant(restaurantData);
+      // Fetch in parallel so first paint isn't gated on 4 serial round-trips.
+      const [restaurantData, restaurantSettings, items, cats] = await Promise.all([
+        publicService.getRestaurant(restaurantId),
+        publicService.getSettings(restaurantId),
+        publicService.getMenuItems(restaurantId),
+        publicService.getCategories(restaurantId),
+      ]);
 
-        const restaurantSettings = await publicService.getSettings(restaurantId);
+      if (restaurantData) {
+        const availableItems = (items || []).filter(item => item.available);
+        setRestaurant(restaurantData);
         setSettings(restaurantSettings);
+        setMenuItems(availableItems);
+        setCategories(cats || []);
         applyRestaurantTheme({
           primaryColor: restaurantSettings?.primaryColor,
           secondaryColor: restaurantSettings?.secondaryColor,
@@ -157,11 +215,13 @@ export const PublicMenu = () => {
           fontSize: restaurantSettings?.fontSize,
         });
 
-        const items = await publicService.getMenuItems(restaurantId);
-        const availableItems = items.filter(item => item.available);
-        setMenuItems(availableItems);
-        const cats = await publicService.getCategories(restaurantId);
-        setCategories(cats);
+        // Cache the payload for an instant, flash-free next refresh.
+        writeMenuCache(restaurantId, {
+          restaurant: restaurantData,
+          settings: restaurantSettings,
+          menuItems: availableItems,
+          categories: cats || [],
+        });
 
         if (tableNumber) {
           try {
