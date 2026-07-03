@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -86,8 +86,10 @@ export const PublicMenu = () => {
 
   const { joinPublic, onOrderUpdated, callStaff } = useSocket();
 
-  // Call Staff state
-  const [callStaffSent, setCallStaffSent] = useState(false);
+  // Call Staff state — machine: 'idle' | 'pending' (5s cancel window) | 'sent'
+  const [callStatus, setCallStatus] = useState('idle');
+  const [callCountdown, setCallCountdown] = useState(5);
+  const callTimerRef = useRef(null);
 
   // Socket: join public room for real-time order status updates
   useEffect(() => {
@@ -463,16 +465,49 @@ export const PublicMenu = () => {
     return statusMap[status] || status;
   };
 
-  const handleCallStaff = async () => {
-    if (callStaffSent) return;
-    setCallStaffSent(true);
+  // Start a 5s cancel window; the admin is only notified once it elapses.
+  const handleCallStaff = () => {
+    if (callStatus !== 'idle') return;
+    setCallStatus('pending');
+    setCallCountdown(5);
+    callTimerRef.current = setInterval(() => {
+      setCallCountdown((n) => {
+        if (n <= 1) {
+          clearInterval(callTimerRef.current);
+          callTimerRef.current = null;
+          fireCallStaff();
+          return 0;
+        }
+        return n - 1;
+      });
+    }, 1000);
+  };
+
+  const fireCallStaff = async () => {
+    setCallStatus('sent');
     try {
       await callStaff(restaurantId, tableNumber, customerName || undefined);
     } catch (err) {
       console.error('Failed to call staff:', err);
     }
-    setTimeout(() => setCallStaffSent(false), 5000);
+    // Return to idle so they can call again if needed.
+    callTimerRef.current = setTimeout(() => setCallStatus('idle'), 4000);
   };
+
+  // Cancel within the 5s window — nothing is sent to the admin.
+  const handleStopCall = () => {
+    if (callTimerRef.current) {
+      clearInterval(callTimerRef.current);
+      callTimerRef.current = null;
+    }
+    setCallStatus('idle');
+    setCallCountdown(5);
+  };
+
+  // Clear any pending timers on unmount.
+  useEffect(() => () => {
+    if (callTimerRef.current) clearInterval(callTimerRef.current);
+  }, []);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -620,14 +655,24 @@ export const PublicMenu = () => {
             </button>
 
             {settings?.allowCallStaff && tableNumber && tableStatus !== 'maintenance' && (
-              <button
-                className={`call-staff-btn ${callStaffSent ? 'call-staff-sent' : ''}`}
-                onClick={handleCallStaff}
-                disabled={callStaffSent}
-              >
-                <Icon icon="mdi:bell-outline" width={16} />
-                {callStaffSent ? 'Notified!' : 'Call Staff'}
-              </button>
+              callStatus === 'pending' ? (
+                <button
+                  className="call-staff-btn call-staff-cancel"
+                  onClick={handleStopCall}
+                >
+                  <Icon icon="mdi:close-circle-outline" width={16} />
+                  Stop calling ({callCountdown})
+                </button>
+              ) : (
+                <button
+                  className={`call-staff-btn ${callStatus === 'sent' ? 'call-staff-sent' : ''}`}
+                  onClick={handleCallStaff}
+                  disabled={callStatus === 'sent'}
+                >
+                  <Icon icon={callStatus === 'sent' ? 'mdi:bell-check' : 'mdi:bell-outline'} width={16} />
+                  {callStatus === 'sent' ? 'Staff notified' : 'Call Staff'}
+                </button>
+              )
             )}
           </div>
 

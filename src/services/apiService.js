@@ -649,3 +649,18 @@ export const categoryService = {
     return put(`/restaurants/${restaurantId}/categories/reorder`, { orderedIds });
   },
 };
+
+export const staffCallService = {
+  async getAll(restaurantId) {
+    return get(`/restaurants/${restaurantId}/staff-calls`);
+  },
+  async markRead(restaurantId, id) {
+    return patch(`/restaurants/${restaurantId}/staff-calls/${id}/read`, {});
+  },
+  async markAllRead(restaurantId) {
+    return patch(`/restaurants/${restaurantId}/staff-calls/read-all`, {});
+  },
+  async clearAll(restaurantId) {
+    return del(`/restaurants/${restaurantId}/staff-calls`);
+  },
+};

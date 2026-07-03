@@ -138,7 +138,7 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  adminOf       Restaurant[]   @relation("PrimaryAdmin")
+  adminOf Restaurant[] @relation("PrimaryAdmin")
 
   @@index([email])
   @@index([restaurantId])
@@ -157,7 +157,7 @@ model RefreshToken {
 }
 
 model Restaurant {
-  id           String   @id @default(cuid())
+  id           String           @id @default(cuid())
   name         String
   tagline      String?
   description  String?
@@ -165,10 +165,10 @@ model Restaurant {
   phone        String?
   email        String?
   website      String?
-  logo         String?  @db.Text
-  coverImage   String?  @db.Text
+  logo         String?          @db.Text
+  coverImage   String?          @db.Text
   cuisineTypes String[]
-  foodType     FoodType @default(both)
+  foodType     FoodType         @default(both)
   socialLinks  Json?
   openingHours String?
   discount     Json?
@@ -190,6 +190,7 @@ model Restaurant {
   billSequences   BillSequence[]
   discountPresets DiscountPreset[]
   categories      Category[]
+  staffCalls      StaffCall[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -214,23 +215,23 @@ model Category {
 }
 
 model MenuItem {
-  id           String      @id @default(cuid())
-  restaurantId String
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  name         String
-  price        Float
-  description  String?
-  category     String?
-  image        String?     @db.Text
-  available    Boolean     @default(true)
-  dietaryType  DietaryType @default(veg)
-  spiceLevel   Int         @default(0)
-  allergens    String[]
-  labels       String[]
-  priceIncludesGst Boolean    @default(false)
+  id               String      @id @default(cuid())
+  restaurantId     String
+  restaurant       Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name             String
+  price            Float
+  description      String?
+  category         String?
+  image            String?     @db.Text
+  available        Boolean     @default(true)
+  dietaryType      DietaryType @default(veg)
+  spiceLevel       Int         @default(0)
+  allergens        String[]
+  labels           String[]
+  priceIncludesGst Boolean     @default(false)
   variants         Json?
-  rating       Float       @default(0)
-  reviewCount  Int         @default(0)
+  rating           Float       @default(0)
+  reviewCount      Int         @default(0)
 
   reviews Review[]
 
@@ -308,50 +309,50 @@ model Staff {
 }
 
 model Settings {
-  id                     String   @id @default(cuid())
-  restaurantId           String   @unique
+  id                     String     @id @default(cuid())
+  restaurantId           String     @unique
   restaurant             Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantName         String?
   address                String?
   phone                  String?
   email                  String?
-  currency               Currency @default(INR)
+  currency               Currency   @default(INR)
   openingTime            String?
   closingTime            String?
-  primaryColor           String?  @default("#7C3AED")
-  secondaryColor         String?  @default("#9333EA")
-  fontColor              String?  @default("#1F2937")
-  fontSize               Int?    @default(16)
-  timezone               String?  @default("Asia/Kolkata")
-  taxRate                Float?   @default(0.08)
-  serviceCharge          Float?   @default(0.1)
-  allowOnlineOrders      Boolean  @default(true)
-  allowTableReservations Boolean  @default(true)
-  allowCallStaff         Boolean  @default(true)
+  primaryColor           String?    @default("#7C3AED")
+  secondaryColor         String?    @default("#9333EA")
+  fontColor              String?    @default("#1F2937")
+  fontSize               Int?       @default(16)
+  timezone               String?    @default("Asia/Kolkata")
+  taxRate                Float?     @default(0.08)
+  serviceCharge          Float?     @default(0.1)
+  allowOnlineOrders      Boolean    @default(true)
+  allowTableReservations Boolean    @default(true)
+  allowCallStaff         Boolean    @default(true)
   notificationEmail      String?
   discountText           String?
-  kitchenPin             String?  @db.VarChar(72)
+  kitchenPin             String?    @db.VarChar(72)
 
   // GST Configuration
-  gstEnabled        Boolean       @default(true)     // master on/off for GST on bills
-  gstin             String?       // 15-digit GSTIN
-  gstScheme         GstScheme     @default(regular)
-  gstRate           Float         @default(5)       // total GST rate as percentage (5, 12, 18, 28)
-  fssaiNumber       String?       // 14-digit FSSAI license
-  placeOfSupply     String?       // State name
-  placeOfSupplyCode String?       // State code (e.g., "29")
+  gstEnabled        Boolean   @default(true) // master on/off for GST on bills
+  gstin             String? // 15-digit GSTIN
+  gstScheme         GstScheme @default(regular)
+  gstRate           Float     @default(5) // total GST rate as percentage (5, 12, 18, 28)
+  fssaiNumber       String? // 14-digit FSSAI license
+  placeOfSupply     String? // State name
+  placeOfSupplyCode String? // State code (e.g., "29")
 
   // Bill Configuration
-  billPrefix            String       @default("INV")
-  showServiceCharge     Boolean      @default(false)
-  serviceChargeLabel    String?      @default("Service Charge")
-  enableRoundOff        Boolean      @default(true)
-  enablePackagingCharge Boolean      @default(false)
-  defaultPackagingCharge Float?      @default(0)
-  billFooterText        String?      @default("Thank you for dining with us!")
-  showFeedbackQR        Boolean      @default(false)
-  autoPrintOnBill       Boolean      @default(false)
-  thermalPrinterWidth   ThermalWidth @default(eighty_mm)
+  billPrefix             String       @default("INV")
+  showServiceCharge      Boolean      @default(false)
+  serviceChargeLabel     String?      @default("Service Charge")
+  enableRoundOff         Boolean      @default(true)
+  enablePackagingCharge  Boolean      @default(false)
+  defaultPackagingCharge Float?       @default(0)
+  billFooterText         String?      @default("Thank you for dining with us!")
+  showFeedbackQR         Boolean      @default(false)
+  autoPrintOnBill        Boolean      @default(false)
+  thermalPrinterWidth    ThermalWidth @default(eighty_mm)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -378,72 +379,72 @@ model Review {
 // ─── BILLING MODELS ────────────────────────────────────
 
 model Bill {
-  id              String        @id @default(cuid())
-  restaurantId    String
-  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   // Multiple orders can be consolidated into one bill
-  orders          Order[]
+  orders Order[]
 
   // Invoice identification
-  billNumber      String        // e.g., "INV/2526/0001"
-  billType        BillType      @default(tax_invoice)
-  financialYear   String        // e.g., "2025-26"
-  sequenceNumber  Int           // auto-increment within FY per restaurant
+  billNumber     String // e.g., "INV/2526/0001"
+  billType       BillType @default(tax_invoice)
+  financialYear  String // e.g., "2025-26"
+  sequenceNumber Int // auto-increment within FY per restaurant
 
   // Snapshotted bill items (frozen at bill time)
-  billItems       Json
+  billItems Json
 
   // Amounts — full calculation chain
-  subtotal            Float     // sum of (price × qty) before any discount
-  totalItemDiscount   Float     @default(0)
-  afterItemDiscount   Float     // subtotal - totalItemDiscount
+  subtotal            Float // sum of (price × qty) before any discount
+  totalItemDiscount   Float         @default(0)
+  afterItemDiscount   Float // subtotal - totalItemDiscount
   billDiscountType    DiscountType?
-  billDiscountValue   Float?    @default(0)
-  billDiscountAmount  Float     @default(0)
-  afterAllDiscounts   Float     // afterItemDiscount - billDiscountAmount
-  serviceChargeRate   Float     @default(0)  // e.g., 10 (meaning 10%)
-  serviceChargeAmount Float     @default(0)
-  packagingCharge     Float     @default(0)
-  taxableAmount       Float     // afterAllDiscounts + serviceCharge + packagingCharge
-  cgstRate            Float     @default(0)
-  cgstAmount          Float     @default(0)
-  sgstRate            Float     @default(0)
-  sgstAmount          Float     @default(0)
-  totalTax            Float     @default(0)
-  roundOff            Float     @default(0)
+  billDiscountValue   Float?        @default(0)
+  billDiscountAmount  Float         @default(0)
+  afterAllDiscounts   Float // afterItemDiscount - billDiscountAmount
+  serviceChargeRate   Float         @default(0) // e.g., 10 (meaning 10%)
+  serviceChargeAmount Float         @default(0)
+  packagingCharge     Float         @default(0)
+  taxableAmount       Float // afterAllDiscounts + serviceCharge + packagingCharge
+  cgstRate            Float         @default(0)
+  cgstAmount          Float         @default(0)
+  sgstRate            Float         @default(0)
+  sgstAmount          Float         @default(0)
+  totalTax            Float         @default(0)
+  roundOff            Float         @default(0)
   grandTotal          Float
 
   // Discount tracking (full audit trail)
-  discountDetails     Json?
-  discountPresetId    String?
-  discountReason      String?
+  discountDetails  Json?
+  discountPresetId String?
+  discountReason   String?
 
   // Payment
-  paymentMode         PaymentMode   @default(cash)
-  paymentStatus       PaymentStatus @default(unpaid)
-  paidAmount          Float         @default(0)
-  dueAmount           Float         @default(0)
-  splitPayments       Json?
+  paymentMode   PaymentMode   @default(cash)
+  paymentStatus PaymentStatus @default(unpaid)
+  paidAmount    Float         @default(0)
+  dueAmount     Float         @default(0)
+  splitPayments Json?
 
   // Customer
-  customerName    String?
-  customerMobile  String?
-  customerGstin   String?
+  customerName   String?
+  customerMobile String?
+  customerGstin  String?
 
   // Table and order info
-  tableNumber     String
-  orderType       OrderType     @default(dine_in)
+  tableNumber String
+  orderType   OrderType @default(dine_in)
 
   // Metadata
-  notes           String?       @db.Text
-  createdBy       String?
-  cancelledAt     DateTime?
-  cancelReason    String?
+  notes            String?   @db.Text
+  createdBy        String?
+  cancelledAt      DateTime?
+  cancelReason     String?
   creditNoteNumber String?
 
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([restaurantId, financialYear, sequenceNumber])
   @@index([restaurantId])
@@ -454,27 +455,27 @@ model Bill {
 }
 
 model BillSequence {
-  id              String     @id @default(cuid())
-  restaurantId    String
-  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  financialYear   String     // "2025-26"
-  lastSequence    Int        @default(0)
+  id            String     @id @default(cuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  financialYear String // "2025-26"
+  lastSequence  Int        @default(0)
 
   @@unique([restaurantId, financialYear])
 }
 
 model DiscountPreset {
-  id              String         @id @default(cuid())
-  restaurantId    String
-  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  name            String
-  description     String?
-  isActive        Boolean        @default(true)
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  isActive     Boolean    @default(true)
 
   // Discount definition
-  scope           DiscountScope  @default(bill)
-  discountType    DiscountType
-  discountValue   Float
+  scope         DiscountScope @default(bill)
+  discountType  DiscountType
+  discountValue Float
 
   // Conditions
   minBillAmount        Float?
@@ -482,19 +483,33 @@ model DiscountPreset {
   applicableItemIds    String[]
 
   // Schedule
-  startDate       DateTime?
-  endDate         DateTime?
-  startTime       String?    // "16:00"
-  endTime         String?    // "19:00"
-  activeDays      Int[]      // [0-6], 0=Sun, 6=Sat
+  startDate  DateTime?
+  endDate    DateTime?
+  startTime  String? // "16:00"
+  endTime    String? // "19:00"
+  activeDays Int[] // [0-6], 0=Sun, 6=Sat
 
   // Constraints
-  requiresReason    Boolean  @default(false)
+  requiresReason    Boolean @default(false)
   maxDiscountAmount Float?
-  autoSuggest       Boolean  @default(true)
+  autoSuggest       Boolean @default(true)
 
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([restaurantId, isActive])
+}
+
+model StaffCall {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tableNumber  String
+  customerName String?
+  read         Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId])
+  @@index([restaurantId, read])
+  @@index([createdAt])
 }

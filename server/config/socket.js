@@ -4,6 +4,7 @@ import { verifyAccessToken } from '../utils/jwt.js';
 
 import { prisma } from './database.js';
 import * as ordersService from '../services/orders.service.js';
+import * as staffCallsService from '../services/staffCalls.service.js';
 
 let io = null;
 
@@ -143,10 +144,15 @@ export const initializeSocket = (httpServer) => {
           return;
         }
 
+        // Persist so the admin notification center survives refresh / re-login.
+        const call = await staffCallsService.create(restaurantId, { tableNumber, customerName });
+
         io.to(`restaurant:${restaurantId}`).emit('staff:called', {
-          tableNumber,
-          customerName: customerName || null,
-          timestamp: new Date().toISOString(),
+          id: call.id,
+          tableNumber: call.tableNumber,
+          customerName: call.customerName,
+          read: call.read,
+          createdAt: call.createdAt,
         });
 
         console.log(`Staff called for table ${tableNumber} at restaurant ${restaurantId}`);

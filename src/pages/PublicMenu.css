@@ -1332,6 +1332,21 @@ body.public-menu-body,
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
+/* Cancel state during the 5s window — red so it clearly reads as "stop". */
+.call-staff-btn.call-staff-cancel {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  animation: callPulse 1s ease-in-out infinite;
+}
+
+@keyframes callPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-staff-btn.call-staff-cancel { animation: none; }
+}
+
 .call-staff-btn svg {
   flex-shrink: 0;
 }

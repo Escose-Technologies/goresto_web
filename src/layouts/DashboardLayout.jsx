@@ -12,7 +12,10 @@ const DashboardLayout = ({
   userName,
   onLogout,
   orderCounts,
-  notificationCount,
+  notifications,
+  onNotificationRead,
+  onNotificationReadAll,
+  onNotificationClear,
   connected,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,7 +41,10 @@ const DashboardLayout = ({
         restaurantName={restaurantName}
         userName={userName}
         onLogout={onLogout}
-        notificationCount={notificationCount}
+        notifications={notifications}
+        onNotificationRead={onNotificationRead}
+        onNotificationReadAll={onNotificationReadAll}
+        onNotificationClear={onNotificationClear}
         connected={connected}
         sidebarWidth={sidebarWidth}
       />

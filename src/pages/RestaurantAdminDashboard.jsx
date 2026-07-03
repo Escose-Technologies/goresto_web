@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import Backdrop from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, staffCallService, getAccessToken } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
@@ -23,7 +21,7 @@ import { GenerateBillModal } from '../components/billing/GenerateBillModal';
 import { BillPreview } from '../components/billing/BillPreview';
 import { BillingTab } from '../components/billing/BillingTab';
 import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
-import { startStaffCallRing } from '../utils/sounds';
+import { playStaffCallSound } from '../utils/sounds';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
@@ -54,15 +52,13 @@ export const RestaurantAdminDashboard = () => {
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
   const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated } = useSocket();
-  const [staffCallAlerts, setStaffCallAlerts] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [suspended, setSuspended] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [showBillModal, setShowBillModal] = useState(false);
   const [billTriggerOrder, setBillTriggerOrder] = useState(null);
   const [billingRefreshKey, setBillingRefreshKey] = useState(0);
   const [autoPrintBill, setAutoPrintBill] = useState(null);
-  const staffCallRingsRef = useRef({});
-  const staffCallTablesRef = useRef(new Set());
 
   useEffect(() => {
     loadRestaurantData();
@@ -95,15 +91,11 @@ export const RestaurantAdminDashboard = () => {
     });
 
     const cleanupStaffCalled = onStaffCalled((data) => {
-      // Guard duplicates via ref (avoids StrictMode double-invocation issues)
-      if (staffCallTablesRef.current.has(data.tableNumber)) return;
-      staffCallTablesRef.current.add(data.tableNumber);
-
-      const id = Date.now() + Math.random();
-      const ring = startStaffCallRing();
-      staffCallRingsRef.current[id] = ring;
-
-      setStaffCallAlerts(prev => [...prev, { ...data, id }]);
+      setNotifications(prev => {
+        if (data.id && prev.some(n => n.id === data.id)) return prev;
+        return [{ ...data, read: false }, ...prev];
+      });
+      playStaffCallSound();
     });
 
     const cleanupBillNew = onBillNew(() => {
@@ -136,6 +128,41 @@ export const RestaurantAdminDashboard = () => {
       cleanupReactivated();
     };
   }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated]);
+
+  // Load persisted staff-call notifications (last 30 days) once the restaurant is known.
+  useEffect(() => {
+    if (!restaurant) return;
+    staffCallService.getAll(restaurant.id)
+      .then(data => setNotifications(Array.isArray(data) ? data : []))
+      .catch(err => console.error('Failed to load notifications:', err));
+  }, [restaurant]);
+
+  const handleNotificationRead = async (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    try {
+      await staffCallService.markRead(restaurant.id, id);
+    } catch (err) {
+      console.error('Failed to mark notification read:', err);
+    }
+  };
+
+  const handleNotificationReadAll = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    try {
+      await staffCallService.markAllRead(restaurant.id);
+    } catch (err) {
+      console.error('Failed to mark all read:', err);
+    }
+  };
+
+  const handleNotificationClear = async () => {
+    setNotifications([]);
+    try {
+      await staffCallService.clearAll(restaurant.id);
+    } catch (err) {
+      console.error('Failed to clear notifications:', err);
+    }
+  };
 
   const loadRestaurantData = async () => {
     try {
@@ -419,7 +446,10 @@ export const RestaurantAdminDashboard = () => {
       userName={user?.name}
       onLogout={logout}
       orderCounts={orderCounts}
-      notificationCount={staffCallAlerts.length}
+      notifications={notifications}
+      onNotificationRead={handleNotificationRead}
+      onNotificationReadAll={handleNotificationReadAll}
+      onNotificationClear={handleNotificationClear}
       connected={true}
     >
       {/* Suspension banner — shown across all tabs when the restaurant is deactivated */}
@@ -430,78 +460,6 @@ export const RestaurantAdminDashboard = () => {
           Please contact the Goresto team to reactivate your restaurant.
         </Alert>
       )}
-
-      {/* Staff call alerts overlay */}
-      <Backdrop
-        open={staffCallAlerts.length > 0}
-        sx={{ zIndex: 1500, backdropFilter: 'blur(4px)', p: 3, alignItems: 'center', overflow: 'auto' }}
-      >
-        <Stack direction="row" flexWrap="wrap" justifyContent="center" alignItems="flex-start" gap={2} sx={{ maxWidth: 820 }}>
-          {staffCallAlerts.map((alert) => (
-            <Card
-              key={alert.id}
-              sx={{
-                p: { xs: 3, sm: '2rem 2.5rem' },
-                textAlign: 'center',
-                borderRadius: 3,
-                maxWidth: 380,
-                flex: '1 1 320px',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                '@keyframes bellRing': { '0%': { transform: 'rotate(-12deg)' }, '100%': { transform: 'rotate(12deg)' } },
-              }}
-            >
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 80, height: 80, borderRadius: '50%', bgcolor: '#FEF3C7', color: '#D97706', mb: 1.5, animation: 'bellRing 0.6s ease-in-out infinite alternate' }}>
-                <Icon icon="mdi:bell-ring" width={48} />
-              </Box>
-              <Typography variant="overline" color="text.secondary" fontWeight={600} display="block" mb={1}>
-                Staff Assistance Requested
-              </Typography>
-              <Typography variant="h4" fontWeight={800} mb={0.5}>
-                Table {alert.tableNumber}
-              </Typography>
-              {alert.customerName && (
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75, bgcolor: 'grey.100', px: 2, py: 0.75, borderRadius: 4, mb: 1.5 }}>
-                  <Icon icon="mdi:account" width={18} color="#6B7280" />
-                  <Typography variant="body1" color="text.secondary">{alert.customerName}</Typography>
-                </Box>
-              )}
-              <Stack direction="row" spacing={1} mt={2}>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  fullWidth
-                  startIcon={<Icon icon="mdi:volume-off" width={18} />}
-                  onClick={() => {
-                    if (staffCallRingsRef.current[alert.id]) {
-                      staffCallRingsRef.current[alert.id].stop();
-                      delete staffCallRingsRef.current[alert.id];
-                    }
-                  }}
-                  sx={{ fontWeight: 600 }}
-                >
-                  Silence
-                </Button>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<Icon icon="mdi:check" width={18} />}
-                  onClick={() => {
-                    if (staffCallRingsRef.current[alert.id]) {
-                      staffCallRingsRef.current[alert.id].stop();
-                      delete staffCallRingsRef.current[alert.id];
-                    }
-                    staffCallTablesRef.current.delete(alert.tableNumber);
-                    setStaffCallAlerts(prev => prev.filter(a => a.id !== alert.id));
-                  }}
-                  sx={{ fontWeight: 600 }}
-                >
-                  Dismiss
-                </Button>
-              </Stack>
-            </Card>
-          ))}
-        </Stack>
-      </Backdrop>
 
       {activeTab === 'settings' && (
         <Settings
