@@ -1221,7 +1221,10 @@
 }
 
 /* Check Status Button */
-.check-status-btn {
+/* Scoped under .public-menu-container to beat the `.bare-controls button`
+   reset (0-1-1) in global.css, which would otherwise flatten these to
+   transparent bg + inherited (dark) text — invisible in dark mode. */
+.public-menu-container .check-status-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1247,7 +1250,7 @@
 }
 
 /* Call Staff Button */
-.call-staff-btn {
+.public-menu-container .call-staff-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2814,7 +2817,7 @@
   color: var(--pm-text-muted, #9CA3AF);
 }
 
-.review-submit-btn {
+.public-menu-container .review-submit-btn {
   width: 100%;
   padding: 0.75rem;
   background: var(--color-primary, #059669);
