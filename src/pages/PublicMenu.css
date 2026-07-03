@@ -2830,10 +2830,12 @@
   margin-bottom: 0.5rem;
 }
 
-.review-skip-btn {
+/* Scoped to beat the `.bare-controls button` reset (0-1-1), which would
+   otherwise force color:inherit and hide this on the dark review card. */
+.public-menu-container .review-skip-btn {
   background: none;
   border: none;
-  color: var(--pm-text-muted, #9CA3AF);
+  color: var(--pm-text-secondary, #6B7280);
   font-size: 0.8125rem;
   cursor: pointer;
   padding: 0.5rem;

@@ -73,6 +73,15 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
     return () => clearInterval(interval);
   }, [baseUrl]);
 
+  // Open the customer-facing menu for this table in a new tab. Uses the
+  // admin's current origin (not the QR's network-IP base) so it always opens.
+  const handleOpenUserView = () => {
+    const url = tableNumber
+      ? `${window.location.origin}/menu/${restaurantId}?table=${tableNumber}`
+      : `${window.location.origin}/menu/${restaurantId}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleDownload = () => {
     if (!qrRef.current) return;
     
@@ -224,15 +233,23 @@ export const QRCodeGenerator = ({ restaurantId, restaurantName = '', tableNumber
         <p className="qr-label">{displayLabel}</p>
         <p className="qr-url">{menuUrl}</p>
       </div>
-      {showDownload && (
+      <div className="qr-actions">
+        {showDownload && (
+          <button
+            onClick={handleDownload}
+            className="qr-download-btn"
+            style={{ background: 'linear-gradient(180deg, #589BF3 0%, #3385F0 100%)' }}
+          >
+            Download QR Code
+          </button>
+        )}
         <button
-          onClick={handleDownload}
-          className="qr-download-btn"
-          style={{ background: 'linear-gradient(180deg, #589BF3 0%, #3385F0 100%)' }}
+          onClick={handleOpenUserView}
+          className="qr-open-btn"
         >
-          Download QR Code
+          Open User View
         </button>
-      )}
+      </div>
     </div>
   );
 };

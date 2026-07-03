@@ -15,7 +15,6 @@ import { restaurantService, menuService, tableService, orderService, staffServic
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
-import { MenuPreview } from '../components/MenuPreview';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsCard';
 import { RestaurantProfileForm } from '../components/forms/RestaurantProfileForm';
 import { useToast } from '../components/ui/Toast';
@@ -178,24 +177,6 @@ export const RestaurantAdminDashboard = () => {
       setAnalytics(data);
     } catch (error) {
       console.error('Error refreshing analytics:', error);
-    }
-  };
-
-  const refreshPreview = async () => {
-    if (!restaurant) return;
-    try {
-      const [items, settingsData] = await Promise.all([
-        menuService.getMenuItems(restaurant.id),
-        settingsService.getSettings(restaurant.id),
-      ]);
-      setMenuItems(items);
-      const cats = await categoryService.getAll(restaurant.id).catch(() => []);
-      const modelCats = cats.map((c) => c.name);
-      const derivedCats = items.map((i) => i.category).filter(Boolean);
-      setCategories([...new Set([...modelCats, ...derivedCats])].sort());
-      setRestaurantSettings(settingsData);
-    } catch (error) {
-      console.error('Error refreshing preview:', error);
     }
   };
 
@@ -645,25 +626,6 @@ export const RestaurantAdminDashboard = () => {
               settings={restaurantSettings}
               onSave={handleSaveProfile}
             />
-          </>
-        )}
-
-        {activeTab === 'preview' && (
-          <>
-            <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} justifyContent="space-between" spacing={1} mb={2}>
-              <Box>
-                <Typography variant="h5" fontWeight={700}>User Preview</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>
-                  See how your menu appears to customers. Changes made to menu items, settings, or discounts will be reflected here.
-                </Typography>
-              </Box>
-              <Button variant="outlined" onClick={refreshPreview} startIcon={<Icon icon="mdi:refresh" width={18} />} sx={{ flexShrink: 0 }}>
-                Refresh
-              </Button>
-            </Stack>
-            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
-              <MenuPreview restaurant={restaurant} settings={restaurantSettings} menuItems={menuItems} categories={categories} />
-            </Paper>
           </>
         )}
 

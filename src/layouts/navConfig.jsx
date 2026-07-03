@@ -32,11 +32,6 @@ const navConfig = [
     icon: <Icon icon="material-symbols:analytics-outline-rounded" width={22} />,
   },
   {
-    id: 'preview',
-    label: 'Menu Preview',
-    icon: <Icon icon="material-symbols:visibility-outline-rounded" width={22} />,
-  },
-  {
     id: 'profile',
     label: 'Profile',
     icon: <Icon icon="material-symbols:store-outline-rounded" width={22} />,
