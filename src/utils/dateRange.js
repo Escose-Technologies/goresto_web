@@ -32,6 +32,23 @@ export function presetRange(preset) {
       const first = new Date(now.getFullYear(), now.getMonth(), 1);
       return { from: first.toISOString(), to: endOfDay(now).toISOString() };
     }
+    case 'lastMonth': {
+      const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const last = new Date(now.getFullYear(), now.getMonth(), 0);
+      return { from: first.toISOString(), to: endOfDay(last).toISOString() };
+    }
+    case 'last3': {
+      const first = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      return { from: first.toISOString(), to: endOfDay(now).toISOString() };
+    }
+    case 'last6': {
+      const first = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+      return { from: first.toISOString(), to: endOfDay(now).toISOString() };
+    }
+    case 'year': {
+      const first = new Date(now.getFullYear(), 0, 1);
+      return { from: first.toISOString(), to: endOfDay(now).toISOString() };
+    }
     case 'all':
     default:
       return {};
@@ -52,4 +69,16 @@ export function customRange(fromStr, toStr) {
 // Local YYYY-MM-DD (for filenames / labels), never UTC-shifted.
 export function localDateStr(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Does an ISO instant fall inside a { from, to } window? An empty window
+// (i.e. "all") always matches. Used to decide whether a live order that
+// arrives over the socket belongs in the currently filtered view.
+export function isWithinRange(iso, range) {
+  if (!range || (!range.from && !range.to)) return true;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return true;
+  if (range.from && t < new Date(range.from).getTime()) return false;
+  if (range.to && t > new Date(range.to).getTime()) return false;
+  return true;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
@@ -16,6 +16,7 @@ import { Settings } from './Settings';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsCard';
 import { RestaurantProfileForm } from '../components/forms/RestaurantProfileForm';
 import { useToast } from '../components/ui/Toast';
+import { presetRange, customRange, isWithinRange } from '../utils/dateRange';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { GenerateBillModal } from '../components/billing/GenerateBillModal';
 import { BillPreview } from '../components/billing/BillPreview';
@@ -34,6 +35,10 @@ export const RestaurantAdminDashboard = () => {
   const [categories, setCategories] = useState([]);
   const [tables, setTables] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [orderDatePreset, setOrderDatePreset] = useState('today');
+  const [orderCustomFrom, setOrderCustomFrom] = useState('');
+  const [orderCustomTo, setOrderCustomTo] = useState('');
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [staff, setStaff] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -72,6 +77,41 @@ export const RestaurantAdminDashboard = () => {
   }, [restaurantSettings?.primaryColor, restaurantSettings?.secondaryColor]);
 
   // Socket: join restaurant room and listen for real-time updates
+  // Active order window. 'custom' only applies once both ends are picked,
+  // so a half-filled range never silently returns nothing.
+  const orderRange = useMemo(() => (
+    orderDatePreset === 'custom'
+      ? customRange(orderCustomFrom, orderCustomTo)
+      : presetRange(orderDatePreset)
+  ), [orderDatePreset, orderCustomFrom, orderCustomTo]);
+
+  // Read by the socket handler so it sees the current window without the
+  // socket effect having to re-subscribe on every filter change.
+  const orderRangeRef = useRef(orderRange);
+  useEffect(() => { orderRangeRef.current = orderRange; }, [orderRange]);
+
+  // Refetch when the window changes. Skipped on the very first render because
+  // the initial load already fetched today's orders.
+  const didInitialOrderLoad = useRef(false);
+  useEffect(() => {
+    if (!restaurant) return;
+    if (!didInitialOrderLoad.current) { didInitialOrderLoad.current = true; return; }
+    if (orderDatePreset === 'custom' && !(orderCustomFrom && orderCustomTo)) return;
+    let cancelled = false;
+    (async () => {
+      setOrdersLoading(true);
+      try {
+        const data = await orderService.getOrders(restaurant.id, orderRange);
+        if (!cancelled) setOrders(data);
+      } catch (error) {
+        if (!cancelled) toast.error('Failed to load orders: ' + error.message);
+      } finally {
+        if (!cancelled) setOrdersLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [restaurant, orderRange, orderDatePreset, orderCustomFrom, orderCustomTo]);
+
   useEffect(() => {
     if (!restaurant) return;
     const token = getAccessToken();
@@ -80,6 +120,9 @@ export const RestaurantAdminDashboard = () => {
     joinRestaurant(restaurant.id, token);
 
     const cleanupNew = onOrderNew((order) => {
+      // A live order that falls outside the filtered window would otherwise
+      // appear in a view it does not belong to (e.g. while viewing Yesterday).
+      if (!isWithinRange(order.createdAt, orderRangeRef.current)) return;
       setOrders(prev => {
         if (prev.find(o => o.id === order.id)) return prev;
         return [order, ...prev];
@@ -173,7 +216,7 @@ export const RestaurantAdminDashboard = () => {
         const [items, tablesData, ordersData, staffData, analyticsData, settingsData, categoryData] = await Promise.all([
           menuService.getMenuItems(restaurantData.id),
           tableService.getTables(restaurantData.id),
-          orderService.getOrders(restaurantData.id),
+          orderService.getOrders(restaurantData.id, presetRange('today')),
           staffService.getStaff(restaurantData.id),
           analyticsService.getAnalytics(restaurantData.id),
           settingsService.getSettings(restaurantData.id),
@@ -538,6 +581,13 @@ export const RestaurantAdminDashboard = () => {
             restaurant={restaurant}
             settings={restaurantSettings}
             toast={toast}
+            datePreset={orderDatePreset}
+            setDatePreset={setOrderDatePreset}
+            customFrom={orderCustomFrom}
+            setCustomFrom={setOrderCustomFrom}
+            customTo={orderCustomTo}
+            setCustomTo={setOrderCustomTo}
+            ordersLoading={ordersLoading}
             onGenerateBill={handleGenerateBill}
           />
         )}

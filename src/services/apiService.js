@@ -348,8 +348,11 @@ export const orderService = {
     return { restaurantId, orders };
   },
 
-  async getOrders(restaurantId) {
-    return get(`/restaurants/${restaurantId}/orders`);
+  async getOrders(restaurantId, query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
+    const qs = params.toString();
+    return get(`/restaurants/${restaurantId}/orders${qs ? `?${qs}` : ''}`);
   },
 
   async getOrdersByCustomer(restaurantId, customerName, customerMobile) {

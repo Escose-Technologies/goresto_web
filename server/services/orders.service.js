@@ -6,6 +6,14 @@ export const getAll = async (restaurantId, query = {}) => {
   const where = { restaurantId };
   if (query.status) where.status = toEnum(query.status);
 
+  // Date window. Sent as absolute ISO instants computed from the user's local
+  // day boundaries, so a range means the same window here as in the client.
+  if (query.from || query.to) {
+    where.createdAt = {};
+    if (query.from) where.createdAt.gte = new Date(query.from);
+    if (query.to) where.createdAt.lte = new Date(query.to);
+  }
+
   const take = Math.min(parseInt(query.limit) || 200, 500);
   const skip = parseInt(query.offset) || 0;
 
