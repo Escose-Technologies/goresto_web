@@ -25,3 +25,8 @@ export const remove = asyncHandler(async (req, res) => {
   await usersService.remove(req.params.id);
   res.json({ success: true, data: { message: 'User deleted successfully' } });
 });
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email } = await usersService.resetPassword(req.params.id, req.body);
+  res.json({ success: true, data: { message: `Password reset for ${email}` } });
+});
