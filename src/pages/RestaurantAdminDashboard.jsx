@@ -535,6 +535,9 @@ export const RestaurantAdminDashboard = () => {
             onCancel={handleCancelEdit}
             onDelete={handleDeleteOrder}
             onUpdateStatus={handleUpdateOrderStatus}
+            restaurant={restaurant}
+            settings={restaurantSettings}
+            toast={toast}
             onGenerateBill={handleGenerateBill}
           />
         )}

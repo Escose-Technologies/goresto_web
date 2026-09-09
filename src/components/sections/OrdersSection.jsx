@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { OrderForm } from '../OrderForm';
 import { OrderDetailsModal } from '../OrderDetailsModal';
+import { BillPreview } from '../billing/BillPreview';
 import { getOrderStatusLabel } from '../../utils/statusLabels';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { STATUS_COLOR, STATUS_DOT, isFinished, money, timeAgo } from '../../utils/orderStatus';
@@ -48,9 +49,13 @@ const OrdersSection = ({
   onDelete,
   onUpdateStatus,
   onGenerateBill,
+  restaurant,
+  settings,
+  toast,
 }) => {
   const cur = useCurrency();
   const [detailsOrder, setDetailsOrder] = useState(null);
+  const [previewBillId, setPreviewBillId] = useState(null);
 
   const counts = useMemo(() => {
     const c = { All: orders.length };
@@ -166,7 +171,13 @@ const OrdersSection = ({
       ) : (
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', alignItems: 'start' }}>
           {visible.map((o) => (
-            <OrderCard key={o.id} order={o} cur={cur} onOpen={() => setDetailsOrder(o)} />
+            <OrderCard
+              key={o.id}
+              order={o}
+              cur={cur}
+              onOpen={() => setDetailsOrder(o)}
+              onViewBill={() => setPreviewBillId(o.billId)}
+            />
           ))}
         </Box>
       )}
@@ -203,15 +214,27 @@ const OrdersSection = ({
           />
         </DialogContent>
       </Dialog>
+
+      {previewBillId && (
+        <BillPreview
+          restaurantId={restaurantId}
+          restaurant={restaurant}
+          bill={{ id: previewBillId }}
+          onClose={() => setPreviewBillId(null)}
+          toast={toast}
+          settings={settings}
+        />
+      )}
     </>
   );
 };
 
 /* One order at a glance: id, table · customer, time, total — opens the details modal. */
-const OrderCard = ({ order, cur, onOpen }) => {
+const OrderCard = ({ order, cur, onOpen, onViewBill }) => {
   const finished = isFinished(order.status);
   const tableLabel = order.tableNumber != null && order.tableNumber !== '' ? `Table ${order.tableNumber}` : 'Takeaway';
   const itemCount = (order.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+  const isBilled = Boolean(order.billId);
 
   return (
     <Box
@@ -242,7 +265,18 @@ const OrderCard = ({ order, cur, onOpen }) => {
         <Typography variant="subtitle1" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
           #{order.orderNumber || order.id.slice(-6)}
         </Typography>
-        <Chip size="small" color={STATUS_COLOR[order.status] || 'default'} label={getOrderStatusLabel(order.status)} />
+        <Stack direction="row" spacing={0.75} alignItems="center">
+          {isBilled && (
+            <Chip
+              size="small"
+              color="success"
+              variant="outlined"
+              icon={<Icon icon="mdi:receipt-text-check-outline" width={14} />}
+              label="Billed"
+            />
+          )}
+          <Chip size="small" color={STATUS_COLOR[order.status] || 'default'} label={getOrderStatusLabel(order.status)} />
+        </Stack>
       </Stack>
 
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.75, color: 'text.secondary' }}>
@@ -259,9 +293,28 @@ const OrderCard = ({ order, cur, onOpen }) => {
 
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.25 }}>
         <Typography variant="h6" fontWeight={800}>{money(order.total, cur)}</Typography>
-        <Stack direction="row" spacing={0.25} alignItems="center" sx={{ color: 'primary.main' }}>
-          <Typography variant="body2" fontWeight={600}>View details</Typography>
-          <Icon icon="mdi:chevron-right" width={18} />
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          {isBilled && (
+            <Stack
+              direction="row"
+              spacing={0.25}
+              alignItems="center"
+              role="button"
+              tabIndex={0}
+              onClick={(e) => { e.stopPropagation(); onViewBill(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); onViewBill(); }
+              }}
+              sx={{ color: 'success.main', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+            >
+              <Icon icon="mdi:receipt-text-outline" width={16} />
+              <Typography variant="body2" fontWeight={600}>View bill</Typography>
+            </Stack>
+          )}
+          <Stack direction="row" spacing={0.25} alignItems="center" sx={{ color: 'primary.main' }}>
+            <Typography variant="body2" fontWeight={600}>Details</Typography>
+            <Icon icon="mdi:chevron-right" width={18} />
+          </Stack>
         </Stack>
       </Stack>
     </Box>
