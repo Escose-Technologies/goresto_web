@@ -25,6 +25,8 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().default(50),
+  // Gate for superadmin-initiated password resets. Empty disables the endpoint.
+  SUPERADMIN_RESET_PASSWORD: z.string().default(''),
   OCI_NAMESPACE: z.string().default(''),
   OCI_BUCKET: z.string().default('goresto-images'),
   OCI_REGION: z.string().default('ap-mumbai-1'),

@@ -13,3 +13,8 @@ export const updateUserSchema = z.object({
   role: z.enum(['superadmin', 'restaurant_admin']).optional(),
   restaurantId: z.string().optional().nullable(),
 });
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters').max(128),
+  superPassword: z.string().min(1, 'Super password is required').max(256),
+});

@@ -1,6 +1,8 @@
+import { timingSafeEqual } from 'crypto';
 import { prisma } from '../config/database.js';
+import { env } from '../config/env.js';
 import { hashPassword } from '../utils/password.js';
-import { NotFoundError, ConflictError } from '../errors/index.js';
+import { NotFoundError, ConflictError, AuthorizationError } from '../errors/index.js';
 import { formatUser } from '../utils/formatters.js';
 
 export const getAll = async (query = {}) => {
@@ -44,4 +46,31 @@ export const remove = async (id) => {
   const existing = await prisma.user.findUnique({ where: { id } });
   if (!existing) throw new NotFoundError('User');
   await prisma.user.delete({ where: { id } });
+};
+
+const superPasswordMatches = (candidate) => {
+  const expected = env.SUPERADMIN_RESET_PASSWORD;
+  const a = Buffer.from(String(candidate));
+  const b = Buffer.from(expected);
+  // timingSafeEqual throws on length mismatch, so guard before comparing.
+  return a.length === b.length && timingSafeEqual(a, b);
+};
+
+export const resetPassword = async (id, { password, superPassword }) => {
+  if (!env.SUPERADMIN_RESET_PASSWORD) {
+    throw new AuthorizationError('Password reset is not enabled on this server');
+  }
+  if (!superPasswordMatches(superPassword)) {
+    throw new AuthorizationError('Invalid super password');
+  }
+
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) throw new NotFoundError('User');
+
+  await prisma.user.update({
+    where: { id },
+    data: { password: await hashPassword(password) },
+  });
+
+  return { email: existing.email };
 };

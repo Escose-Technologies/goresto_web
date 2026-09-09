@@ -52,6 +52,8 @@ export const SuperAdminDashboard = () => {
     adminId: '',
   });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [resetData, setResetData] = useState({ password: '', confirm: '', superPassword: '' });
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -99,13 +101,35 @@ export const SuperAdminDashboard = () => {
       phone: restaurant.phone,
       adminId: restaurant.adminId || '',
     });
+    setResetData({ password: '', confirm: '', superPassword: '' });
     setShowForm(true);
   };
 
   const resetForm = () => {
     setFormData({ name: '', address: '', phone: '', adminId: '' });
+    setResetData({ password: '', confirm: '', superPassword: '' });
     setEditingRestaurant(null);
     setShowForm(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (resetData.password !== resetData.confirm) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setResetting(true);
+    try {
+      const result = await userService.resetPassword(formData.adminId, {
+        password: resetData.password,
+        superPassword: resetData.superPassword,
+      });
+      toast.success(result?.message || 'Password reset');
+      setResetData({ password: '', confirm: '', superPassword: '' });
+    } catch (error) {
+      toast.error(error.message || 'Password reset failed');
+    } finally {
+      setResetting(false);
+    }
   };
 
   const getAdminName = (adminId) => {
@@ -286,6 +310,61 @@ export const SuperAdminDashboard = () => {
                 <Button variant="outlined" onClick={resetForm}>Cancel</Button>
               </Stack>
             </Box>
+
+            {editingRestaurant && formData.adminId && (
+              <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle1" fontWeight={700}>Reset Admin Password</Typography>
+                <Typography variant="body2" color="text.secondary" mb={2}>
+                  Overrides the password for {getAdminName(formData.adminId)}. Existing sessions stay signed in.
+                </Typography>
+                <Grid container spacing={2} mb={2}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      label="New Password"
+                      type="password"
+                      value={resetData.password}
+                      onChange={(e) => setResetData({ ...resetData, password: e.target.value })}
+                      fullWidth
+                      autoComplete="new-password"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      label="Confirm Password"
+                      type="password"
+                      value={resetData.confirm}
+                      onChange={(e) => setResetData({ ...resetData, confirm: e.target.value })}
+                      fullWidth
+                      autoComplete="new-password"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      label="Super Password"
+                      type="password"
+                      value={resetData.superPassword}
+                      onChange={(e) => setResetData({ ...resetData, superPassword: e.target.value })}
+                      fullWidth
+                      autoComplete="off"
+                    />
+                  </Grid>
+                </Grid>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={handleResetPassword}
+                  disabled={
+                    resetting ||
+                    !resetData.password ||
+                    !resetData.confirm ||
+                    !resetData.superPassword
+                  }
+                  startIcon={resetting ? <CircularProgress size={16} color="inherit" /> : <Icon icon="mdi:lock-reset" width={18} />}
+                >
+                  {resetting ? 'Resetting...' : 'Reset Password'}
+                </Button>
+              </Box>
+            )}
           </Card>
         )}
 
