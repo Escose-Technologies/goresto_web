@@ -204,6 +204,10 @@ export const userService = {
   async update(id, updates) {
     return patch(`/users/${id}`, updates);
   },
+
+  async resetPassword(id, { password, superPassword }) {
+    return post(`/users/${id}/reset-password`, { password, superPassword });
+  },
 };
 
 // ─── Restaurant Service ─────────────────────────────────
