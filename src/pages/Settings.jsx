@@ -104,6 +104,35 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
 
   const getCurrencySymbol = () => currencySymbols[formData.currency] || '₹';
 
+  // <input type="number"> yields a string, but the API validates these as
+  // numbers — send them through unconverted and Zod rejects the whole save.
+  // Nullable on the API — an empty input clears them.
+  const NUMERIC_FIELDS = ['fontSize', 'taxRate', 'serviceCharge', 'defaultPackagingCharge'];
+  // Not nullable (has a server-side default), so an empty input must omit the
+  // key entirely rather than send null, which the schema would reject.
+  const NUMERIC_FIELDS_NON_NULL = ['gstRate'];
+
+  const toNumericPayload = (data) => {
+    const out = { ...data };
+    const asNumber = (v) => {
+      const n = Number(v);
+      return Number.isNaN(n) ? null : n;
+    };
+    for (const key of NUMERIC_FIELDS) {
+      const v = out[key];
+      out[key] = (v === '' || v === null || v === undefined) ? null : asNumber(v);
+    }
+    for (const key of NUMERIC_FIELDS_NON_NULL) {
+      const v = out[key];
+      if (v === '' || v === null || v === undefined) delete out[key];
+      else {
+        const n = asNumber(v);
+        if (n === null) delete out[key]; else out[key] = n;
+      }
+    }
+    return out;
+  };
+
   const handleChange = (name) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -129,10 +158,10 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
     setSaving(true);
     setServerErrors({});
     try {
-      const dataToSave = {
+      const dataToSave = toNumericPayload({
         ...formData,
         currencySymbol: getCurrencySymbol(),
-      };
+      });
       // Only send kitchenPin if it's a valid 4-digit PIN or empty to keep current
       if (!dataToSave.kitchenPin || dataToSave.kitchenPin.length !== 4) {
         delete dataToSave.kitchenPin;
