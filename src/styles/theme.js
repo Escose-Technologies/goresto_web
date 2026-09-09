@@ -1,13 +1,13 @@
 export const theme = {
   colors: {
     primary: {
-      light: '#589BF3',
-      main: '#3385F0',
-      dark: '#2B71CC',
+      light: '#9C6CF0',
+      main: '#7830E4',
+      dark: '#5F1FC4',
     },
     gradient: {
-      from: '#589BF3',
-      to: '#3385F0',
+      from: '#9C6CF0',
+      to: '#7830E4',
     },
     text: {
       primary: '#1F2937',
@@ -18,13 +18,13 @@ export const theme = {
       primary: '#FFFFFF',
       secondary: '#F9FAFB',
       tertiary: '#F3F4F6',
-      gradient: 'linear-gradient(180deg, #589BF3 0%, #3385F0 100%)',
+      gradient: 'linear-gradient(180deg, #9C6CF0 0%, #7830E4 100%)',
     },
     border: '#E5E7EB',
     error: '#EF4444',
     success: '#10B981',
     warning: '#F59E0B',
-    info: '#3B82F6',
+    info: '#7830E4',
     // Dietary colors
     dietary: {
       veg: '#22C55E',

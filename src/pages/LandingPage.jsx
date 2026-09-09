@@ -129,37 +129,37 @@ export const LandingPage = () => {
       icon: 'solar:chart-square-linear',
       title: 'Dashboard',
       description: 'Track daily sales, popular items, order trends, and revenue from an intuitive dashboard with real-time insights.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
       icon: 'solar:qr-code-linear',
       title: 'QR Code Ordering',
       description: 'No app to download. Customers scan the QR on your table, browse the menu in their browser, and order straight from their phone.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
       icon: 'solar:chef-hat-linear',
       title: 'Menu Management',
       description: 'Add, edit, and organize menu items with images, veg/non-veg labels, categories, and pricing — all from one dashboard.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
       icon: 'solar:monitor-smartphone-linear',
       title: 'Kitchen Display System',
       description: 'Real-time kitchen display for your staff. Orders appear instantly with live status updates via WebSocket.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
       icon: 'solar:bill-list-linear',
       title: 'GST-Compliant Billing',
       description: 'Generate professional invoices with CGST, SGST, and IGST calculations. Supports discounts, round-off, and amount in words.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
       icon: 'solar:users-group-rounded-linear',
       title: 'Staff Management',
       description: 'Manage your team with roles, attendance tracking, and contact details. Assign kitchen access with secure PINs.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
   ];
 

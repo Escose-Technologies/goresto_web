@@ -37,7 +37,7 @@
 
 .tour-nav.scrolled {
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 4px 40px rgba(51, 133, 240, 0.15);
+  box-shadow: 0 4px 40px rgba(120, 48, 228, 0.15);
 }
 
 .tour-nav-container {
@@ -68,7 +68,7 @@
 }
 
 .tour-nav-back:hover {
-  color: #3385F0;
+  color: #7830E4;
 }
 
 .tour-nav-cta {
@@ -83,7 +83,7 @@
 
 .tour-nav-cta:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(51, 133, 240, 0.4);
+  box-shadow: 0 4px 15px rgba(120, 48, 228, 0.4);
 }
 
 /* Hero */
@@ -99,8 +99,8 @@
   display: inline-block;
   padding: 0.4rem 1rem;
   border-radius: 9999px;
-  background: rgba(51, 133, 240, 0.1);
-  color: #3385F0;
+  background: rgba(120, 48, 228, 0.1);
+  color: #7830E4;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -117,7 +117,7 @@
 }
 
 .tour-hero-highlight {
-  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #7830E4 0%, #9C6CF0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -144,7 +144,7 @@
   border-radius: 9999px;
   border: 1px solid #E5E7EB;
   background: #FFFFFF;
-  color: var(--accent, #3385F0);
+  color: var(--accent, #7830E4);
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
@@ -330,7 +330,7 @@
   padding: 0.9rem 2rem;
   border-radius: 9999px;
   background: #FFFFFF;
-  color: #3385F0;
+  color: #7830E4;
   font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
@@ -369,7 +369,7 @@
 }
 
 .tour-footer a {
-  color: #3385F0;
+  color: #7830E4;
   text-decoration: none;
 }
 
