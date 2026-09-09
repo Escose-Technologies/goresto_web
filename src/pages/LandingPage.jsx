@@ -245,7 +245,7 @@ export const LandingPage = () => {
             <a href="#pricing">Pricing</a>
             <a href="#how-it-works" className="nav-hide-sm">How It Works</a>
             <Link to="/tour" className="nav-hide-sm">Product Tour</Link>
-            <Link to="/goresto-admin" className="nav-btn-login">Login</Link>
+            <Link to="/srm-app" className="nav-btn-login">Login</Link>
             <Link
               to="/register"
               className="nav-btn-cta"
@@ -645,7 +645,7 @@ export const LandingPage = () => {
             <div className="footer-column">
               <h4>Quick Links</h4>
               <Link to="/register">Start Free Trial</Link>
-              <Link to="/goresto-admin">Restaurant Login</Link>
+              <Link to="/srm-app">Restaurant Login</Link>
             </div>
           </div>
         </AnimatedSection>

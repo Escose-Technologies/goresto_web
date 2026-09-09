@@ -270,7 +270,7 @@ export const ProductTour = () => {
             </svg>
           </Link>
           <p className="tour-cta-note">
-            Already with us? <Link to="/goresto-admin">Restaurant login</Link>
+            Already with us? <Link to="/srm-app">Restaurant login</Link>
           </p>
         </AnimatedSection>
       </section>
