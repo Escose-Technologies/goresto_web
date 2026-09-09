@@ -64,7 +64,7 @@ const chapters = [
     title: 'They scan. That is the whole setup.',
     lede:
       'No app store, no download, no sign-up. The QR on the table opens your menu in the phone browser they already have.',
-    accent: '#3385F0',
+    accent: '#7830E4',
     steps: [
       {
         title: 'Scan the table QR',
@@ -270,7 +270,7 @@ export const ProductTour = () => {
             </svg>
           </Link>
           <p className="tour-cta-note">
-            Already with us? <Link to="/goresto-admin">Restaurant login</Link>
+            Already with us? <Link to="/srm-app">Restaurant login</Link>
           </p>
         </AnimatedSection>
       </section>

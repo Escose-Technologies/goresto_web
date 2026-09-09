@@ -88,7 +88,7 @@ export const Register = () => {
           <Typography variant="body1" color="text.secondary" mb={3}>
             Your restaurant registration is pending approval. You will be able to log in once the admin approves your account.
           </Typography>
-          <Button component={Link} to="/goresto-admin" variant="contained" size="large">
+          <Button component={Link} to="/srm-app" variant="contained" size="large">
             Go to Login
           </Button>
         </Card>
@@ -247,7 +247,7 @@ export const Register = () => {
         <Box sx={{ textAlign: 'center', mt: 2.5 }}>
           <Typography variant="body2" color="text.secondary">
             Already have an account?{' '}
-            <Link to="/goresto-admin" style={{ color: '#3385F0', fontWeight: 600, textDecoration: 'none' }}>Sign In</Link>
+            <Link to="/srm-app" style={{ color: '#3385F0', fontWeight: 600, textDecoration: 'none' }}>Sign In</Link>
           </Typography>
         </Box>
 

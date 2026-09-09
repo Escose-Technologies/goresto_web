@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { theme } from '../styles/theme';
+import { Icon } from '@iconify/react';
 import { Logo } from '../components/Logo';
 import './LandingPage.css';
 
@@ -106,29 +107,6 @@ const ParallaxLayer = ({ children, speed = 0.5, className = '' }) => {
   );
 };
 
-// Floating food icons component
-const FloatingIcons = () => {
-  const icons = ['🍕', '🍔', '🍜', '🍣', '🥗', '🍰', '☕', '🍷'];
-
-  return (
-    <div className="floating-icons">
-      {icons.map((icon, index) => (
-        <span
-          key={index}
-          className="floating-icon"
-          style={{
-            '--delay': `${index * 0.5}s`,
-            '--x-start': `${Math.random() * 100}%`,
-            '--duration': `${15 + Math.random() * 10}s`,
-          }}
-        >
-          {icon}
-        </span>
-      ))}
-    </div>
-  );
-};
-
 export const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -148,40 +126,40 @@ export const LandingPage = () => {
 
   const features = [
     {
-      icon: '📊',
+      icon: 'solar:chart-square-linear',
       title: 'Dashboard',
       description: 'Track daily sales, popular items, order trends, and revenue from an intuitive dashboard with real-time insights.',
-      color: '#EF4444',
+      color: '#7830E4',
     },
     {
-      icon: '📱',
+      icon: 'solar:qr-code-linear',
       title: 'QR Code Ordering',
       description: 'No app to download. Customers scan the QR on your table, browse the menu in their browser, and order straight from their phone.',
-      color: '#3385F0',
+      color: '#7830E4',
     },
     {
-      icon: '🍽️',
+      icon: 'solar:chef-hat-linear',
       title: 'Menu Management',
       description: 'Add, edit, and organize menu items with images, veg/non-veg labels, categories, and pricing — all from one dashboard.',
-      color: '#EC4899',
+      color: '#7830E4',
     },
     {
-      icon: '🖥️',
+      icon: 'solar:monitor-smartphone-linear',
       title: 'Kitchen Display System',
       description: 'Real-time kitchen display for your staff. Orders appear instantly with live status updates via WebSocket.',
-      color: '#F59E0B',
+      color: '#7830E4',
     },
     {
-      icon: '🧾',
+      icon: 'solar:bill-list-linear',
       title: 'GST-Compliant Billing',
       description: 'Generate professional invoices with CGST, SGST, and IGST calculations. Supports discounts, round-off, and amount in words.',
-      color: '#10B981',
+      color: '#7830E4',
     },
     {
-      icon: '👥',
+      icon: 'solar:users-group-rounded-linear',
       title: 'Staff Management',
       description: 'Manage your team with roles, attendance tracking, and contact details. Assign kitchen access with secure PINs.',
-      color: '#3B82F6',
+      color: '#7830E4',
     },
   ];
 
@@ -202,25 +180,25 @@ export const LandingPage = () => {
       step: '1',
       title: 'Register Your Restaurant',
       description: 'Set up your restaurant profile with details, logo, and GST information',
-      icon: '✨',
+      icon: 'solar:shop-linear',
     },
     {
       step: '2',
       title: 'Build Your Menu',
       description: 'Add items with images, veg/non-veg tags, categories, and pricing',
-      icon: '📝',
+      icon: 'solar:clipboard-list-linear',
     },
     {
       step: '3',
       title: 'Set Up Tables & QR',
       description: 'Add tables and generate unique QR codes for each one',
-      icon: '📲',
+      icon: 'solar:qr-code-linear',
     },
     {
       step: '4',
       title: 'Go Live',
       description: 'Customers scan QR codes to browse and order. You manage everything from the dashboard.',
-      icon: '🚀',
+      icon: 'solar:rocket-2-linear',
     },
   ];
 
@@ -230,9 +208,6 @@ export const LandingPage = () => {
       <div className="scroll-progress-container">
         <div className="scroll-progress-bar" style={{ width: `${scrollProgress}%` }} />
       </div>
-
-      {/* Floating Food Icons Background */}
-      <FloatingIcons />
 
       {/* Navigation */}
       <nav className={`landing-nav ${isScrolled ? 'scrolled' : ''}`}>
@@ -245,7 +220,7 @@ export const LandingPage = () => {
             <a href="#pricing">Pricing</a>
             <a href="#how-it-works" className="nav-hide-sm">How It Works</a>
             <Link to="/tour" className="nav-hide-sm">Product Tour</Link>
-            <Link to="/goresto-admin" className="nav-btn-login">Login</Link>
+            <Link to="/srm-app" className="nav-btn-login">Login</Link>
             <Link
               to="/register"
               className="nav-btn-cta"
@@ -317,26 +292,30 @@ export const LandingPage = () => {
                 <div className="mockup-avatar"></div>
                 <div className="mockup-restaurant-info">
                   <div className="mockup-name"></div>
-                  <div className="mockup-rating">⭐⭐⭐⭐⭐</div>
+                  <div className="mockup-rating">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <Icon key={i} icon="solar:star-bold" />
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="mockup-menu-items">
                 <div className="mockup-menu-item">
-                  <div className="mockup-item-img">🍕</div>
+                  <div className="mockup-item-img"><Icon icon="mdi:coffee-outline" /></div>
                   <div className="mockup-item-info">
                     <div className="mockup-item-name"></div>
                     <div className="mockup-item-price"></div>
                   </div>
                 </div>
                 <div className="mockup-menu-item">
-                  <div className="mockup-item-img">🍔</div>
+                  <div className="mockup-item-img"><Icon icon="mdi:hamburger" /></div>
                   <div className="mockup-item-info">
                     <div className="mockup-item-name"></div>
                     <div className="mockup-item-price"></div>
                   </div>
                 </div>
                 <div className="mockup-menu-item">
-                  <div className="mockup-item-img">🍜</div>
+                  <div className="mockup-item-img"><Icon icon="mdi:noodles" /></div>
                   <div className="mockup-item-info">
                     <div className="mockup-item-name"></div>
                     <div className="mockup-item-price"></div>
@@ -349,7 +328,7 @@ export const LandingPage = () => {
 
           {/* Floating notification cards */}
           <div className="floating-card card-order animate-float">
-            <span className="card-icon">🛒</span>
+            <span className="card-icon"><Icon icon="solar:bag-check-linear" /></span>
             <div className="card-content">
               <span className="card-title">New Order!</span>
               <span className="card-subtitle">Table 5 - 3 items</span>
@@ -357,7 +336,7 @@ export const LandingPage = () => {
           </div>
 
           <div className="floating-card card-review animate-float-delayed">
-            <span className="card-icon">⭐</span>
+            <span className="card-icon"><Icon icon="solar:star-bold" /></span>
             <div className="card-content">
               <span className="card-title">5-Star Review</span>
               <span className="card-subtitle">"Amazing food!"</span>
@@ -419,7 +398,7 @@ export const LandingPage = () => {
                 style={{ '--accent-color': feature.color }}
               >
                 <div className="feature-icon-wrapper" style={{ background: `${feature.color}15` }}>
-                  <span className="feature-icon">{feature.icon}</span>
+                  <Icon icon={feature.icon} className="feature-icon" style={{ color: feature.color }} />
                 </div>
                 <h3 className="feature-title">{feature.title}</h3>
                 <p className="feature-description">{feature.description}</p>
@@ -453,7 +432,7 @@ export const LandingPage = () => {
                 className="step-card"
               >
                 <div className="step-icon-wrapper">
-                  <span className="step-emoji">{item.icon}</span>
+                  <Icon icon={item.icon} className="step-emoji" />
                 </div>
                 <div className="step-number" style={{ background: theme.colors.background.gradient }}>
                   {item.step}
@@ -557,17 +536,17 @@ export const LandingPage = () => {
           </AnimatedSection>
           <div className="why-goresto-grid">
             <AnimatedSection animation="fade-up" delay={0} className="why-card">
-              <span className="why-icon">🇮🇳</span>
+              <Icon icon="solar:map-point-wave-linear" className="why-icon" />
               <h4 className="why-title">India-First Approach</h4>
               <p className="why-description">GST-compliant billing, Indian state support, and workflows designed for how Indian restaurants actually operate.</p>
             </AnimatedSection>
             <AnimatedSection animation="fade-up" delay={100} className="why-card">
-              <span className="why-icon">⚡</span>
+              <Icon icon="solar:bolt-circle-linear" className="why-icon" />
               <h4 className="why-title">Real-Time Operations</h4>
               <p className="why-description">Orders flow instantly from customer phone to kitchen display. No delays, no missed orders, no paper slips.</p>
             </AnimatedSection>
             <AnimatedSection animation="fade-up" delay={200} className="why-card">
-              <span className="why-icon">🔒</span>
+              <Icon icon="solar:lock-keyhole-minimalistic-linear" className="why-icon" />
               <h4 className="why-title">Secure & Reliable</h4>
               <p className="why-description">Role-based access control, secure kitchen PINs, and JWT authentication keep your data and operations safe.</p>
             </AnimatedSection>
@@ -645,7 +624,7 @@ export const LandingPage = () => {
             <div className="footer-column">
               <h4>Quick Links</h4>
               <Link to="/register">Start Free Trial</Link>
-              <Link to="/goresto-admin">Restaurant Login</Link>
+              <Link to="/srm-app">Restaurant Login</Link>
             </div>
           </div>
         </AnimatedSection>
