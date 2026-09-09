@@ -31,6 +31,19 @@ const SUMMARY = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
+const DATE_PRESETS = [
+  { value: 'today', label: 'Today' },
+  { value: 'yesterday', label: 'Yesterday' },
+  { value: 'week', label: 'This Week' },
+  { value: 'month', label: 'This Month' },
+  { value: 'lastMonth', label: 'Last Month' },
+  { value: 'last3', label: 'Last 3 Months' },
+  { value: 'last6', label: 'Last 6 Months' },
+  { value: 'year', label: 'This Year' },
+  { value: 'custom', label: 'Custom Range…' },
+  { value: 'all', label: 'All Time' },
+];
+
 const OrdersSection = ({
   orders,
   orderStatusFilter,
@@ -52,8 +65,16 @@ const OrdersSection = ({
   restaurant,
   settings,
   toast,
+  datePreset = 'today',
+  setDatePreset,
+  customFrom = '',
+  setCustomFrom,
+  customTo = '',
+  setCustomTo,
+  ordersLoading = false,
 }) => {
   const cur = useCurrency();
+  const periodLabel = DATE_PRESETS.find((p) => p.value === datePreset)?.label || 'this period';
   const [detailsOrder, setDetailsOrder] = useState(null);
   const [previewBillId, setPreviewBillId] = useState(null);
 
@@ -149,6 +170,39 @@ const OrdersSection = ({
             },
           }}
         />
+        <FormControl size="small" sx={{ minWidth: 165 }}>
+          <InputLabel>Period</InputLabel>
+          <Select value={datePreset} label="Period" onChange={(e) => setDatePreset?.(e.target.value)}>
+            {DATE_PRESETS.map((p) => (
+              <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {datePreset === 'custom' && (
+          <>
+            <TextField
+              size="small"
+              type="date"
+              label="From"
+              value={customFrom}
+              onChange={(e) => setCustomFrom?.(e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ minWidth: 150 }}
+            />
+            <TextField
+              size="small"
+              type="date"
+              label="To"
+              value={customTo}
+              onChange={(e) => setCustomTo?.(e.target.value)}
+              slotProps={{ inputLabel: { shrink: true } }}
+              inputProps={{ min: customFrom || undefined }}
+              sx={{ minWidth: 150 }}
+            />
+          </>
+        )}
+
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel>Status</InputLabel>
           <Select value={orderStatusFilter} label="Status" onChange={(e) => setOrderStatusFilter(e.target.value)}>
@@ -167,7 +221,18 @@ const OrdersSection = ({
       </Stack>
 
       {visible.length === 0 ? (
-        <EmptyState text={orders.length === 0 ? 'No orders yet. Tap + to create one.' : 'No orders match your filters.'} />
+        <EmptyState
+          text={
+            orders.length === 0
+              ? `No orders in ${periodLabel.toLowerCase()}.`
+              : 'No orders match your filters.'
+          }
+          action={
+            orders.length === 0 && datePreset !== 'all'
+              ? { label: 'View all time', onClick: () => setDatePreset?.('all') }
+              : null
+          }
+        />
       ) : (
         <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', alignItems: 'start' }}>
           {visible.map((o) => (
@@ -321,10 +386,21 @@ const OrderCard = ({ order, cur, onOpen, onViewBill }) => {
   );
 };
 
-const EmptyState = ({ text }) => (
+const EmptyState = ({ text, action }) => (
   <Box sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
     <Icon icon="mdi:receipt-text-outline" width={44} style={{ opacity: 0.4, marginBottom: 8 }} />
     <Typography>{text}</Typography>
+    {action && (
+      <Typography
+        role="button"
+        tabIndex={0}
+        onClick={action.onClick}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && action.onClick()}
+        sx={{ mt: 1, color: 'primary.main', fontWeight: 600, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+      >
+        {action.label}
+      </Typography>
+    )}
   </Box>
 );
 
