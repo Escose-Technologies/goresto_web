@@ -200,15 +200,22 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
         allowScrollButtonsMobile
         sx={{ mb: 2.5, borderBottom: 1, borderColor: 'divider', minHeight: 44, '& .MuiTab-root': { minHeight: 44, textTransform: 'none', fontWeight: 600 } }}
       >
+        {/* Tab must be the DIRECT child of Tabs: Tabs injects `selected` into its
+            children, and a wrapping Tooltip does not forward it — which left no
+            tab looking active even though the right panel was shown. The hint
+            lives on the label instead. */}
         {SECTIONS.map((s) => (
-          <Tooltip key={s.id} title={s.hint} arrow enterDelay={400}>
-            <Tab
-              value={s.id}
-              label={s.label}
-              iconPosition="start"
-              icon={<Icon icon={s.icon} width={18} />}
-            />
-          </Tooltip>
+          <Tab
+            key={s.id}
+            value={s.id}
+            iconPosition="start"
+            icon={<Icon icon={s.icon} width={18} />}
+            label={
+              <Tooltip title={s.hint} arrow enterDelay={400}>
+                <span>{s.label}</span>
+              </Tooltip>
+            }
+          />
         ))}
       </Tabs>
 
