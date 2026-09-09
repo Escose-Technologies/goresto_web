@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './components/ui/Toast';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LandingPage } from './pages/LandingPage';
+import { ProductTour } from './pages/ProductTour';
 import { Login } from './pages/Login';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { RestaurantAdminDashboard } from './pages/RestaurantAdminDashboard';
@@ -39,6 +40,7 @@ const AppRoutes = () => {
       />
       <Route path="/menu/:restaurantId" element={<PublicMenu />} />
       <Route path="/kitchen/:restaurantId" element={<KitchenDisplay />} />
+      <Route path="/tour" element={<ProductTour />} />
       <Route path="/" element={<LandingPage />} />
     </Routes>
   );

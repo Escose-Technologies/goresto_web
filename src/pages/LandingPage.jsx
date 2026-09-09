@@ -156,7 +156,7 @@ export const LandingPage = () => {
     {
       icon: '📱',
       title: 'QR Code Ordering',
-      description: 'Generate unique QR codes for each table. Customers scan, browse your menu, and place orders directly from their phone.',
+      description: 'No app to download. Customers scan the QR on your table, browse the menu in their browser, and order straight from their phone.',
       color: '#3385F0',
     },
     {
@@ -183,6 +183,18 @@ export const LandingPage = () => {
       description: 'Manage your team with roles, attendance tracking, and contact details. Assign kitchen access with secure PINs.',
       color: '#3B82F6',
     },
+  ];
+
+  const pricingIncludes = [
+    'Unlimited menu items & categories',
+    'QR code ordering for every table',
+    'Real-time kitchen display system',
+    'GST-compliant billing & invoices',
+    'Thermal & A4 bill printing',
+    'Split payments & discount presets',
+    'Staff management & attendance',
+    'Sales analytics & daily reports',
+    'Customer ratings & reviews',
   ];
 
   const howItWorks = [
@@ -230,8 +242,25 @@ export const LandingPage = () => {
           </Link>
           <div className="nav-links">
             <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#how-it-works" className="nav-hide-sm">How It Works</a>
+            <Link to="/tour" className="nav-hide-sm">Product Tour</Link>
+            <Link to="/goresto-admin" className="nav-btn-login">Login</Link>
+            <Link
+              to="/register"
+              className="nav-btn-cta"
+              style={{ background: theme.colors.background.gradient }}
+            >
+              Start Free
+            </Link>
           </div>
+          <Link
+            to="/register"
+            className="mobile-cta"
+            style={{ background: theme.colors.background.gradient }}
+          >
+            Start Free
+          </Link>
         </div>
       </nav>
 
@@ -248,35 +277,36 @@ export const LandingPage = () => {
         <AnimatedSection animation="fade-up" className="hero-content">
           <div className="hero-badge">
             <span className="badge-dot"></span>
-            Modern Restaurant Management Platform
+            Free for the first 250 restaurants
           </div>
           <h1 className="hero-title">
             Your Restaurant,
             <span className="hero-highlight"> Digitally Empowered</span>
           </h1>
           <p className="hero-subtitle">
-            Streamline your restaurant operations with digital menus, QR code ordering,
-            real-time kitchen display, and insightful analytics — all in one platform.
+            Digital menus, QR code ordering, real-time kitchen display, and GST billing —
+            all in one platform. <strong>Your customers never download an app.</strong> They just scan.
           </p>
           <div className="hero-cta">
-            <a
-              href="#features"
+            <Link
+              to="/register"
               className="btn-primary-large pulse-animation"
               style={{ background: theme.colors.background.gradient }}
             >
-              <span>Discover Features</span>
+              <span>Start Free for 1 Year</span>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 10H15M15 10L10 5M15 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </a>
-            <a href="#how-it-works" className="btn-secondary-large">
+            </Link>
+            <Link to="/tour" className="btn-secondary-large">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M10 2C5.582 2 2 5.582 2 10s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 14.4A6.4 6.4 0 1116.4 10 6.407 6.407 0 0110 16.4z"/>
                 <path d="M10 5.6V10l3.2 1.6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span>How It Works</span>
-            </a>
+              <span>See It In Action</span>
+            </Link>
           </div>
+          <p className="hero-note">No credit card. No setup fee. Cancel anytime.</p>
         </AnimatedSection>
 
         <AnimatedSection animation="fade-left" delay={200} className="hero-visual">
@@ -341,9 +371,9 @@ export const LandingPage = () => {
         <AnimatedSection animation="scale-up" className="stats-container">
           <div className="stat-item">
             <span className="stat-number">
-              <AnimatedCounter end={6} suffix="+" />
+              <span>Zero</span>
             </span>
-            <span className="stat-label">Core Modules</span>
+            <span className="stat-label">App Downloads</span>
           </div>
           <div className="stat-divider"></div>
           <div className="stat-item">
@@ -437,6 +467,84 @@ export const LandingPage = () => {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="pricing-section">
+        <div className="section-container">
+          <AnimatedSection animation="fade-up" className="section-header">
+            <span className="section-badge">Pricing</span>
+            <h2 className="section-title">Simple, Honest Pricing</h2>
+            <p className="section-subtitle">
+              One plan with everything included. No feature gates, no per-order commission.
+            </p>
+          </AnimatedSection>
+
+          <div className="pricing-grid">
+            <AnimatedSection animation="fade-up" className="pricing-card pricing-card-featured">
+              <div className="pricing-ribbon">Launch Offer</div>
+              <h3 className="pricing-plan-name">Free for 1 Year</h3>
+              <div className="pricing-amount">
+                <span className="pricing-currency">₹</span>
+                <span className="pricing-value">0</span>
+                <span className="pricing-period">/ month</span>
+              </div>
+              <p className="pricing-note-strike">
+                Then ₹1,000/month
+              </p>
+              <p className="pricing-desc">
+                We're onboarding our first <strong>250 restaurants</strong> free for a full year.
+                Everything below, unlocked from day one.
+              </p>
+              <ul className="pricing-features">
+                {pricingIncludes.map((item, i) => (
+                  <li key={i}>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M4 10.5L8 14.5L16 6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to="/register"
+                className="pricing-cta"
+                style={{ background: theme.colors.background.gradient }}
+              >
+                Claim Your Free Year
+              </Link>
+              <p className="pricing-fineprint">No credit card required</p>
+            </AnimatedSection>
+
+            <AnimatedSection animation="fade-up" delay={120} className="pricing-card">
+              <h3 className="pricing-plan-name">Standard</h3>
+              <div className="pricing-amount">
+                <span className="pricing-currency">₹</span>
+                <span className="pricing-value">1,000</span>
+                <span className="pricing-period">/ month</span>
+              </div>
+              <p className="pricing-note-strike">Per restaurant, billed monthly</p>
+              <p className="pricing-desc">
+                The regular price once the launch offer ends — or if you join after the
+                first 250 restaurants.
+              </p>
+              <ul className="pricing-features">
+                {pricingIncludes.map((item, i) => (
+                  <li key={i}>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M4 10.5L8 14.5L16 6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/register" className="pricing-cta pricing-cta-outline">
+                Get Started
+              </Link>
+              <p className="pricing-fineprint">Cancel anytime</p>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
       {/* Why GoResto Section */}
       <section className="testimonial-section">
         <div className="section-container">
@@ -473,15 +581,18 @@ export const LandingPage = () => {
           <div className="cta-pattern"></div>
           <h2 className="cta-title">Ready to Go Digital?</h2>
           <p className="cta-subtitle">
-            Take the first step towards smarter restaurant management. Get in touch with our team today.
+            Join the first 250 restaurants and get a full year free. Set up your menu today,
+            take your first QR order tonight.
           </p>
-          <a href="mailto:contact@goresto.com" className="btn-cta-white">
-            Get in Touch
+          <Link to="/register" className="btn-cta-white">
+            Start Free for 1 Year
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 10H15M15 10L10 5M15 10L10 15" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </a>
-          <p className="cta-note">We'd love to understand your restaurant's needs</p>
+          </Link>
+          <p className="cta-note">
+            Questions first? Write to us at <a href="mailto:info@escose.com">info@escose.com</a>
+          </p>
         </AnimatedSection>
       </section>
 
@@ -493,6 +604,9 @@ export const LandingPage = () => {
               <Logo size="large" variant="light" />
             </div>
             <p className="footer-tagline">Your Restaurant, Digitally Empowered</p>
+            <p className="footer-powered">
+              Powered by <span className="footer-powered-brand">Escose</span>
+            </p>
             <div className="footer-social">
               <a href="#" className="social-link" aria-label="Facebook">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -520,21 +634,25 @@ export const LandingPage = () => {
             <div className="footer-column">
               <h4>Product</h4>
               <a href="#features">Features</a>
+              <a href="#pricing">Pricing</a>
               <a href="#how-it-works">How It Works</a>
+              <Link to="/tour">Product Tour</Link>
             </div>
             <div className="footer-column">
               <h4>Contact</h4>
-              <a href="mailto:contact@goresto.com">contact@goresto.com</a>
+              <a href="mailto:info@escose.com">info@escose.com</a>
             </div>
             <div className="footer-column">
               <h4>Quick Links</h4>
-              <a href="#features">Explore Platform</a>
+              <Link to="/register">Start Free Trial</Link>
+              <Link to="/goresto-admin">Restaurant Login</Link>
             </div>
           </div>
         </AnimatedSection>
         <div className="footer-big-name">GoResto</div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} GoResto. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} GoResto by Escose. All rights reserved.</p>
+          <p className="footer-made-in">Made in India 🇮🇳</p>
         </div>
       </footer>
     </div>
