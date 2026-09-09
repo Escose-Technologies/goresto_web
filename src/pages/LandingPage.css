@@ -98,7 +98,7 @@ html {
 
 .scroll-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #9C6CF0 0%, #7830E4 100%);
+  background: linear-gradient(90deg, #3385F0 0%, #EC4899 50%, #F59E0B 100%);
   transition: width 0.1s ease-out;
   box-shadow: 0 0 10px rgba(120, 48, 228, 0.5);
 }
@@ -455,7 +455,7 @@ html {
 }
 
 .hero-highlight {
-  background: linear-gradient(135deg, #7830E4 0%, #9C6CF0 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1291,7 +1291,7 @@ html {
   font-weight: 400;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #9C6CF0 0%, #7830E4 100%);
+  background: linear-gradient(135deg, #3385F0 0%, #589BF3 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
