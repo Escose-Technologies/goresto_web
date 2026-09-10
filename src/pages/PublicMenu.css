@@ -1409,11 +1409,14 @@ body.public-menu-body,
 }
 
 .customer-order-card {
-  background: #F9FAFB;
+  /* Hardcoded light values here made the whole card invisible in dark mode:
+     --pm-text flips to near-white while the background stayed near-white. */
+  background: var(--pm-order-card-bg, #F9FAFB);
   border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.75rem;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--pm-border, #E5E7EB);
+  color: var(--pm-text, #1F2937);
 }
 
 .customer-order-header {
@@ -1432,13 +1435,13 @@ body.public-menu-body,
 
 .order-date {
   font-size: 0.8125rem;
-  color: #6B7280;
+  color: var(--pm-text-secondary, #6B7280);
   margin-bottom: 0.125rem;
 }
 
 .order-table {
   font-size: 0.8125rem;
-  color: #6B7280;
+  color: var(--pm-text-secondary, #6B7280);
 }
 
 /* Status Badges */
@@ -1511,7 +1514,7 @@ body.public-menu-body,
 .customer-order-items h5 {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--pm-text-secondary, #6B7280);
   margin-bottom: 0.375rem;
 }
 
@@ -1995,6 +1998,7 @@ body.public-menu-body,
     --pm-card-bg: #262626;
     --pm-text: #F3F4F6;
     --pm-text-secondary: #9CA3AF;
+    --pm-order-card-bg: #2E2E2E;
     --pm-text-muted: #6B7280;
     --pm-border: #404040;
     --pm-divider: #333333;
