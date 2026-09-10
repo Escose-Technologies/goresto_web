@@ -219,22 +219,27 @@ export const RestaurantAdminDashboard = () => {
   const [deepLinkOrder, setDeepLinkOrder] = useState(null);
   const [deepLinkBillId, setDeepLinkBillId] = useState(null);
 
+  // Shared by notifications and the Reviews tab: fetch by id so the Orders
+  // date filter cannot hide the target.
+  const openOrderById = async (orderId) => {
+    if (!orderId || !restaurant) return;
+    try {
+      const order = await orderService.getById(restaurant.id, orderId);
+      setActiveTab('orders');
+      setDeepLinkOrder(order);
+    } catch {
+      toast.warning('That order no longer exists');
+    }
+  };
+
   const handleNotificationOpen = async (note) => {
     if (!note || !restaurant) return;
     if (!note.read) handleNotificationRead(note.id);
 
     switch (note.type) {
-      case 'order_new': {
-        if (!note.refId) return;
-        try {
-          const order = await orderService.getById(restaurant.id, note.refId);
-          setActiveTab('orders');
-          setDeepLinkOrder(order);
-        } catch {
-          toast.warning('That order no longer exists');
-        }
+      case 'order_new':
+        await openOrderById(note.refId);
         break;
-      }
       case 'bill_new': {
         if (!note.refId) return;
         setActiveTab('billing');
@@ -722,6 +727,7 @@ export const RestaurantAdminDashboard = () => {
             menuItems={menuItems}
             loading={reviewsLoading}
             onDelete={handleDeleteReview}
+            onOpenOrder={openOrderById}
           />
         )}
 

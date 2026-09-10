@@ -37,7 +37,7 @@ const Stars = ({ value = 0, size = 16 }) => (
   </Stack>
 );
 
-const ReviewsSection = ({ reviews = [], menuItems = [], loading = false, onDelete }) => {
+const ReviewsSection = ({ reviews = [], menuItems = [], loading = false, onDelete, onOpenOrder }) => {
   const [ratingFilter, setRatingFilter] = useState('all');
 
   const itemName = useMemo(() => {
@@ -166,9 +166,26 @@ const ReviewsSection = ({ reviews = [], menuItems = [], loading = false, onDelet
                   </Typography>
                 )}
 
-                <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1.25 }}>
-                  {timeAgo(r.createdAt)}
-                </Typography>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1.25 }} spacing={1}>
+                  <Typography variant="caption" color="text.disabled">
+                    {timeAgo(r.createdAt)}
+                  </Typography>
+                  {r.orderId && onOpenOrder && (
+                    <Stack
+                      direction="row"
+                      spacing={0.25}
+                      alignItems="center"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onOpenOrder(r.orderId)}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpenOrder(r.orderId)}
+                      sx={{ color: 'primary.main', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                    >
+                      <Icon icon="mdi:receipt-text-outline" width={15} />
+                      <Typography variant="caption" fontWeight={600}>View order</Typography>
+                    </Stack>
+                  )}
+                </Stack>
               </Card>
             </Grid>
           ))}

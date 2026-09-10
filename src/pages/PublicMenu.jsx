@@ -82,7 +82,7 @@ export const PublicMenu = () => {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [lastOrderCustomer, setLastOrderCustomer] = useState({ name: '', mobile: '' });
+  const [lastOrderCustomer, setLastOrderCustomer] = useState({ name: '', mobile: '', orderId: null });
 
   const { joinPublic, onOrderUpdated, callStaff } = useSocket();
 
@@ -377,8 +377,13 @@ export const PublicMenu = () => {
         customerMobile: customerMobile.trim(),
       };
 
-      await publicService.placeOrder(restaurantId, orderData);
-      setLastOrderCustomer({ name: customerName.trim(), mobile: customerMobile.trim() });
+      // Keep the order id so a review left afterwards can point back at it.
+      const placed = await publicService.placeOrder(restaurantId, orderData);
+      setLastOrderCustomer({
+        name: customerName.trim(),
+        mobile: customerMobile.trim(),
+        orderId: placed?.id || null,
+      });
       setCart([]);
       setShowCart(false);
       setCustomerName('');
@@ -426,6 +431,7 @@ export const PublicMenu = () => {
         customerMobile: lastOrderCustomer.mobile || null,
         rating: reviewRating,
         comment: reviewComment || '',
+        orderId: lastOrderCustomer.orderId || null,
       });
       setReviewSubmitted(true);
     } catch (error) {

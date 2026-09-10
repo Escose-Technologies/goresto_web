@@ -242,8 +242,17 @@ const FeedbackSection = ({ restaurantId, toast }) => {
                     />
                   </Stack>
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                    {new Date(f.createdAt).toLocaleDateString()} · {f.rating}★
+                    {new Date(f.createdAt).toLocaleDateString()} · {f.rating}★ · {String(f.category || '').replace('_', ' ')}
                   </Typography>
+                  {f.details && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 1, whiteSpace: 'pre-wrap' }}
+                    >
+                      {f.details}
+                    </Typography>
+                  )}
                   {f.adminNotes && (
                     <Alert severity="success" sx={{ mt: 1, py: 0.25 }}>
                       <Typography variant="caption">{f.adminNotes}</Typography>
