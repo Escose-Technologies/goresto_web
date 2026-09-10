@@ -23,6 +23,7 @@ import { BillPreview } from '../components/billing/BillPreview';
 import { BillingTab } from '../components/billing/BillingTab';
 import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
 import { playNewOrderSound, playStaffCallSound, unlockAudio, startRinging } from '../utils/sounds';
+import { showNotification } from '../utils/browserNotifications';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
@@ -159,6 +160,15 @@ export const RestaurantAdminDashboard = () => {
 
     const cleanupNotification = onNotificationNew((note) => {
       setNotifications(prev => (prev.some(n => n.id === note.id) ? prev : [note, ...prev]));
+      // Desktop alert only when the tab isn't visible — otherwise the in-app
+      // feed and the sound have already done the job, and a banner is noise.
+      if (document.hidden) {
+        showNotification(note.title, {
+          body: note.body || undefined,
+          tag: note.type,
+          onClick: () => window.focus(),
+        });
+      }
     });
 
     const cleanupBillNew = onBillNew(() => {
