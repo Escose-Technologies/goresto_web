@@ -98,8 +98,19 @@ export const Register = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 2, bgcolor: 'grey.50' }}>
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
+      {/* Same centring as the login page: textAlign alone leaves the inline
+          <img> aligned by its line box rather than the column. */}
+      <Box
+        sx={{
+          textAlign: 'center',
+          mb: 4,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex' }}>
           <Logo size="xlarge" />
         </Link>
         <Typography variant="body2" color="text.secondary" mt={1}>
