@@ -17,6 +17,23 @@ import { restaurantService, userService, registrationService } from '../services
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
+const FOOD_TYPES = [
+  { value: 'pure_veg', label: 'Pure Veg' },
+  { value: 'egg', label: 'Egg' },
+  { value: 'veg_egg', label: 'Veg + Egg' },
+  { value: 'non_veg', label: 'Non-Veg' },
+  { value: 'both', label: 'Both' },
+];
+
+// Registration stores the owner's name inside `description` as "Owner: <name>"
+// — there is no ownerName column. Read it back out for display, and never
+// expose description as an editable field or the name is lost.
+const ownerNameOf = (restaurant) => {
+  const d = restaurant?.description || '';
+  const m = d.match(/^Owner:\s*(.+)$/);
+  return m ? m[1].trim() : '—';
+};
+
 const fmtDate = (iso) => {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
@@ -50,6 +67,11 @@ export const SuperAdminDashboard = () => {
     address: '',
     phone: '',
     adminId: '',
+    foodType: 'both',
+    cuisineTypes: '',
+    website: '',
+    tagline: '',
+    openingHours: '',
   });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [resetData, setResetData] = useState({ password: '', confirm: '', superPassword: '' });
@@ -81,10 +103,17 @@ export const SuperAdminDashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        cuisineTypes: formData.cuisineTypes
+          .split(',')
+          .map((c) => c.trim())
+          .filter(Boolean),
+      };
       if (editingRestaurant) {
-        await restaurantService.update(editingRestaurant.id, formData);
+        await restaurantService.update(editingRestaurant.id, payload);
       } else {
-        await restaurantService.create(formData);
+        await restaurantService.create(payload);
       }
       await loadData();
       resetForm();
@@ -100,13 +129,21 @@ export const SuperAdminDashboard = () => {
       address: restaurant.address,
       phone: restaurant.phone,
       adminId: restaurant.adminId || '',
+      foodType: restaurant.foodType || 'both',
+      cuisineTypes: (restaurant.cuisineTypes || []).join(', '),
+      website: restaurant.website || '',
+      tagline: restaurant.tagline || '',
+      openingHours: restaurant.openingHours || '',
     });
     setResetData({ password: '', confirm: '', superPassword: '' });
     setShowForm(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', phone: '', adminId: '' });
+    setFormData({
+      name: '', address: '', phone: '', adminId: '',
+      foodType: 'both', cuisineTypes: '', website: '', tagline: '', openingHours: '',
+    });
     setResetData({ password: '', confirm: '', superPassword: '' });
     setEditingRestaurant(null);
     setShowForm(false);
@@ -253,9 +290,17 @@ export const SuperAdminDashboard = () => {
                       </Typography>
                       {reg.description && (
                         <Typography variant="body2" color="text.secondary">
-                          <strong>Owner:</strong> {reg.description.replace('Owner: ', '')}
+                          <strong>Owner:</strong> {ownerNameOf(reg)}
                         </Typography>
                       )}
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Food Type:</strong>{' '}
+                        {FOOD_TYPES.find((f) => f.value === reg.foodType)?.label || '—'}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Cuisine:</strong>{' '}
+                        {(reg.cuisineTypes || []).length ? reg.cuisineTypes.join(', ') : '—'}
+                      </Typography>
                       <Typography variant="caption" color="text.disabled">
                         Applied: {new Date(reg.createdAt).toLocaleDateString()}
                       </Typography>
@@ -325,12 +370,67 @@ export const SuperAdminDashboard = () => {
                 </Grid>
               </Grid>
               <TextField label="Address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} required fullWidth sx={{ mb: 2 }} />
+
+              <Grid container spacing={2} mb={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField label="Food Type" select value={formData.foodType} onChange={(e) => setFormData({ ...formData, foodType: e.target.value })} fullWidth>
+                    {FOOD_TYPES.map((f) => (
+                      <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Cuisine Types"
+                    value={formData.cuisineTypes}
+                    onChange={(e) => setFormData({ ...formData, cuisineTypes: e.target.value })}
+                    fullWidth
+                    helperText="Comma separated, e.g. North Indian, Chinese"
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2} mb={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField label="Tagline" value={formData.tagline} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} fullWidth />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField label="Website" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} fullWidth placeholder="https://" />
+                </Grid>
+              </Grid>
+
+              <TextField label="Opening Hours" value={formData.openingHours} onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })} fullWidth sx={{ mb: 2 }} placeholder="e.g. 11:00 AM - 11:00 PM" />
+
               <TextField label="Assign Admin" select value={formData.adminId} onChange={(e) => setFormData({ ...formData, adminId: e.target.value })} fullWidth sx={{ mb: 2 }}>
                 <MenuItem value="">Select Admin</MenuItem>
                 {users.map((user) => (
                   <MenuItem key={user.id} value={user.id}>{user.email}</MenuItem>
                 ))}
               </TextField>
+              {editingRestaurant && (
+                <Box sx={{ mb: 2.5, p: 2, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>
+                    Registration details
+                  </Typography>
+                  <Grid container spacing={2} mt={0}>
+                    {[
+                      ['Email', editingRestaurant.email || '—'],
+                      ['Owner', ownerNameOf(editingRestaurant)],
+                      ['Status', editingRestaurant.status || '—'],
+                      ['Registered', fmtDate(editingRestaurant.createdAt)],
+                    ].map(([label, value]) => (
+                      <Grid key={label} size={{ xs: 12, sm: 6, md: 3 }}>
+                        <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
+                        <Typography variant="body2" fontWeight={600} sx={{ wordBreak: 'break-word' }}>{value}</Typography>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
+                    Email identifies the admin account and cannot be changed here.
+                  </Typography>
+                </Box>
+              )}
+
               <Stack direction="row" spacing={1.5}>
                 <Button type="submit" variant="contained">
                   {editingRestaurant ? 'Update' : 'Create'}
