@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { restaurantIdParamSchema } from '../validators/common.validator.js';
 import { createReviewSchema } from '../validators/reviews.validator.js';
-import { publicOrderLimiter } from '../config/rateLimiter.js';
+import { kitchenPinLimiter, publicOrderLimiter } from '../config/rateLimiter.js';
 import * as publicController from '../controllers/public.controller.js';
 import { z } from 'zod';
 
@@ -33,6 +33,6 @@ router.get('/:restaurantId/orders/status', validate(restaurantIdParamSchema, 'pa
 router.post('/:restaurantId/reviews', validate(restaurantIdParamSchema, 'params'), validate(createReviewSchema), publicController.submitReview);
 router.get('/:restaurantId/menu-items/:menuItemId/reviews', validate(restaurantIdParamSchema, 'params'), publicController.getMenuItemReviews);
 router.get('/:restaurantId/tables/:tableNumber/status', validate(restaurantIdParamSchema, 'params'), publicController.getTableStatus);
-router.post('/:restaurantId/kitchen/verify-pin', validate(restaurantIdParamSchema, 'params'), publicController.verifyKitchenPin);
+router.post('/:restaurantId/kitchen/verify-pin', kitchenPinLimiter, validate(restaurantIdParamSchema, 'params'), publicController.verifyKitchenPin);
 
 export default router;

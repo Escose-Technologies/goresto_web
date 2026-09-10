@@ -7,6 +7,7 @@ import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
 import { notify, money } from '../utils/notify.js';
+import { comparePassword, hashPassword } from '../utils/password.js';
 
 const UNAVAILABLE = {
   success: false,
@@ -195,11 +196,27 @@ export const verifyKitchenPin = asyncHandler(async (req, res) => {
     });
   }
 
-  if (pin !== settings.kitchenPin) {
+  // PINs are stored hashed. Rows written before hashing shipped still hold
+  // plaintext, so accept those once and upgrade them in place — otherwise
+  // every existing kitchen screen would be locked out on deploy.
+  const stored = settings.kitchenPin;
+  const storedIsHashed = stored.startsWith('$2');
+  const ok = storedIsHashed
+    ? await comparePassword(String(pin), stored)
+    : String(pin) === stored;
+
+  if (!ok) {
     return res.status(401).json({
       success: false,
       error: { code: 'INVALID_PIN', message: 'Invalid kitchen PIN' },
     });
+  }
+
+  if (!storedIsHashed) {
+    // Fire-and-forget: a failed upgrade must not block the kitchen.
+    prisma.settings
+      .update({ where: { restaurantId }, data: { kitchenPin: await hashPassword(String(pin)) } })
+      .catch((err) => console.error('kitchen pin upgrade failed:', err.message));
   }
 
   // Return active orders on successful verification
