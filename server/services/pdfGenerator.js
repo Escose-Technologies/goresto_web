@@ -7,19 +7,33 @@ const fmt = (n) => {
   return val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const fmtDate = (iso) => {
+// PDFs are rendered on the server, whose container runs in UTC, while the
+// on-screen bill is rendered in the customer's browser. Using getDate()/
+// getHours() here meant the downloaded invoice disagreed with the printed one
+// by the UTC offset — and by a whole calendar day for anything billed after
+// 18:30 IST. Always format in the restaurant's own timezone.
+const DEFAULT_TZ = 'Asia/Kolkata';
+
+const parts = (iso, timeZone) => {
   const d = new Date(iso);
-  const day = String(d.getDate()).padStart(2, '0');
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
+  const out = {};
+  for (const p of fmt.formatToParts(d)) out[p.type] = p.value;
+  return out;
 };
 
-const fmtTime = (iso) => {
-  const d = new Date(iso);
-  const h = d.getHours();
-  const m = String(d.getMinutes()).padStart(2, '0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  return `${h % 12 || 12}:${m} ${ampm}`;
+const fmtDate = (iso, timeZone = DEFAULT_TZ) => {
+  const p = parts(iso, timeZone);
+  return `${p.day}-${p.month}-${p.year}`;
+};
+
+const fmtTime = (iso, timeZone = DEFAULT_TZ) => {
+  const p = parts(iso, timeZone);
+  return `${p.hour}:${p.minute} ${(p.dayPeriod || '').toUpperCase()}`;
 };
 
 const ORDER_TYPE_LABELS = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' };
@@ -76,6 +90,7 @@ export function generateBillPdf(bill) {
   const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', INR: 'Rs.', CAD: 'C$', AUD: 'A$' };
   const cur = SYMBOLS[settings.currency] || 'Rs.';
   const items = bill.billItems || [];
+  const tz = settings.timezone || DEFAULT_TZ;
   const gstOn = settings.gstEnabled !== false;
   const isComposition = settings.gstScheme === 'composition';
   const billTitle = !gstOn ? 'BILL' : (isComposition ? 'BILL OF SUPPLY' : 'TAX INVOICE');
@@ -181,7 +196,7 @@ export function generateBillPdf(bill) {
   const metaLeft = [
     `Bill No: ${bill.billNumber}`,
     ...(orderNos.length ? [`${orderNos.length > 1 ? 'Orders' : 'Order No'}: ${orderNos.join(', ')}`] : []),
-    `Date: ${fmtDate(bill.createdAt)}  ${fmtTime(bill.createdAt)}`,
+    `Date: ${fmtDate(bill.createdAt, tz)}  ${fmtTime(bill.createdAt, tz)}`,
     `Table: ${bill.tableNumber}`,
     `Type: ${ORDER_TYPE_LABELS[bill.orderType] || bill.orderType}`,
   ];
