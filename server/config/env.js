@@ -45,3 +45,21 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
+
+// A guessable reset secret is as good as no secret: it is the only thing
+// standing between a compromised superadmin session and every restaurant
+// account. Warn rather than exit — refusing to boot would take production down
+// over a configuration problem that is not itself an outage.
+if (env.SUPERADMIN_RESET_PASSWORD) {
+  const value = env.SUPERADMIN_RESET_PASSWORD;
+  const weak =
+    value.length < 24 ||
+    /^[a-z_]+$/.test(value) ||
+    /superadmin|password|reset|goresto|changeme|secret/i.test(value);
+  if (weak) {
+    console.warn(
+      '[security] SUPERADMIN_RESET_PASSWORD looks guessable. Generate one with ' +
+      '`openssl rand -base64 32` and set it in the environment.'
+    );
+  }
+}

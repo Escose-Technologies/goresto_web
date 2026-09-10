@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { sensitiveAdminLimiter } from '../config/rateLimiter.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 import { validate } from '../middleware/validate.js';
@@ -16,6 +17,7 @@ router.post('/', validate(createUserSchema), usersController.create);
 router.patch('/:id', validate(idParamSchema, 'params'), validate(updateUserSchema), usersController.update);
 router.post(
   '/:id/reset-password',
+  sensitiveAdminLimiter,
   validate(idParamSchema, 'params'),
   validate(resetPasswordSchema),
   usersController.resetPassword,

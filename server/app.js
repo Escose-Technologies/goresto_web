@@ -35,6 +35,11 @@ app.use('/api/auth', generalLimiter);
 app.use('/api/restaurants', generalLimiter);
 app.use('/api/superadmin', generalLimiter);
 app.use('/api/upload', generalLimiter);
+// Previously unlimited: these fall through to app.use('/api', routes) and had
+// no limiter of their own, including the superadmin password-reset endpoint.
+app.use('/api/users', generalLimiter);
+app.use('/api/registrations', generalLimiter);
+app.use('/api/admin', generalLimiter);
 
 // API routes
 app.use('/api', routes);
