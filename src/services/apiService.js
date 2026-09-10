@@ -279,6 +279,12 @@ export const restaurantService = {
     return patch(`/restaurants/${id}`, updates);
   },
 
+  // Identity fields only. Writes Restaurant and Settings in one transaction so
+  // the two cannot drift apart.
+  async updateProfile(id, updates) {
+    return patch(`/restaurants/${id}/profile`, updates);
+  },
+
   async deactivate(id) {
     return patch(`/restaurants/${id}/deactivate`, {});
   },

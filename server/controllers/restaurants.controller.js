@@ -40,3 +40,8 @@ export const remove = asyncHandler(async (req, res) => {
   await restaurantsService.remove(req.params.id);
   res.json({ success: true, data: { message: 'Restaurant deleted successfully' } });
 });
+
+export const updateProfile = asyncHandler(async (req, res) => {
+  const restaurant = await restaurantsService.updateProfile(req.params.id, req.body);
+  res.json({ success: true, data: restaurant });
+});

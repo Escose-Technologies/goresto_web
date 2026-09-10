@@ -4,7 +4,7 @@ import { authorize } from '../middleware/authorize.js';
 import { restaurantOwnership } from '../middleware/restaurantOwnership.js';
 import { validate } from '../middleware/validate.js';
 import { idParamSchema } from '../validators/common.validator.js';
-import { createRestaurantSchema, updateRestaurantSchema } from '../validators/restaurants.validator.js';
+import { createRestaurantSchema, updateRestaurantSchema, updateProfileSchema } from '../validators/restaurants.validator.js';
 import * as restaurantsController from '../controllers/restaurants.controller.js';
 
 const router = Router();
@@ -17,6 +17,7 @@ router.get('/:id', validate(idParamSchema, 'params'), restaurantOwnership, resta
 router.post('/', authorize('superadmin'), validate(createRestaurantSchema), restaurantsController.create);
 router.patch('/:id/deactivate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.deactivate);
 router.patch('/:id/activate', authorize('superadmin'), validate(idParamSchema, 'params'), restaurantsController.activate);
+router.patch('/:id/profile', authorize('restaurant_admin', 'superadmin'), validate(idParamSchema, 'params'), validate(updateProfileSchema), restaurantOwnership, restaurantsController.updateProfile);
 router.patch('/:id', authorize('restaurant_admin', 'superadmin'), validate(idParamSchema, 'params'), validate(updateRestaurantSchema), restaurantOwnership, restaurantsController.update);
 // No hard-delete route: restaurants are suspended (PATCH /:id/deactivate), never destroyed.
 

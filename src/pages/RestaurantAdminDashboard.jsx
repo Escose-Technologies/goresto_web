@@ -353,21 +353,18 @@ export const RestaurantAdminDashboard = () => {
 
   const handleSaveProfile = async (profileData) => {
     try {
-      const updated = await restaurantService.update(restaurant.id, profileData);
-      await settingsService.updateSettings(restaurant.id, {
-        restaurantName: profileData.name,
-        address: profileData.address,
-        phone: profileData.phone,
-        email: profileData.email,
-        openingTime: profileData.openingTime,
-        closingTime: profileData.closingTime,
-      });
+      // One transactional call. Previously this issued two writes — restaurant
+      // then settings — and a failure between them left the rows disagreeing.
+      const updated = await restaurantService.updateProfile(restaurant.id, profileData);
       setRestaurant(updated);
-      toast.success('Profile updated! Changes will reflect on the public menu.');
+      const freshSettings = await settingsService.getSettings(restaurant.id);
+      setRestaurantSettings(freshSettings);
+      toast.success('Profile updated');
     } catch (error) {
-      toast.error('Error updating profile: ' + error.message);
+      toast.error('Failed to update profile: ' + error.message);
     }
   };
+;
 
   const handleSaveItem = async (itemData) => {
     try {
