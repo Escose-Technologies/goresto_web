@@ -5,6 +5,7 @@ import { verifyAccessToken } from '../utils/jwt.js';
 import { prisma } from './database.js';
 import * as ordersService from '../services/orders.service.js';
 import * as staffCallsService from '../services/staffCalls.service.js';
+import * as notificationsService from '../services/notifications.service.js';
 
 let io = null;
 
@@ -154,6 +155,16 @@ export const initializeSocket = (httpServer) => {
           read: call.read,
           createdAt: call.createdAt,
         });
+
+        // Mirror into the notification feed so the centre has one source.
+        const note = await notificationsService.record({
+          restaurantId,
+          type: 'staff_call',
+          title: `Table ${call.tableNumber} needs assistance`,
+          body: call.customerName || null,
+          refId: call.id,
+        });
+        if (note) io.to(`restaurant:${restaurantId}`).emit('notification:new', note);
 
         console.log(`Staff called for table ${tableNumber} at restaurant ${restaurantId}`);
         if (callback) callback({ success: true });

@@ -1,6 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as ordersService from '../services/orders.service.js';
 import { emitOrderCreated, emitOrderUpdated } from '../utils/socketEmitter.js';
+import { notify, money } from '../utils/notify.js';
 
 export const getAll = asyncHandler(async (req, res) => {
   const orders = await ordersService.getAll(req.params.restaurantId, req.query);
@@ -15,6 +16,12 @@ export const getById = asyncHandler(async (req, res) => {
 export const create = asyncHandler(async (req, res) => {
   const order = await ordersService.create(req.params.restaurantId, req.body);
   emitOrderCreated(req.params.restaurantId, order);
+  notify(req.params.restaurantId, {
+    type: 'order_new',
+    title: `New order${order.tableNumber ? ` - Table ${order.tableNumber}` : ''}`,
+    body: `${order.customerName || 'Walk-in'} - ${money(order.total)}`,
+    refId: order.id,
+  });
   res.status(201).json({ success: true, data: order });
 });
 

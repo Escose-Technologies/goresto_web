@@ -74,6 +74,12 @@ export const useSocket = () => {
     return () => socket.off('staff:called', callback);
   }, []);
 
+  const onNotificationNew = useCallback((callback) => {
+    const socket = getSocket();
+    socket.on('notification:new', callback);
+    return () => socket.off('notification:new', callback);
+  }, []);
+
   const onBillNew = useCallback((callback) => {
     const socket = getSocket();
     socket.on('bill:new', callback);
@@ -124,6 +130,7 @@ export const useSocket = () => {
     updateOrderStatus,
     callStaff,
     onStaffCalled,
+    onNotificationNew,
     onBillNew,
     onBillUpdated,
     onRestaurantSuspended,
