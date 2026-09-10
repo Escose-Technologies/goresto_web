@@ -17,6 +17,7 @@ import Divider from '@mui/material/Divider';
 import { Icon } from '@iconify/react';
 import { restaurantService, settingsService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
+import { TONE_OPTIONS, playTone } from '../utils/sounds';
 import { INDIAN_STATES } from '../utils/indianStates';
 import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 
@@ -30,6 +31,7 @@ const SECTIONS = [
   { id: 'features', label: 'Features', icon: 'mdi:tune-variant', hint: 'Online ordering & more' },
   { id: 'kitchenDisplay', label: 'Kitchen', icon: 'mdi:monitor-dashboard', hint: 'KDS access PIN' },
   { id: 'promotions', label: 'Promotions', icon: 'mdi:bullhorn-outline', hint: 'Menu announcement' },
+  { id: 'notifications', label: 'Notifications', icon: 'mdi:bell-outline', hint: 'Alert sounds & volume' },
 ];
 
 export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings: settingsProp }) => {
@@ -49,6 +51,8 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
     allowCallStaff: true, notificationEmail: '', discountText: '', kitchenPin: '',
     gstEnabled: true, gstin: '', gstScheme: 'regular', gstRate: 5, fssaiNumber: '',
     placeOfSupply: '', placeOfSupplyCode: '', billPrefix: 'INV',
+    soundEnabled: true, soundVolume: 70, newOrderTone: 'chime',
+    staffCallTone: 'doorbell', staffCallRepeat: false,
     showServiceCharge: false, serviceChargeLabel: 'Service Charge',
     enableRoundOff: true, enablePackagingCharge: false, defaultPackagingCharge: 0,
     billFooterText: 'Thank you for dining with us!', showFeedbackQR: false,
@@ -107,7 +111,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
   // <input type="number"> yields a string, but the API validates these as
   // numbers — send them through unconverted and Zod rejects the whole save.
   // Nullable on the API — an empty input clears them.
-  const NUMERIC_FIELDS = ['fontSize', 'taxRate', 'serviceCharge', 'defaultPackagingCharge'];
+  const NUMERIC_FIELDS = ['fontSize', 'taxRate', 'serviceCharge', 'defaultPackagingCharge', 'soundVolume'];
   // Not nullable (has a server-side default), so an empty input must omit the
   // key entirely rather than send null, which the schema would reject.
   const NUMERIC_FIELDS_NON_NULL = ['gstRate'];
@@ -685,6 +689,106 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
           )}
 
           {/* Promotions */}
+          {active === 'notifications' && (
+            <>
+              <Stack spacing={1.5} mb={3}>
+                <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.soundEnabled}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, soundEnabled: e.target.checked }))}
+                    style={{ accentColor: '#3385F0' }}
+                  />
+                  <Typography variant="body2" fontWeight={500}>Play a sound for new orders and staff calls</Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ pl: 3 }}>
+                  Applies to the dashboard and the kitchen display. Your browser may stay
+                  silent until you interact with the page once after opening it.
+                </Typography>
+              </Stack>
+
+              <Box sx={{ mb: 3, opacity: formData.soundEnabled ? 1 : 0.5, pointerEvents: formData.soundEnabled ? 'auto' : 'none' }}>
+                <Typography variant="body2" fontWeight={600} mb={0.5}>Volume</Typography>
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ maxWidth: 420 }}>
+                  <Icon icon="mdi:volume-low" width={20} style={{ opacity: 0.6, flexShrink: 0 }} />
+                  <Slider
+                    value={Number(formData.soundVolume) || 0}
+                    onChange={(_, v) => setFormData((prev) => ({ ...prev, soundVolume: v }))}
+                    onChangeCommitted={(_, v) => playTone(formData.newOrderTone, v)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    valueLabelDisplay="auto"
+                  />
+                  <Icon icon="mdi:volume-high" width={20} style={{ opacity: 0.6, flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ minWidth: 38, textAlign: 'right' }}>
+                    {Number(formData.soundVolume) || 0}%
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Grid container spacing={2} mb={2} sx={{ opacity: formData.soundEnabled ? 1 : 0.5, pointerEvents: formData.soundEnabled ? 'auto' : 'none' }}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <TextField
+                      label="New Order Tone"
+                      select
+                      value={formData.newOrderTone}
+                      onChange={handleChange('newOrderTone')}
+                      fullWidth
+                    >
+                      {TONE_OPTIONS.map((t) => (
+                        <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+                      ))}
+                    </TextField>
+                    <Button
+                      variant="outlined"
+                      onClick={() => playTone(formData.newOrderTone, formData.soundVolume)}
+                      startIcon={<Icon icon="mdi:play" width={18} />}
+                      sx={{ mt: 0.5, flexShrink: 0 }}
+                    >
+                      Preview
+                    </Button>
+                  </Stack>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <TextField
+                      label="Staff Call Tone"
+                      select
+                      value={formData.staffCallTone}
+                      onChange={handleChange('staffCallTone')}
+                      fullWidth
+                    >
+                      {TONE_OPTIONS.map((t) => (
+                        <MenuItem key={t.value} value={t.value}>{t.label}</MenuItem>
+                      ))}
+                    </TextField>
+                    <Button
+                      variant="outlined"
+                      onClick={() => playTone(formData.staffCallTone, formData.soundVolume)}
+                      startIcon={<Icon icon="mdi:play" width={18} />}
+                      sx={{ mt: 0.5, flexShrink: 0 }}
+                    >
+                      Preview
+                    </Button>
+                  </Stack>
+                </Grid>
+              </Grid>
+
+              <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', opacity: formData.soundEnabled ? 1 : 0.5 }}>
+                <input
+                  type="checkbox"
+                  checked={formData.staffCallRepeat}
+                  disabled={!formData.soundEnabled}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, staffCallRepeat: e.target.checked }))}
+                  style={{ accentColor: '#3385F0' }}
+                />
+                <Typography variant="body2" fontWeight={500}>Keep ringing for staff calls until acknowledged</Typography>
+              </Box>
+            </>
+          )}
+
           {active === 'promotions' && (
             <TextField
               label="Discount/Announcement Text"

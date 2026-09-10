@@ -354,6 +354,14 @@ model Settings {
   autoPrintOnBill        Boolean      @default(false)
   thermalPrinterWidth    ThermalWidth @default(eighty_mm)
 
+  // Notification sounds. Tones are synthesized in the browser (see
+  // src/utils/sounds.js) — these store which pattern to play, not a file.
+  soundEnabled    Boolean @default(true)
+  soundVolume     Int     @default(70) // 0-100
+  newOrderTone    String  @default("chime")
+  staffCallTone   String  @default("doorbell")
+  staffCallRepeat Boolean @default(false) // ring until acknowledged
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

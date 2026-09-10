@@ -52,4 +52,11 @@ export const upsertSettingsSchema = z.object({
   showFeedbackQR: z.boolean().default(false),
   autoPrintOnBill: z.boolean().default(false),
   thermalPrinterWidth: z.enum(['eighty_mm', 'fifty_eight_mm']).default('eighty_mm'),
+
+  // Notification sounds
+  soundEnabled: z.boolean().optional(),
+  soundVolume: z.number().int().min(0).max(100).optional(),
+  newOrderTone: z.enum(['chime', 'doorbell', 'bell', 'marimba', 'alert', 'beep']).optional(),
+  staffCallTone: z.enum(['chime', 'doorbell', 'bell', 'marimba', 'alert', 'beep']).optional(),
+  staffCallRepeat: z.boolean().optional(),
 });
