@@ -6,4 +6,5 @@ export const createReviewSchema = z.object({
   customerMobile: z.string().max(20).optional().nullable(),
   rating: z.number().int().min(1, 'Rating must be 1-5').max(5, 'Rating must be 1-5'),
   comment: z.string().max(1000).trim().optional().default(''),
+  orderId: z.string().optional().nullable(),
 });

@@ -115,3 +115,47 @@ export const remove = async (id) => {
   if (!existing) throw new NotFoundError('Restaurant');
   await prisma.restaurant.delete({ where: { id } });
 };
+
+/**
+ * Update a restaurant's identity in one transaction.
+ *
+ * Identity lives in two places for historical reasons: the public menu reads
+ * settings.address / settings.phone / settings.openingTime, while bills and the
+ * profile header read the Restaurant row. Writing them separately let the two
+ * drift — production already had restaurants whose Settings.email was empty
+ * while Restaurant.email was set.
+ *
+ * Profile is now the only writer, and both rows move together or not at all.
+ */
+export const updateProfile = async (id, data) => {
+  const existing = await prisma.restaurant.findUnique({ where: { id } });
+  if (!existing) throw new NotFoundError('Restaurant');
+
+  const { openingTime, closingTime, ...restaurantData } = data;
+
+  const [restaurant] = await prisma.$transaction([
+    prisma.restaurant.update({ where: { id }, data: restaurantData }),
+    prisma.settings.upsert({
+      where: { restaurantId: id },
+      create: {
+        restaurantId: id,
+        restaurantName: restaurantData.name,
+        address: restaurantData.address ?? null,
+        phone: restaurantData.phone ?? null,
+        email: restaurantData.email ?? null,
+        ...(openingTime ? { openingTime } : {}),
+        ...(closingTime ? { closingTime } : {}),
+      },
+      update: {
+        restaurantName: restaurantData.name,
+        address: restaurantData.address ?? null,
+        phone: restaurantData.phone ?? null,
+        email: restaurantData.email ?? null,
+        ...(openingTime ? { openingTime } : {}),
+        ...(closingTime ? { closingTime } : {}),
+      },
+    }),
+  ]);
+
+  return formatRestaurant(restaurant);
+};

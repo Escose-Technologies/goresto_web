@@ -51,3 +51,11 @@ export const createRestaurantSchema = z.object({
 });
 
 export const updateRestaurantSchema = createRestaurantSchema.partial();
+
+// Profile is the single writer for restaurant identity. Extends the update
+// schema with the two time fields that live on Settings, so one request can
+// keep both rows in step.
+export const updateProfileSchema = updateRestaurantSchema.extend({
+  openingTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM').optional().nullable(),
+  closingTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM').optional().nullable(),
+});

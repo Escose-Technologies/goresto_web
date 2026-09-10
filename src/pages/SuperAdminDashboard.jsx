@@ -71,7 +71,6 @@ export const SuperAdminDashboard = () => {
     cuisineTypes: '',
     website: '',
     tagline: '',
-    openingHours: '',
   });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [feedback, setFeedback] = useState([]);
@@ -152,7 +151,6 @@ export const SuperAdminDashboard = () => {
       cuisineTypes: (restaurant.cuisineTypes || []).join(', '),
       website: restaurant.website || '',
       tagline: restaurant.tagline || '',
-      openingHours: restaurant.openingHours || '',
     });
     setResetData({ password: '', confirm: '', superPassword: '' });
     setShowForm(true);
@@ -161,7 +159,7 @@ export const SuperAdminDashboard = () => {
   const resetForm = () => {
     setFormData({
       name: '', address: '', phone: '', adminId: '',
-      foodType: 'both', cuisineTypes: '', website: '', tagline: '', openingHours: '',
+      foodType: 'both', cuisineTypes: '', website: '', tagline: '',
     });
     setResetData({ password: '', confirm: '', superPassword: '' });
     setEditingRestaurant(null);
@@ -513,8 +511,6 @@ export const SuperAdminDashboard = () => {
                   <TextField label="Website" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} fullWidth placeholder="https://" />
                 </Grid>
               </Grid>
-
-              <TextField label="Opening Hours" value={formData.openingHours} onChange={(e) => setFormData({ ...formData, openingHours: e.target.value })} fullWidth sx={{ mb: 2 }} placeholder="e.g. 11:00 AM - 11:00 PM" />
 
               <TextField label="Assign Admin" select value={formData.adminId} onChange={(e) => setFormData({ ...formData, adminId: e.target.value })} fullWidth sx={{ mb: 2 }}>
                 <MenuItem value="">Select Admin</MenuItem>

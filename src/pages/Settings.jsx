@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import Divider from '@mui/material/Divider';
 import { Icon } from '@iconify/react';
-import { restaurantService, settingsService } from '../services/apiService';
+import { settingsService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
 import { TONE_OPTIONS, playTone } from '../utils/sounds';
 import {
@@ -30,9 +30,7 @@ import { INDIAN_STATES } from '../utils/indianStates';
 import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 
 const SECTIONS = [
-  { id: 'restaurantInfo', label: 'Restaurant', icon: 'mdi:storefront-outline', hint: 'Name, contact & address' },
-  { id: 'businessHours', label: 'Hours', icon: 'mdi:clock-outline', hint: 'Opening times & timezone' },
-  { id: 'currencyPricing', label: 'Pricing', icon: 'mdi:currency-inr', hint: 'Currency, tax & service' },
+  { id: 'currencyPricing', label: 'Pricing', icon: 'mdi:currency-inr', hint: 'Currency, tax, service & timezone' },
   { id: 'billingTax', label: 'Billing & Tax', icon: 'mdi:receipt-text-outline', hint: 'GST, FSSAI & bill format' },
   { id: 'discountPresets', label: 'Discounts', icon: 'mdi:tag-outline', hint: 'Reusable discount presets' },
   { id: 'themeColors', label: 'Theme', icon: 'mdi:palette-outline', hint: 'Brand colours' },
@@ -48,7 +46,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
   const [desktopOn, setDesktopOn] = useState(() => desktopEnabled());
   const [restaurant] = useState(restaurantProp);
   const [saving, setSaving] = useState(false);
-  const [active, setActive] = useState('restaurantInfo');
+  const [active, setActive] = useState('currencyPricing');
   const [kdsUrlCopied, setKdsUrlCopied] = useState(false);
 
   const currencySymbols = { USD: '$', EUR: '€', GBP: '£', INR: '₹', CAD: 'C$', AUD: 'A$' };
@@ -100,7 +98,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
   };
   // Which section each validated field lives in, so a failed save can jump there.
   const FIELD_SECTION = {
-    email: 'restaurantInfo', taxRate: 'currencyPricing', serviceCharge: 'currencyPricing',
+    taxRate: 'currencyPricing', serviceCharge: 'currencyPricing',
     gstin: 'billingTax', fssaiNumber: 'billingTax', placeOfSupplyCode: 'billingTax', billPrefix: 'billingTax',
     primaryColor: 'themeColors', secondaryColor: 'themeColors',
     notificationEmail: 'features', kitchenPin: 'kitchenDisplay',
@@ -172,8 +170,17 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
     setSaving(true);
     setServerErrors({});
     try {
+      // Identity now belongs to Profile. Settings must not send these, or a
+      // Settings save would silently overwrite what Profile owns and put the
+      // Restaurant and Settings rows back out of step.
+      const {
+        restaurantName: _n, address: _a, phone: _p, email: _e,
+        openingTime: _o, closingTime: _c,
+        ...configOnly
+      } = formData;
+
       const dataToSave = toNumericPayload({
-        ...formData,
+        ...configOnly,
         currencySymbol: getCurrencySymbol(),
       });
       // Only send kitchenPin if it's a valid 4-digit PIN or empty to keep current
@@ -181,9 +188,6 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
         delete dataToSave.kitchenPin;
       }
       const updatedSettings = await settingsService.updateSettings(restaurant.id, dataToSave);
-      await restaurantService.update(restaurant.id, {
-        name: formData.restaurantName, address: formData.address, phone: formData.phone,
-      });
       if (onSettingsSaved) onSettingsSaved(updatedSettings);
       toast.success('Settings saved successfully!');
     } catch (error) {
@@ -287,33 +291,10 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
               up to the same width — the standard settings-form look. */}
           <Box sx={{ maxWidth: 760, width: '100%' }}>
           {/* Restaurant Information */}
-          {active === 'restaurantInfo' && (
+          {/* Currency & Pricing */}
+          {active === 'currencyPricing' && (
             <Box>
-              <Grid container spacing={2} mb={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Restaurant Name" value={formData.restaurantName} onChange={handleChange('restaurantName')} required fullWidth />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Phone" type="tel" value={formData.phone} onChange={handleChange('phone')} fullWidth />
-                </Grid>
-              </Grid>
-              <TextField label="Address" value={formData.address} onChange={handleChange('address')} fullWidth multiline rows={2} sx={{ mb: 2 }} />
-              <TextField label="Email" type="text" value={formData.email} onChange={handleChange('email')} onBlur={markTouched('email')} error={!!fieldError('email')} helperText={fieldError('email') || ''} fullWidth slotProps={{ htmlInput: { inputMode: 'email' } }} />
-            </Box>
-          )}
-
-          {/* Business Hours */}
-          {active === 'businessHours' && (
-            <Box>
-              <Grid container spacing={2} mb={2}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Opening Time" type="time" value={formData.openingTime} onChange={handleChange('openingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <TextField label="Closing Time" type="time" value={formData.closingTime} onChange={handleChange('closingTime')} fullWidth slotProps={{ inputLabel: { shrink: true } }} />
-                </Grid>
-              </Grid>
-              <TextField label="Timezone" select value={formData.timezone} onChange={handleChange('timezone')} fullWidth>
+              <TextField label="Timezone" select value={formData.timezone} onChange={handleChange('timezone')} fullWidth sx={{ mb: 2 }}>
                 <MenuItem value="Asia/Kolkata">India Standard Time (IST)</MenuItem>
                 <MenuItem value="Asia/Dubai">Gulf Standard Time (GST)</MenuItem>
                 <MenuItem value="Asia/Singapore">Singapore Time (SGT)</MenuItem>
@@ -325,12 +306,6 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
                 <MenuItem value="America/Los_Angeles">Pacific Time (PT)</MenuItem>
                 <MenuItem value="UTC">UTC</MenuItem>
               </TextField>
-            </Box>
-          )}
-
-          {/* Currency & Pricing */}
-          {active === 'currencyPricing' && (
-            <Box>
               <TextField label="Currency" select value={formData.currency} onChange={handleChange('currency')} fullWidth sx={{ mb: 2 }}>
                 <MenuItem value="INR">INR - Indian Rupee (₹)</MenuItem>
                 <MenuItem value="USD">USD - US Dollar ($)</MenuItem>

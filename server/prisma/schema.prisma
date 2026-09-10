@@ -399,6 +399,9 @@ model Review {
   customerMobile String?
   rating         Int
   comment        String?
+  /// The order this review followed, when known. Null for reviews left before
+  /// this was captured, and for any submitted outside an order flow.
+  orderId        String?
 
   createdAt DateTime @default(now())
 
