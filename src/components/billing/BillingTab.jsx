@@ -17,7 +17,7 @@ const DATE_PRESETS = [
   { value: 'all', label: 'All Time' },
 ];
 
-export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, settings }) => {
+export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, settings, deepLinkBillId, onDeepLinkHandled }) => {
   const cur = getCurrencySymbol(settings);
   const [billingView, setBillingView] = useState('bills'); // 'bills' | 'reports'
   const [bills, setBills] = useState([]);
@@ -36,6 +36,14 @@ export const BillingTab = ({ restaurantId, restaurant, toast, refreshTrigger, se
 
   // Preview modal
   const [previewBill, setPreviewBill] = useState(null);
+
+  // Opened from a notification. BillPreview loads the full bill from an id, so
+  // this works regardless of the tab's own date filter.
+  useEffect(() => {
+    if (!deepLinkBillId) return;
+    setPreviewBill({ id: deepLinkBillId });
+    onDeepLinkHandled?.();
+  }, [deepLinkBillId]);
 
   // Payment modal
   const [payingBill, setPayingBill] = useState(null);

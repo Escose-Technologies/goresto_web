@@ -44,6 +44,7 @@ const AppBarHeader = ({
   onLogout,
   notifications = [],
   onNotificationRead,
+  onNotificationOpen,
   onNotificationReadAll,
   onNotificationClear,
   connected = false,
@@ -176,7 +177,10 @@ const AppBarHeader = ({
                 {notifications.map((n) => (
                   <MenuItem
                     key={n.id}
-                    onClick={() => !n.read && onNotificationRead(n.id)}
+                    onClick={() => {
+                      if (onNotificationOpen) { onNotificationOpen(n); setNotifAnchor(null); }
+                      else if (!n.read) onNotificationRead(n.id);
+                    }}
                     sx={{
                       py: 1.25,
                       alignItems: 'flex-start',

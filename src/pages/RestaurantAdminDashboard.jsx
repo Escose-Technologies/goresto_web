@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, notificationService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, notificationService, reviewService, getAccessToken } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
@@ -26,6 +26,7 @@ import { playNewOrderSound, playStaffCallSound, unlockAudio, startRinging } from
 import { showNotification } from '../utils/browserNotifications';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
+import ReviewsSection from '../components/sections/ReviewsSection';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -61,6 +62,8 @@ export const RestaurantAdminDashboard = () => {
   const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled,
     onNotificationNew, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated } = useSocket();
   const [notifications, setNotifications] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [suspended, setSuspended] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [showBillModal, setShowBillModal] = useState(false);
@@ -202,6 +205,61 @@ export const RestaurantAdminDashboard = () => {
       cleanupReactivated();
     };
   }, [restaurant, joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated]);
+
+  useEffect(() => {
+    if (activeTab !== 'reviews' || !restaurant) return;
+    setReviewsLoading(true);
+    reviewService.list(restaurant.id)
+      .then((data) => setReviews(Array.isArray(data) ? data : []))
+      .catch((err) => toast.error('Failed to load reviews: ' + err.message))
+      .finally(() => setReviewsLoading(false));
+  }, [activeTab, restaurant]);
+
+  const [deepLinkOrder, setDeepLinkOrder] = useState(null);
+  const [deepLinkBillId, setDeepLinkBillId] = useState(null);
+
+  const handleNotificationOpen = async (note) => {
+    if (!note || !restaurant) return;
+    if (!note.read) handleNotificationRead(note.id);
+
+    switch (note.type) {
+      case 'order_new': {
+        if (!note.refId) return;
+        try {
+          const order = await orderService.getById(restaurant.id, note.refId);
+          setActiveTab('orders');
+          setDeepLinkOrder(order);
+        } catch {
+          toast.warning('That order no longer exists');
+        }
+        break;
+      }
+      case 'bill_new': {
+        if (!note.refId) return;
+        setActiveTab('billing');
+        setDeepLinkBillId(note.refId);
+        break;
+      }
+      case 'review_new':
+        setActiveTab('reviews');
+        break;
+      case 'staff_call':
+        setActiveTab('tables');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleDeleteReview = async (id) => {
+    try {
+      await reviewService.remove(restaurant.id, id);
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+      toast.success('Review deleted');
+    } catch (err) {
+      toast.error('Failed to delete review: ' + err.message);
+    }
+  };
 
   // Load persisted staff-call notifications (last 30 days) once the restaurant is known.
   useEffect(() => {
@@ -525,6 +583,7 @@ export const RestaurantAdminDashboard = () => {
       orderCounts={orderCounts}
       notifications={notifications}
       onNotificationRead={handleNotificationRead}
+      onNotificationOpen={handleNotificationOpen}
       onNotificationReadAll={handleNotificationReadAll}
       onNotificationClear={handleNotificationClear}
       connected={true}
@@ -622,12 +681,16 @@ export const RestaurantAdminDashboard = () => {
             customTo={orderCustomTo}
             setCustomTo={setOrderCustomTo}
             ordersLoading={ordersLoading}
+            deepLinkOrder={deepLinkOrder}
+            onDeepLinkHandled={() => setDeepLinkOrder(null)}
             onGenerateBill={handleGenerateBill}
           />
         )}
 
         {activeTab === 'billing' && (
           <BillingTab
+            deepLinkBillId={deepLinkBillId}
+            onDeepLinkHandled={() => setDeepLinkBillId(null)}
             restaurantId={restaurant.id}
             restaurant={restaurant}
             toast={toast}
@@ -648,6 +711,15 @@ export const RestaurantAdminDashboard = () => {
             onSave={handleSaveStaff}
             onCancel={handleCancelEdit}
             onDelete={handleDeleteStaff}
+          />
+        )}
+
+        {activeTab === 'reviews' && (
+          <ReviewsSection
+            reviews={reviews}
+            menuItems={menuItems}
+            loading={reviewsLoading}
+            onDelete={handleDeleteReview}
           />
         )}
 

@@ -366,6 +366,10 @@ export const orderService = {
     return { restaurantId, orders };
   },
 
+  async getById(restaurantId, orderId) {
+    return get(`/restaurants/${restaurantId}/orders/${orderId}`);
+  },
+
   async getOrders(restaurantId, query = {}) {
     const params = new URLSearchParams();
     Object.entries(query).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
@@ -469,6 +473,14 @@ export const reviewService = {
   async getByRestaurantId(restaurantId) {
     const reviews = await get(`/restaurants/${restaurantId}/reviews`);
     return { restaurantId, reviews };
+  },
+
+  async list(restaurantId) {
+    return get(`/restaurants/${restaurantId}/reviews`);
+  },
+
+  async remove(restaurantId, id) {
+    return del(`/restaurants/${restaurantId}/reviews/${id}`);
   },
 
   async getReviews(restaurantId) {
