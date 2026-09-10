@@ -22,13 +22,14 @@ import { GenerateBillModal } from '../components/billing/GenerateBillModal';
 import { BillPreview } from '../components/billing/BillPreview';
 import { BillingTab } from '../components/billing/BillingTab';
 import { TablesSection, StaffSection, MenuSection, OrdersSection } from '../components/sections';
-import { playStaffCallSound } from '../utils/sounds';
+import { playNewOrderSound, playStaffCallSound, unlockAudio, startRinging } from '../utils/sounds';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
   const toast = useToast();
+  useEffect(() => { unlockAudio(); }, []);
   const [restaurant, setRestaurant] = useState(null);
   const [restaurantSettings, setRestaurantSettings] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
@@ -87,6 +88,14 @@ export const RestaurantAdminDashboard = () => {
 
   // Read by the socket handler so it sees the current window without the
   // socket effect having to re-subscribe on every filter change.
+  // Holds the active repeat-ring so acknowledging a staff call can silence it.
+  const ringRef = useRef(null);
+  const stopRinging = () => { ringRef.current?.stop(); ringRef.current = null; };
+  useEffect(() => () => { ringRef.current?.stop(); }, []);
+
+  const soundSettingsRef = useRef(null);
+  useEffect(() => { soundSettingsRef.current = restaurantSettings; }, [restaurantSettings]);
+
   const orderRangeRef = useRef(orderRange);
   useEffect(() => { orderRangeRef.current = orderRange; }, [orderRange]);
 
@@ -125,6 +134,7 @@ export const RestaurantAdminDashboard = () => {
       if (!isWithinRange(order.createdAt, orderRangeRef.current)) return;
       setOrders(prev => {
         if (prev.find(o => o.id === order.id)) return prev;
+        playNewOrderSound(soundSettingsRef.current);
         return [order, ...prev];
       });
     });
@@ -138,7 +148,14 @@ export const RestaurantAdminDashboard = () => {
         if (data.id && prev.some(n => n.id === data.id)) return prev;
         return [{ ...data, read: false }, ...prev];
       });
-      playStaffCallSound();
+      const snd = soundSettingsRef.current;
+      if (snd?.soundEnabled !== false && snd?.staffCallRepeat) {
+        // Ring until someone acknowledges, rather than a single easily-missed chime.
+        ringRef.current?.stop();
+        ringRef.current = startRinging(snd?.staffCallTone || 'doorbell', snd?.soundVolume ?? 70);
+      } else {
+        playStaffCallSound(snd);
+      }
     });
 
     const cleanupBillNew = onBillNew(() => {
@@ -181,6 +198,7 @@ export const RestaurantAdminDashboard = () => {
   }, [restaurant]);
 
   const handleNotificationRead = async (id) => {
+    stopRinging();
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     try {
       await staffCallService.markRead(restaurant.id, id);
@@ -190,6 +208,7 @@ export const RestaurantAdminDashboard = () => {
   };
 
   const handleNotificationReadAll = async () => {
+    stopRinging();
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     try {
       await staffCallService.markAllRead(restaurant.id);
@@ -199,6 +218,7 @@ export const RestaurantAdminDashboard = () => {
   };
 
   const handleNotificationClear = async () => {
+    stopRinging();
     setNotifications([]);
     try {
       await staffCallService.clearAll(restaurant.id);

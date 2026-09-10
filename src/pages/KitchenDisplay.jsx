@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
-import { playNewOrderSound } from '../utils/sounds';
+import { publicService } from '../services/apiService';
+import { playNewOrderSound, unlockAudio } from '../utils/sounds';
 import './KitchenDisplay.css';
 
 const STATUS_FLOW = {
@@ -39,6 +40,16 @@ const getElapsedInfo = (createdAt) => {
 export const KitchenDisplay = () => {
   const { restaurantId } = useParams();
   const [authenticated, setAuthenticated] = useState(false);
+  // The kitchen screen has no admin token, so sound settings come from the
+  // public settings endpoint, which already excludes the sensitive fields.
+  const soundSettingsRef = useRef(null);
+  useEffect(() => { unlockAudio(); }, []);
+  useEffect(() => {
+    if (!authenticated || !restaurantId) return;
+    publicService.getSettings(restaurantId)
+      .then((s) => { soundSettingsRef.current = s; })
+      .catch(() => {});
+  }, [authenticated, restaurantId]);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [verifying, setVerifying] = useState(false);
@@ -101,7 +112,7 @@ export const KitchenDisplay = () => {
           return next;
         });
       }, 5000);
-      playNewOrderSound();
+      playNewOrderSound(soundSettingsRef.current);
     });
 
     const cleanupUpdated = onOrderUpdated((order) => {
