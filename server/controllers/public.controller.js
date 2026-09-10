@@ -6,6 +6,7 @@ import * as settingsService from '../services/settings.service.js';
 import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
 import { emitOrderCreated } from '../utils/socketEmitter.js';
+import { notify, money } from '../utils/notify.js';
 
 const UNAVAILABLE = {
   success: false,
@@ -110,6 +111,12 @@ export const placeOrder = asyncHandler(async (req, res) => {
     status: 'pending',
   });
   emitOrderCreated(restaurantId, order);
+  notify(restaurantId, {
+    type: 'order_new',
+    title: `New order${order.tableNumber ? ` - Table ${order.tableNumber}` : ''}`,
+    body: `${order.customerName || 'Walk-in'} - ${money(order.total)}`,
+    refId: order.id,
+  });
   res.status(201).json({ success: true, data: order });
 });
 
@@ -127,6 +134,12 @@ export const checkOrderStatus = asyncHandler(async (req, res) => {
 
 export const submitReview = asyncHandler(async (req, res) => {
   const review = await reviewsService.create(req.params.restaurantId, req.body);
+  notify(req.params.restaurantId, {
+    type: 'review_new',
+    title: `New ${review.rating}-star review`,
+    body: review.comment?.slice(0, 140) || null,
+    refId: review.id,
+  });
   res.status(201).json({ success: true, data: review });
 });
 

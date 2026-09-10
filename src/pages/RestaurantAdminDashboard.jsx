@@ -9,7 +9,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, staffCallService, getAccessToken } from '../services/apiService';
+import { restaurantService, menuService, tableService, orderService, staffService, analyticsService, settingsService, categoryService, notificationService, getAccessToken } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
 import { Settings } from './Settings';
@@ -57,7 +57,8 @@ export const RestaurantAdminDashboard = () => {
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [staffStatusFilter, setStaffStatusFilter] = useState('All');
   const [expandedQRCodes, setExpandedQRCodes] = useState({}); // Track which QR codes are expanded
-  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated } = useSocket();
+  const { joinRestaurant, onOrderNew, onOrderUpdated, onStaffCalled,
+    onNotificationNew, onBillNew, onBillUpdated, onConnect, onRestaurantSuspended, onRestaurantReactivated } = useSocket();
   const [notifications, setNotifications] = useState([]);
   const [suspended, setSuspended] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
@@ -143,11 +144,9 @@ export const RestaurantAdminDashboard = () => {
       setOrders(prev => prev.map(o => o.id === order.id ? order : o));
     });
 
-    const cleanupStaffCalled = onStaffCalled((data) => {
-      setNotifications(prev => {
-        if (data.id && prev.some(n => n.id === data.id)) return prev;
-        return [{ ...data, read: false }, ...prev];
-      });
+    const cleanupStaffCalled = onStaffCalled(() => {
+      // Sound only. The feed entry arrives separately on notification:new,
+      // so adding it here too would show the call twice.
       const snd = soundSettingsRef.current;
       if (snd?.soundEnabled !== false && snd?.staffCallRepeat) {
         // Ring until someone acknowledges, rather than a single easily-missed chime.
@@ -156,6 +155,10 @@ export const RestaurantAdminDashboard = () => {
       } else {
         playStaffCallSound(snd);
       }
+    });
+
+    const cleanupNotification = onNotificationNew((note) => {
+      setNotifications(prev => (prev.some(n => n.id === note.id) ? prev : [note, ...prev]));
     });
 
     const cleanupBillNew = onBillNew(() => {
@@ -181,6 +184,7 @@ export const RestaurantAdminDashboard = () => {
       cleanupNew();
       cleanupUpdated();
       cleanupStaffCalled();
+      cleanupNotification();
       cleanupBillNew();
       cleanupBillUpdated();
       cleanupConnect();
@@ -192,7 +196,7 @@ export const RestaurantAdminDashboard = () => {
   // Load persisted staff-call notifications (last 30 days) once the restaurant is known.
   useEffect(() => {
     if (!restaurant) return;
-    staffCallService.getAll(restaurant.id)
+    notificationService.getAll(restaurant.id)
       .then(data => setNotifications(Array.isArray(data) ? data : []))
       .catch(err => console.error('Failed to load notifications:', err));
   }, [restaurant]);
@@ -201,7 +205,7 @@ export const RestaurantAdminDashboard = () => {
     stopRinging();
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     try {
-      await staffCallService.markRead(restaurant.id, id);
+      await notificationService.markRead(restaurant.id, id);
     } catch (err) {
       console.error('Failed to mark notification read:', err);
     }
@@ -211,7 +215,7 @@ export const RestaurantAdminDashboard = () => {
     stopRinging();
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     try {
-      await staffCallService.markAllRead(restaurant.id);
+      await notificationService.markAllRead(restaurant.id);
     } catch (err) {
       console.error('Failed to mark all read:', err);
     }
@@ -221,7 +225,7 @@ export const RestaurantAdminDashboard = () => {
     stopRinging();
     setNotifications([]);
     try {
-      await staffCallService.clearAll(restaurant.id);
+      await notificationService.clearAll(restaurant.id);
     } catch (err) {
       console.error('Failed to clear notifications:', err);
     }

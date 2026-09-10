@@ -2,6 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import * as billsService from '../services/bills.service.js';
 import { generateBillPdf } from '../services/pdfGenerator.js';
 import { emitBillCreated, emitBillUpdated } from '../utils/socketEmitter.js';
+import { notify, money } from '../utils/notify.js';
 
 export const getAll = asyncHandler(async (req, res) => {
   const result = await billsService.getAll(req.params.restaurantId, req.query);
@@ -32,6 +33,12 @@ export const create = asyncHandler(async (req, res) => {
   const userId = req.user?.id || null;
   const bill = await billsService.create(req.params.restaurantId, req.body, userId);
   emitBillCreated(req.params.restaurantId, bill);
+  notify(req.params.restaurantId, {
+    type: 'bill_new',
+    title: `Bill ${bill.billNumber} generated`,
+    body: `Table ${bill.tableNumber} - ${money(bill.grandTotal)}`,
+    refId: bill.id,
+  });
   res.status(201).json({ success: true, data: bill });
 });
 

@@ -55,6 +55,13 @@ enum OrderStatus {
   cancelled
 }
 
+enum NotificationType {
+  order_new
+  staff_call
+  bill_new
+  review_new
+}
+
 enum StaffStatus {
   active
   inactive
@@ -189,6 +196,7 @@ model Restaurant {
   bills           Bill[]
   billSequences   BillSequence[]
   discountPresets DiscountPreset[]
+  notifications   Notification[]
   categories      Category[]
   staffCalls      StaffCall[]
 
@@ -520,4 +528,24 @@ model StaffCall {
   @@index([restaurantId])
   @@index([restaurantId, read])
   @@index([createdAt])
+}
+
+/// One entry in the admin notification feed. Distinct from StaffCall, which
+/// keeps its own row because a call can be cancelled; a staff call also writes
+/// a Notification here so the feed has a single source.
+model Notification {
+  id           String           @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  type         NotificationType
+  title        String
+  body         String?
+  /// Id of the row this refers to (order, bill, staff call, review).
+  refId        String?
+  read         Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+
+  @@index([restaurantId])
+  @@index([restaurantId, read])
+  @@index([restaurantId, createdAt])
 }

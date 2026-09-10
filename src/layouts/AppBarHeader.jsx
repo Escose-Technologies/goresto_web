@@ -26,6 +26,16 @@ const timeAgo = (dateStr) => {
   return `${d}d ago`;
 };
 
+// Presentation per notification type. Anything unknown falls back to the bell,
+// so a new server-side type never renders as a broken row.
+const TYPE_META = {
+  order_new:  { icon: 'mdi:receipt-text-outline', bg: 'info.light',    fg: 'info.dark' },
+  staff_call: { icon: 'mdi:bell-ring',            bg: 'warning.light', fg: 'warning.dark' },
+  bill_new:   { icon: 'mdi:cash-register',        bg: 'success.light', fg: 'success.dark' },
+  review_new: { icon: 'mdi:star-outline',         bg: 'secondary.light', fg: 'secondary.dark' },
+};
+const metaFor = (type) => TYPE_META[type] || { icon: 'mdi:bell-outline', bg: 'action.selected', fg: 'text.secondary' };
+
 const AppBarHeader = ({
   onMenuToggle,
   onSidebarCollapse,
@@ -185,19 +195,19 @@ const AppBarHeader = ({
                         borderRadius: '50%',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: n.read ? 'action.selected' : 'warning.light',
-                        color: n.read ? 'text.secondary' : 'warning.dark',
+                        bgcolor: n.read ? 'action.selected' : metaFor(n.type).bg,
+                        color: n.read ? 'text.secondary' : metaFor(n.type).fg,
                       }}
                     >
-                      <Icon icon="mdi:bell-ring" width={18} />
+                      <Icon icon={metaFor(n.type).icon} width={18} />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="body2" fontWeight={n.read ? 500 : 700}>
-                        Table {n.tableNumber} needs assistance
+                        {n.title || `Table ${n.tableNumber} needs assistance`}
                       </Typography>
-                      {n.customerName && (
+                      {(n.body || n.customerName) && (
                         <Typography variant="caption" color="text.secondary" display="block">
-                          {n.customerName}
+                          {n.body || n.customerName}
                         </Typography>
                       )}
                       <Typography variant="caption" color="text.secondary">

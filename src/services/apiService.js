@@ -212,6 +212,24 @@ export const userService = {
 
 // ─── Restaurant Service ─────────────────────────────────
 
+export const notificationService = {
+  async getAll(restaurantId, query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
+    const qs = params.toString();
+    return get(`/restaurants/${restaurantId}/notifications${qs ? `?${qs}` : ''}`);
+  },
+  async markRead(restaurantId, id) {
+    return patch(`/restaurants/${restaurantId}/notifications/${id}/read`, {});
+  },
+  async markAllRead(restaurantId) {
+    return patch(`/restaurants/${restaurantId}/notifications/read-all`, {});
+  },
+  async clearAll(restaurantId) {
+    return del(`/restaurants/${restaurantId}/notifications`);
+  },
+};
+
 export const restaurantService = {
   async getAll() {
     return get('/restaurants');

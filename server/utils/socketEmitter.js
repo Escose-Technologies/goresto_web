@@ -63,3 +63,13 @@ export const emitRestaurantReactivated = (restaurantId) => {
     console.error('emitRestaurantReactivated error:', err.message);
   }
 };
+
+export const emitNotification = (restaurantId, notification) => {
+  try {
+    const io = getIO();
+    if (!io || !notification) return;
+    io.to(`restaurant:${restaurantId}`).emit('notification:new', notification);
+  } catch (err) {
+    console.error('emitNotification error:', err.message);
+  }
+};
