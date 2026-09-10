@@ -1,3 +1,4 @@
+import Alert from '@mui/material/Alert';
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -18,6 +19,13 @@ import { Icon } from '@iconify/react';
 import { restaurantService, settingsService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
 import { TONE_OPTIONS, playTone } from '../utils/sounds';
+import {
+  isSupported as desktopSupported,
+  getPermission as desktopPermission,
+  isEnabled as desktopEnabled,
+  setEnabled as setDesktopEnabled,
+  requestPermission as requestDesktopPermission,
+} from '../utils/browserNotifications';
 import { INDIAN_STATES } from '../utils/indianStates';
 import { DiscountPresetManager } from '../components/billing/DiscountPresetManager';
 
@@ -36,6 +44,8 @@ const SECTIONS = [
 
 export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings: settingsProp }) => {
   const toast = useToast();
+  const [desktopPerm, setDesktopPerm] = useState(() => desktopPermission());
+  const [desktopOn, setDesktopOn] = useState(() => desktopEnabled());
   const [restaurant] = useState(restaurantProp);
   const [saving, setSaving] = useState(false);
   const [active, setActive] = useState('restaurantInfo');
@@ -776,7 +786,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
                 </Grid>
               </Grid>
 
-              <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', opacity: formData.soundEnabled ? 1 : 0.5 }}>
+              <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', opacity: formData.soundEnabled ? 1 : 0.5, mb: 3 }}>
                 <input
                   type="checkbox"
                   checked={formData.staffCallRepeat}
@@ -785,6 +795,52 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
                   style={{ accentColor: '#3385F0' }}
                 />
                 <Typography variant="body2" fontWeight={500}>Keep ringing for staff calls until acknowledged</Typography>
+              </Box>
+
+              <Box sx={{ pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" fontWeight={700}>Desktop alerts</Typography>
+                <Typography variant="body2" color="text.secondary" mb={1.5}>
+                  Show a system notification when an order or staff call arrives while
+                  this tab is in the background. Granted per device and per browser, so
+                  it is not part of Save — turn it on wherever you need it.
+                </Typography>
+
+                {!desktopSupported() ? (
+                  <Alert severity="info" sx={{ maxWidth: 520 }}>
+                    This browser does not support desktop notifications.
+                  </Alert>
+                ) : desktopPerm === 'denied' ? (
+                  <Alert severity="warning" sx={{ maxWidth: 520 }}>
+                    Notifications are blocked for this site. Re-enable them in your
+                    browser's site settings, then reload.
+                  </Alert>
+                ) : desktopPerm === 'granted' ? (
+                  <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={desktopOn}
+                      onChange={(e) => { setDesktopEnabled(e.target.checked); setDesktopOn(e.target.checked); }}
+                      style={{ accentColor: '#3385F0' }}
+                    />
+                    <Typography variant="body2" fontWeight={500}>
+                      Desktop alerts enabled on this device
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    startIcon={<Icon icon="mdi:bell-alert-outline" width={18} />}
+                    onClick={async () => {
+                      const result = await requestDesktopPermission();
+                      setDesktopPerm(result);
+                      setDesktopOn(result === 'granted');
+                      if (result === 'granted') toast.success('Desktop alerts enabled on this device');
+                      else if (result === 'denied') toast.warning('Permission denied by the browser');
+                    }}
+                  >
+                    Enable desktop alerts
+                  </Button>
+                )}
               </Box>
             </>
           )}
