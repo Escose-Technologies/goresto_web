@@ -27,6 +27,11 @@ const navConfig = [
     icon: <Icon icon="material-symbols:groups-outline-rounded" width={22} />,
   },
   {
+    id: 'reviews',
+    label: 'Reviews',
+    icon: <Icon icon="material-symbols:star-outline-rounded" width={22} />,
+  },
+  {
     id: 'analytics',
     label: 'Analytics',
     icon: <Icon icon="material-symbols:analytics-outline-rounded" width={22} />,

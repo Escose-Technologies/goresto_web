@@ -14,6 +14,7 @@ const DashboardLayout = ({
   orderCounts,
   notifications,
   onNotificationRead,
+  onNotificationOpen,
   onNotificationReadAll,
   onNotificationClear,
   connected,
@@ -43,6 +44,7 @@ const DashboardLayout = ({
         onLogout={onLogout}
         notifications={notifications}
         onNotificationRead={onNotificationRead}
+        onNotificationOpen={onNotificationOpen}
         onNotificationReadAll={onNotificationReadAll}
         onNotificationClear={onNotificationClear}
         connected={connected}

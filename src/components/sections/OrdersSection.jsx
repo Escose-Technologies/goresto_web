@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
@@ -72,10 +72,20 @@ const OrdersSection = ({
   customTo = '',
   setCustomTo,
   ordersLoading = false,
+  deepLinkOrder = null,
+  onDeepLinkHandled,
 }) => {
   const cur = useCurrency();
   const periodLabel = DATE_PRESETS.find((p) => p.value === datePreset)?.label || 'this period';
   const [detailsOrder, setDetailsOrder] = useState(null);
+
+  // Opened from a notification. Fetched by id upstream, so it shows even when
+  // the current Period filter excludes it.
+  useEffect(() => {
+    if (!deepLinkOrder) return;
+    setDetailsOrder(deepLinkOrder);
+    onDeepLinkHandled?.();
+  }, [deepLinkOrder]);
   const [previewBillId, setPreviewBillId] = useState(null);
 
   const counts = useMemo(() => {
