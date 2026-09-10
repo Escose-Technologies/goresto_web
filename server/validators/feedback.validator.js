@@ -14,6 +14,13 @@ export const createFeedbackSchema = z.object({
 export const feedbackQuerySchema = z.object({
   status: z.enum(['new', 'triaged', 'in_progress', 'resolved', 'wont_fix']).optional(),
   category: z.enum(['bug', 'feature_request', 'general']).optional(),
+  restaurantId: z.string().optional(),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  // Absolute ISO instants, built from the viewer's local day boundaries.
+  from: z.string().optional(),
+  to: z.string().optional(),
+  // Free text across title, details, restaurant name and submitter email.
+  q: z.string().max(200).optional(),
 });
 
 export const updateFeedbackSchema = z.object({

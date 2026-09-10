@@ -30,13 +30,37 @@ export const listForRestaurant = async (restaurantId) =>
     },
   });
 
-export const listAll = async ({ status, category } = {}) =>
-  prisma.feedback.findMany({
-    where: { ...(status ? { status } : {}), ...(category ? { category } : {}) },
+export const listAll = async ({ status, category, restaurantId, rating, from, to, q } = {}) => {
+  const where = {
+    ...(status ? { status } : {}),
+    ...(category ? { category } : {}),
+    ...(restaurantId ? { restaurantId } : {}),
+    ...(rating ? { rating } : {}),
+  };
+
+  if (from || to) {
+    where.createdAt = {};
+    if (from) where.createdAt.gte = new Date(from);
+    if (to) where.createdAt.lte = new Date(to);
+  }
+
+  if (q && q.trim()) {
+    const term = q.trim();
+    where.OR = [
+      { title: { contains: term, mode: 'insensitive' } },
+      { details: { contains: term, mode: 'insensitive' } },
+      { userEmail: { contains: term, mode: 'insensitive' } },
+      { restaurant: { name: { contains: term, mode: 'insensitive' } } },
+    ];
+  }
+
+  return prisma.feedback.findMany({
+    where,
     orderBy: { createdAt: 'desc' },
     take: 300,
     include: { restaurant: { select: { id: true, name: true } } },
   });
+};
 
 export const update = async (id, data) => {
   const existing = await prisma.feedback.findUnique({ where: { id } });
