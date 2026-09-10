@@ -13,7 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, userService, registrationService } from '../services/apiService';
+import { restaurantService, userService, registrationService, feedbackService } from '../services/apiService';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -74,12 +74,31 @@ export const SuperAdminDashboard = () => {
     openingHours: '',
   });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [feedback, setFeedback] = useState([]);
+  const [feedbackFilter, setFeedbackFilter] = useState('');
+  const [expandedFeedback, setExpandedFeedback] = useState(null);
   const [resetData, setResetData] = useState({ password: '', confirm: '', superPassword: '' });
   const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    feedbackService.listAll(feedbackFilter ? { status: feedbackFilter } : {})
+      .then((d) => setFeedback(Array.isArray(d) ? d : []))
+      .catch((err) => console.error('Failed to load feedback:', err));
+  }, [feedbackFilter]);
+
+  const updateFeedbackStatus = async (id, status) => {
+    try {
+      await feedbackService.update(id, { status });
+      setFeedback((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
+      toast.success('Status updated');
+    } catch (err) {
+      toast.error('Failed to update: ' + err.message);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -347,6 +366,102 @@ export const SuperAdminDashboard = () => {
             </Grid>
           </Card>
         )}
+
+        {/* Product feedback inbox */}
+        <Card variant="outlined" sx={{ p: 2.5, mb: 3 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Icon icon="material-symbols:rate-review-outline-rounded" width={22} />
+              <Typography variant="h6" fontWeight={700}>
+                Product Feedback ({feedback.length})
+              </Typography>
+            </Stack>
+            <TextField
+              select
+              size="small"
+              label="Status"
+              value={feedbackFilter}
+              onChange={(e) => setFeedbackFilter(e.target.value)}
+              sx={{ minWidth: 160 }}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="new">New</MenuItem>
+              <MenuItem value="triaged">Triaged</MenuItem>
+              <MenuItem value="in_progress">In progress</MenuItem>
+              <MenuItem value="resolved">Resolved</MenuItem>
+              <MenuItem value="wont_fix">Won't fix</MenuItem>
+            </TextField>
+          </Stack>
+
+          {feedback.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No feedback yet.</Typography>
+          ) : (
+            <Stack spacing={1.5}>
+              {feedback.map((f) => (
+                <Card key={f.id} variant="outlined" sx={{ p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} flexWrap="wrap">
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Chip size="small" label={f.category?.replace('_', ' ')} variant="outlined" />
+                        <Typography variant="body2" fontWeight={700}>{f.title}</Typography>
+                        <Typography variant="caption" color="warning.main">{'★'.repeat(f.rating)}</Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                        {f.restaurant?.name || 'Unknown'} · {f.userEmail || 'unknown'} · {fmtDate(f.createdAt)}
+                      </Typography>
+                    </Box>
+                    <TextField
+                      select
+                      size="small"
+                      value={f.status}
+                      onChange={(e) => updateFeedbackStatus(f.id, e.target.value)}
+                      sx={{ minWidth: 140 }}
+                    >
+                      <MenuItem value="new">New</MenuItem>
+                      <MenuItem value="triaged">Triaged</MenuItem>
+                      <MenuItem value="in_progress">In progress</MenuItem>
+                      <MenuItem value="resolved">Resolved</MenuItem>
+                      <MenuItem value="wont_fix">Won't fix</MenuItem>
+                    </TextField>
+                  </Stack>
+
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.25, whiteSpace: 'pre-wrap' }}>
+                    {f.details}
+                  </Typography>
+
+                  {f.diagnostics ? (
+                    <>
+                      <Button
+                        size="small"
+                        sx={{ mt: 1, textTransform: 'none' }}
+                        onClick={() => setExpandedFeedback(expandedFeedback === f.id ? null : f.id)}
+                        endIcon={<Icon icon={expandedFeedback === f.id ? 'mdi:chevron-up' : 'mdi:chevron-down'} width={16} />}
+                      >
+                        Diagnostics
+                        {f.diagnostics?.errorCount > 0 ? ` (${f.diagnostics.errorCount} errors)` : ''}
+                      </Button>
+                      {expandedFeedback === f.id && (
+                        <Box
+                          component="pre"
+                          sx={{
+                            mt: 1, p: 1.5, borderRadius: 1, bgcolor: 'grey.900', color: 'grey.100',
+                            fontSize: 11, overflowX: 'auto', maxHeight: 320, whiteSpace: 'pre-wrap',
+                          }}
+                        >
+                          {JSON.stringify(f.diagnostics, null, 2)}
+                        </Box>
+                      )}
+                    </>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1 }}>
+                      No diagnostics — the submitter declined to share them.
+                    </Typography>
+                  )}
+                </Card>
+              ))}
+            </Stack>
+          )}
+        </Card>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography variant="h6" fontWeight={700}>Restaurants</Typography>

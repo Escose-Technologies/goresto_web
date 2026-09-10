@@ -55,6 +55,20 @@ enum OrderStatus {
   cancelled
 }
 
+enum FeedbackCategory {
+  bug
+  feature_request
+  general
+}
+
+enum FeedbackStatus {
+  new
+  triaged
+  in_progress
+  resolved
+  wont_fix
+}
+
 enum NotificationType {
   order_new
   staff_call
@@ -197,6 +211,7 @@ model Restaurant {
   billSequences   BillSequence[]
   discountPresets DiscountPreset[]
   notifications   Notification[]
+  feedback        Feedback[]
   categories      Category[]
   staffCalls      StaffCall[]
 
@@ -548,4 +563,34 @@ model Notification {
   @@index([restaurantId])
   @@index([restaurantId, read])
   @@index([restaurantId, createdAt])
+}
+
+/// Product feedback from a restaurant admin to the Goresto team.
+/// `diagnostics` holds browser/device details and recent console errors,
+/// collected only with the submitter's explicit consent (see consentGiven).
+model Feedback {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  userId       String?
+  userEmail    String?
+
+  rating   Int
+  category FeedbackCategory @default(general)
+  title    String
+  details  String           @db.Text
+
+  /// Null when the submitter declined to share diagnostics.
+  diagnostics  Json?
+  consentGiven Boolean @default(false)
+
+  status     FeedbackStatus @default(new)
+  adminNotes String?        @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([restaurantId])
+  @@index([status])
+  @@index([createdAt])
 }
