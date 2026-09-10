@@ -20,6 +20,7 @@ import { BillPreview } from '../billing/BillPreview';
 import { getOrderStatusLabel } from '../../utils/statusLabels';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { STATUS_COLOR, STATUS_DOT, isFinished, money, timeAgo } from '../../utils/orderStatus';
+import { orderLabel } from '../../utils/orderLabel';
 
 // Status buckets surfaced in the summary strip (doubles as a quick filter).
 const SUMMARY = [
@@ -338,7 +339,7 @@ const OrderCard = ({ order, cur, onOpen, onViewBill }) => {
     >
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1}>
         <Typography variant="subtitle1" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-          #{order.orderNumber || order.id.slice(-6)}
+          {orderLabel(order)}
         </Typography>
         <Stack direction="row" spacing={0.75} alignItems="center">
           {isBilled && (

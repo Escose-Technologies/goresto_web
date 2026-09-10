@@ -18,6 +18,7 @@ import { DietaryBadge, DietaryLabels, AllergenLabels } from '../components/menu/
 import { SpiceIndicator } from '../components/menu/SpiceLevel';
 import { RatingDisplay } from '../components/menu/Rating';
 import './PublicMenu.css';
+import { orderLabel } from '../utils/orderLabel';
 
 // Customer-facing label + style for the restaurant's food type (set by the admin).
 const FOOD_TYPE_BADGE = {
@@ -1156,7 +1157,7 @@ export const PublicMenu = () => {
               <div key={order.id} className="customer-order-card">
                 <div className="customer-order-header">
                   <div>
-                    <h4>Order #{order.orderNumber || order.id.slice(-6)}</h4>
+                    <h4>Order {orderLabel(order)}</h4>
                     <p className="order-date">
                       {new Date(order.createdAt).toLocaleString()}
                     </p>

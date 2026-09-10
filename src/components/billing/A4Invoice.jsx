@@ -1,5 +1,6 @@
 import { QRCodeCanvas } from 'qrcode.react';
 import { getCurrencySymbol } from '../../utils/currency';
+import { orderLabel } from '../../utils/orderLabel';
 
 const ORDER_TYPE_LABELS = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' };
 
@@ -54,7 +55,7 @@ export const A4Invoice = ({ bill, restaurant, settings }) => {
   const billTitle = !gstOn ? 'Bill' : (isComposition ? 'Bill of Supply' : 'Tax Invoice');
   const items = bill.billItems || [];
   const orderNos = (bill.orders || [])
-    .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
+    .map((o) => orderLabel(o) || null)
     .filter(Boolean);
   const itemRate = (it) => Number(it.unitPrice ?? it.price ?? 0);
   const itemDisc = (it) => Number(it.itemDiscountAmount ?? it.discountAmount ?? 0);
