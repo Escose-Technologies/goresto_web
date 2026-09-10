@@ -1,3 +1,5 @@
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -13,7 +15,8 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useAuth } from '../context/AuthContext';
-import { restaurantService, userService, registrationService, feedbackService } from '../services/apiService';
+import { restaurantService, userService, registrationService } from '../services/apiService';
+import ProductFeedbackPanel from '../components/superadmin/ProductFeedbackPanel';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -73,9 +76,7 @@ export const SuperAdminDashboard = () => {
     tagline: '',
   });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
-  const [feedback, setFeedback] = useState([]);
-  const [feedbackFilter, setFeedbackFilter] = useState('');
-  const [expandedFeedback, setExpandedFeedback] = useState(null);
+  const [tab, setTab] = useState('restaurants');
   const [resetData, setResetData] = useState({ password: '', confirm: '', superPassword: '' });
   const [resetting, setResetting] = useState(false);
 
@@ -83,21 +84,7 @@ export const SuperAdminDashboard = () => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    feedbackService.listAll(feedbackFilter ? { status: feedbackFilter } : {})
-      .then((d) => setFeedback(Array.isArray(d) ? d : []))
-      .catch((err) => console.error('Failed to load feedback:', err));
-  }, [feedbackFilter]);
 
-  const updateFeedbackStatus = async (id, status) => {
-    try {
-      await feedbackService.update(id, { status });
-      setFeedback((prev) => prev.map((f) => (f.id === id ? { ...f, status } : f)));
-      toast.success('Status updated');
-    } catch (err) {
-      toast.error('Failed to update: ' + err.message);
-    }
-  };
 
   const loadData = async () => {
     try {
@@ -279,8 +266,34 @@ export const SuperAdminDashboard = () => {
         <Button variant="contained" color="error" onClick={logout}>Logout</Button>
       </Box>
 
+      {/* Tabs */}
+      <Box sx={{ bgcolor: 'white', borderBottom: 1, borderColor: 'divider', px: { xs: 1, md: 3 } }}>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+          <Tab
+            value="restaurants"
+            label="Restaurants"
+            iconPosition="start"
+            icon={<Icon icon="material-symbols:store-outline-rounded" width={18} />}
+            sx={{ minHeight: 52, textTransform: 'none', fontWeight: 600 }}
+          />
+          <Tab
+            value="feedback"
+            label="Product Feedback"
+            iconPosition="start"
+            icon={<Icon icon="material-symbols:rate-review-outline-rounded" width={18} />}
+            sx={{ minHeight: 52, textTransform: 'none', fontWeight: 600 }}
+          />
+        </Tabs>
+      </Box>
+
       {/* Content */}
       <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 3 } }}>
+        {tab === 'feedback' && (
+          <ProductFeedbackPanel restaurants={restaurants} toast={toast} />
+        )}
+
+        {tab === 'restaurants' && (
+        <>
         {/* Pending Registrations */}
         {pendingRegistrations.length > 0 && (
           <Card sx={{ p: 3, mb: 3, borderLeft: '4px solid', borderColor: 'warning.main' }}>
@@ -364,102 +377,6 @@ export const SuperAdminDashboard = () => {
             </Grid>
           </Card>
         )}
-
-        {/* Product feedback inbox */}
-        <Card variant="outlined" sx={{ p: 2.5, mb: 3 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Icon icon="material-symbols:rate-review-outline-rounded" width={22} />
-              <Typography variant="h6" fontWeight={700}>
-                Product Feedback ({feedback.length})
-              </Typography>
-            </Stack>
-            <TextField
-              select
-              size="small"
-              label="Status"
-              value={feedbackFilter}
-              onChange={(e) => setFeedbackFilter(e.target.value)}
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="new">New</MenuItem>
-              <MenuItem value="triaged">Triaged</MenuItem>
-              <MenuItem value="in_progress">In progress</MenuItem>
-              <MenuItem value="resolved">Resolved</MenuItem>
-              <MenuItem value="wont_fix">Won't fix</MenuItem>
-            </TextField>
-          </Stack>
-
-          {feedback.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">No feedback yet.</Typography>
-          ) : (
-            <Stack spacing={1.5}>
-              {feedback.map((f) => (
-                <Card key={f.id} variant="outlined" sx={{ p: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} flexWrap="wrap">
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                        <Chip size="small" label={f.category?.replace('_', ' ')} variant="outlined" />
-                        <Typography variant="body2" fontWeight={700}>{f.title}</Typography>
-                        <Typography variant="caption" color="warning.main">{'★'.repeat(f.rating)}</Typography>
-                      </Stack>
-                      <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-                        {f.restaurant?.name || 'Unknown'} · {f.userEmail || 'unknown'} · {fmtDate(f.createdAt)}
-                      </Typography>
-                    </Box>
-                    <TextField
-                      select
-                      size="small"
-                      value={f.status}
-                      onChange={(e) => updateFeedbackStatus(f.id, e.target.value)}
-                      sx={{ minWidth: 140 }}
-                    >
-                      <MenuItem value="new">New</MenuItem>
-                      <MenuItem value="triaged">Triaged</MenuItem>
-                      <MenuItem value="in_progress">In progress</MenuItem>
-                      <MenuItem value="resolved">Resolved</MenuItem>
-                      <MenuItem value="wont_fix">Won't fix</MenuItem>
-                    </TextField>
-                  </Stack>
-
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.25, whiteSpace: 'pre-wrap' }}>
-                    {f.details}
-                  </Typography>
-
-                  {f.diagnostics ? (
-                    <>
-                      <Button
-                        size="small"
-                        sx={{ mt: 1, textTransform: 'none' }}
-                        onClick={() => setExpandedFeedback(expandedFeedback === f.id ? null : f.id)}
-                        endIcon={<Icon icon={expandedFeedback === f.id ? 'mdi:chevron-up' : 'mdi:chevron-down'} width={16} />}
-                      >
-                        Diagnostics
-                        {f.diagnostics?.errorCount > 0 ? ` (${f.diagnostics.errorCount} errors)` : ''}
-                      </Button>
-                      {expandedFeedback === f.id && (
-                        <Box
-                          component="pre"
-                          sx={{
-                            mt: 1, p: 1.5, borderRadius: 1, bgcolor: 'grey.900', color: 'grey.100',
-                            fontSize: 11, overflowX: 'auto', maxHeight: 320, whiteSpace: 'pre-wrap',
-                          }}
-                        >
-                          {JSON.stringify(f.diagnostics, null, 2)}
-                        </Box>
-                      )}
-                    </>
-                  ) : (
-                    <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1 }}>
-                      No diagnostics — the submitter declined to share them.
-                    </Typography>
-                  )}
-                </Card>
-              ))}
-            </Stack>
-          )}
-        </Card>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
           <Typography variant="h6" fontWeight={700}>Restaurants</Typography>
@@ -703,6 +620,8 @@ export const SuperAdminDashboard = () => {
               </Grid>
             ))}
           </Grid>
+        )}
+        </>
         )}
       </Box>
 
