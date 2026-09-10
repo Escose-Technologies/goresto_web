@@ -6,7 +6,14 @@ export const get = async (restaurantId) => {
   const settings = await prisma.settings.findUnique({
     where: { restaurantId },
   });
-  return settings ? formatSettings(settings) : null;
+  if (!settings) return null;
+
+  // The PIN is a bcrypt hash and no client has any use for it. Send a flag so
+  // the UI can say whether one is set, and nothing more. Leaking the hash also
+  // broke the Settings form, which pre-filled the field with it and then failed
+  // its own 4-digit validation on every save.
+  const { kitchenPin, ...rest } = settings;
+  return { ...formatSettings(rest), kitchenPinSet: Boolean(kitchenPin) };
 };
 
 /** bcrypt hashes always start with $2 — used to avoid re-hashing a hash. */

@@ -5,6 +5,7 @@ import { verifyAccessToken } from '../utils/jwt.js';
 import { prisma } from './database.js';
 import * as ordersService from '../services/orders.service.js';
 import * as staffCallsService from '../services/staffCalls.service.js';
+import { comparePassword, hashPassword } from '../utils/password.js';
 import * as notificationsService from '../services/notifications.service.js';
 
 let io = null;
@@ -70,9 +71,24 @@ export const initializeSocket = (httpServer) => {
           return;
         }
 
-        if (pin !== settings.kitchenPin) {
+        // Second PIN check in the codebase — the REST verify endpoint is the
+        // other. Hashing the PIN without updating this one broke the kitchen
+        // display, because a hash never equals the 4 digits typed in.
+        const stored = settings.kitchenPin;
+        const storedIsHashed = stored.startsWith('$2');
+        const pinOk = storedIsHashed
+          ? await comparePassword(String(pin), stored)
+          : String(pin) === stored;
+
+        if (!pinOk) {
           if (callback) callback({ success: false, error: 'Invalid PIN' });
           return;
+        }
+
+        if (!storedIsHashed) {
+          prisma.settings
+            .update({ where: { restaurantId }, data: { kitchenPin: await hashPassword(String(pin)) } })
+            .catch((err) => console.error('kitchen pin upgrade failed:', err.message));
         }
 
         socket.join(`kitchen:${restaurantId}`);

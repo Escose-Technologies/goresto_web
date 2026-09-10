@@ -70,12 +70,13 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
   const [formData, setFormData] = useState(() => {
     if (settingsProp) {
       const { currencySymbol, ...rest } = settingsProp;
-      return { ...defaults, ...rest, currency: settingsProp.currency || 'INR', kitchenPin: settingsProp.kitchenPin || '' };
+      // Never pre-fill the PIN: the server only reports whether one exists.
+      return { ...defaults, ...rest, currency: settingsProp.currency || 'INR', kitchenPin: '' };
     }
     return { ...defaults, restaurantName: restaurantProp?.name || '', address: restaurantProp?.address || '', phone: restaurantProp?.phone || '' };
   });
 
-  const [hasExistingPin] = useState(() => !!(settingsProp?.kitchenPin));
+  const [hasExistingPin] = useState(() => Boolean(settingsProp?.kitchenPinSet ?? settingsProp?.kitchenPin));
   const [showPin, setShowPin] = useState(false);
 
   // Inline validation — client rules mirror the backend Zod schema
@@ -615,7 +616,7 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
           {active === 'kitchenDisplay' && (
             <Box>
               <TextField
-                label="Kitchen PIN (4 digits)"
+                label={hasExistingPin ? 'Set a new Kitchen PIN (4 digits)' : 'Kitchen PIN (4 digits)'}
                 type={showPin ? 'text' : 'password'}
                 value={formData.kitchenPin || ''}
                 onChange={(e) => {
@@ -637,7 +638,12 @@ export const Settings = ({ onSettingsSaved, restaurant: restaurantProp, settings
                     ),
                   },
                 }}
-                helperText={fieldError('kitchenPin') || '4-digit PIN for kitchen staff to access the Kitchen Display System.'}
+                helperText={
+                  fieldError('kitchenPin') ||
+                  (hasExistingPin
+                    ? 'A PIN is set. It is stored hashed and cannot be shown — type a new one to replace it, or leave blank to keep it.'
+                    : '4-digit PIN for kitchen staff to access the Kitchen Display System.')
+                }
                 sx={{ mb: 2 }}
               />
               {(hasExistingPin || (formData.kitchenPin && formData.kitchenPin.length === 4)) && (
