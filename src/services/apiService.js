@@ -230,6 +230,25 @@ export const notificationService = {
   },
 };
 
+export const feedbackService = {
+  async submit(restaurantId, payload) {
+    return post(`/restaurants/${restaurantId}/feedback`, payload);
+  },
+  async mine(restaurantId) {
+    return get(`/restaurants/${restaurantId}/feedback`);
+  },
+  // Superadmin inbox
+  async listAll(query = {}) {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([k, v]) => { if (v !== undefined && v !== '') params.set(k, v); });
+    const qs = params.toString();
+    return get(`/admin/feedback${qs ? `?${qs}` : ''}`);
+  },
+  async update(id, data) {
+    return patch(`/admin/feedback/${id}`, data);
+  },
+};
+
 export const restaurantService = {
   async getAll() {
     return get('/restaurants');

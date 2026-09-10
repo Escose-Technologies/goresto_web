@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import os from 'os'
@@ -17,6 +18,14 @@ function getNetworkIP() {
 
 const networkIP = getNetworkIP();
 
+const appVersion = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'dev';
+  }
+})();
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -35,6 +44,8 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.VITE_NETWORK_IP': JSON.stringify(networkIP),
+    // Surfaced in feedback reports so a bug can be tied to a specific build.
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
   },
   optimizeDeps: {
     include: ['@emotion/styled', '@mui/material', '@mui/x-data-grid'],

@@ -27,6 +27,7 @@ import { showNotification } from '../utils/browserNotifications';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 import ReviewsSection from '../components/sections/ReviewsSection';
+import FeedbackSection from '../components/sections/FeedbackSection';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -712,6 +713,10 @@ export const RestaurantAdminDashboard = () => {
             onCancel={handleCancelEdit}
             onDelete={handleDeleteStaff}
           />
+        )}
+
+        {activeTab === 'feedback' && (
+          <FeedbackSection restaurantId={restaurant.id} toast={toast} />
         )}
 
         {activeTab === 'reviews' && (
