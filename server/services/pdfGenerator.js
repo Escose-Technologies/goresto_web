@@ -190,7 +190,7 @@ export function generateBillPdf(bill) {
   // ─── Meta Grid ──────────────────────────────────
 
   const orderNos = (bill.orders || [])
-    .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${o.id.slice(-6)}` : null)))
+    .map((o) => (o.orderNumber ? `#${o.orderNumber}` : (o.id ? `#${String(o.id).slice(-6).toUpperCase()}` : null)))
     .filter(Boolean);
 
   const metaLeft = [

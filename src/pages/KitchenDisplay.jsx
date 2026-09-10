@@ -4,6 +4,7 @@ import { useSocket } from '../hooks/useSocket';
 import { publicService } from '../services/apiService';
 import { playNewOrderSound, unlockAudio } from '../utils/sounds';
 import './KitchenDisplay.css';
+import { orderLabel } from '../utils/orderLabel';
 
 const STATUS_FLOW = {
   pending: 'accepted',
@@ -322,7 +323,7 @@ const OrderCard = ({ order, isNew, onStatusUpdate }) => {
     >
       <div className="kds-order-header">
         <div>
-          <div className="kds-order-id">#{order.id.slice(-6).toUpperCase()}</div>
+          <div className="kds-order-id">{orderLabel(order)}</div>
           <div className="kds-order-table">Table {order.tableNumber}</div>
           {order.customerName && (
             <div className="kds-order-customer">{order.customerName}</div>

@@ -10,6 +10,7 @@ import { Icon } from '@iconify/react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { getOrderStatusLabel } from '../utils/statusLabels';
 import { STATUS_COLOR, money } from '../utils/orderStatus';
+import { orderLabel } from '../utils/orderLabel';
 
 /* Action buttons available for the order's current status (read-only modal footer). */
 function statusActions(order, onUpdateStatus, onGenerateBill) {
@@ -91,7 +92,7 @@ export const OrderDetailsModal = ({ order, open, onClose, onEdit, onUpdateStatus
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={0.5}>
           <Box>
             <Typography variant="h6" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-              Order #{order.id.slice(-6)}
+              Order {orderLabel(order)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {tableLabel} · {order.customerName || 'Walk-in'}
