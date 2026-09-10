@@ -74,7 +74,41 @@ export const getPendingRegistrations = async () => {
       admin: { select: { id: true, email: true } },
     },
   });
-  return restaurants.map(formatRestaurant);
+  if (restaurants.length === 0) return [];
+
+  // Soft duplicate detection: flag pending applications whose phone or email
+  // already belongs to another restaurant, so the reviewer can spot an
+  // accidental re-registration. Deliberately NOT a unique constraint —
+  // a chain legitimately shares one contact number across branches — so this
+  // informs the decision rather than blocking it.
+  const phones = restaurants.map((r) => r.phone).filter(Boolean);
+  const emails = restaurants.map((r) => r.email).filter(Boolean);
+  const pendingIds = new Set(restaurants.map((r) => r.id));
+
+  const matches = (phones.length || emails.length)
+    ? await prisma.restaurant.findMany({
+        where: {
+          OR: [
+            ...(phones.length ? [{ phone: { in: phones } }] : []),
+            ...(emails.length ? [{ email: { in: emails } }] : []),
+          ],
+        },
+        select: { id: true, name: true, phone: true, email: true, status: true },
+      })
+    : [];
+
+  return restaurants.map((r) => {
+    const others = matches.filter((m) => m.id !== r.id && !pendingIds.has(m.id));
+    const duplicates = {
+      phone: r.phone ? others.filter((m) => m.phone === r.phone).map((m) => m.name) : [],
+      email: r.email ? others.filter((m) => m.email === r.email).map((m) => m.name) : [],
+    };
+    return {
+      ...formatRestaurant(r),
+      duplicates:
+        duplicates.phone.length || duplicates.email.length ? duplicates : null,
+    };
+  });
 };
 
 export const approveRegistration = async (id) => {

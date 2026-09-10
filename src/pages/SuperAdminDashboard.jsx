@@ -260,6 +260,34 @@ export const SuperAdminDashboard = () => {
                         Applied: {new Date(reg.createdAt).toLocaleDateString()}
                       </Typography>
                     </Stack>
+                    {reg.duplicates && (
+                      <Box
+                        sx={{
+                          display: 'flex', gap: 1, alignItems: 'flex-start',
+                          p: 1.25, mb: 1.5, borderRadius: 1.5,
+                          bgcolor: 'warning.light', color: 'warning.contrastText',
+                          border: '1px solid', borderColor: 'warning.main',
+                        }}
+                      >
+                        <Icon icon="mdi:alert-outline" width={18} style={{ flexShrink: 0, marginTop: 2 }} />
+                        <Box>
+                          <Typography variant="caption" fontWeight={700} display="block">
+                            Possible duplicate
+                          </Typography>
+                          {reg.duplicates.phone?.length > 0 && (
+                            <Typography variant="caption" display="block">
+                              This phone is already used by {reg.duplicates.phone.join(', ')}
+                            </Typography>
+                          )}
+                          {reg.duplicates.email?.length > 0 && (
+                            <Typography variant="caption" display="block">
+                              This email is already used by {reg.duplicates.email.join(', ')}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    )}
+
                     <Stack direction="row" spacing={1}>
                       <Button variant="contained" color="success" size="small" onClick={() => handleApprove(reg.id)} startIcon={<Icon icon="mdi:check" width={16} />}>
                         Approve

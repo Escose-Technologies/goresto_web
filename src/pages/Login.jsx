@@ -49,8 +49,20 @@ export const Login = () => {
         bgcolor: 'grey.50',
       }}
     >
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
+      {/* Centre the mark explicitly. Relying on textAlign alone leaves the
+          inline <img> aligned by its line box rather than the column, which
+          drifted it off-centre against the card below. */}
+      <Box
+        sx={{
+          textAlign: 'center',
+          mb: 4,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex' }}>
           <Logo size="xlarge" />
         </Link>
         <Typography variant="body2" color="text.secondary" mt={1}>
