@@ -70,7 +70,7 @@ const chapters = [
         title: 'Scan the table QR',
         body:
           'Every table gets its own QR code, printed from your dashboard. The scan opens your live menu instantly — and because the table is encoded in the code, you always know where the order came from.',
-        shot: '/tour/public-menu.png',
+        shot: '/tour/public-menu.jpg',
         alt: 'Public menu on a phone',
         phone: true,
       },
@@ -78,7 +78,7 @@ const chapters = [
         title: 'Browse a menu that sells',
         body:
           'Photos, veg and non-veg marks, spice levels and dietary badges. Prices update the moment you change them — no reprinting, no stale cards, no "sorry, that is unavailable".',
-        shot: '/tour/public-menu-items.png',
+        shot: '/tour/public-menu-items.jpg',
         alt: 'Menu items with dietary badges',
         phone: true,
       },
@@ -86,7 +86,7 @@ const chapters = [
         title: 'Order and call a waiter',
         body:
           'Items go into a cart and straight to your kitchen. Need service? One tap raises a waiter call that shows up in your dashboard until somebody clears it.',
-        shot: '/tour/public-menu-cart.png',
+        shot: '/tour/public-menu-cart.jpg',
         alt: 'Cart and waiter call',
         phone: true,
       },
@@ -159,7 +159,7 @@ const chapters = [
         title: 'Menu, tables, done',
         body:
           'Add your categories and items with photos, create your tables, print the QR codes and stick them down. Staff get their own logins and a kitchen PIN.',
-        shot: '/tour/menu-management.png',
+        shot: '/tour/menu-management.jpg',
         alt: 'Menu management dashboard',
       },
     ],
