@@ -97,19 +97,22 @@ body.public-menu-body,
 }
 
 /* Discount Banner */
+/* Sits beside the table chip, and takes its own full line when the offer text
+   is long — an offer must never be truncated. */
 .discount-banner {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: white;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.4375rem 0.75rem;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  margin: 0.75rem;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28);
   animation: slideDown 0.3s ease-out;
 }
 
@@ -148,11 +151,97 @@ body.public-menu-body,
     linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
 }
 
+/* Slides are stacked and cross-faded; with one slide `.is-active` is simply
+   always on, so nothing animates. */
 .restaurant-banner-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+}
+
+.restaurant-banner-image.is-active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .restaurant-banner-image {
+    transition: none;
+  }
+}
+
+.banner-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.625rem;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+/* 8px dot inside a 24px tap target — visually small, comfortably tappable. */
+.banner-dot {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.banner-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.banner-dot.is-active::before {
+  width: 20px;
+  background: #fff;
+}
+
+.banner-expand-btn {
+  position: absolute;
+  right: 0.625rem;
+  bottom: 0.625rem;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 32px;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.banner-expand-btn:active {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Dots sit centred, so keep the count pill clear of them on narrow phones. */
+@media (max-width: 360px) {
+  .banner-expand-btn {
+    font-size: 0.6875rem;
+    padding: 0 0.5rem;
+  }
 }
 
 .restaurant-banner-overlay {
@@ -162,24 +251,84 @@ body.public-menu-body,
   pointer-events: none;
 }
 
-/* Identity block lifts the logo up to overlap the banner */
+/* Identity row — logo beside the name, not stacked above it. The old centred
+   stack cost ~250px before the customer saw a single dish. */
+.restaurant-identity-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.875rem;
+  text-align: left;
+}
+
 .restaurant-identity {
   position: relative;
   z-index: 5;
-  display: flex;
-  justify-content: center;
-  margin-top: clamp(-72px, -18vw, -56px);
-  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+  margin-top: clamp(-40px, -10vw, -28px);
+}
+
+.restaurant-identity-text {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0.25rem;
 }
 
 .restaurant-logo {
-  width: clamp(128px, 32vw, 168px);
-  height: clamp(128px, 32vw, 168px);
-  border-radius: 28%;
-  border: 4px solid var(--pm-bg, #fff);
+  display: block;
+  width: clamp(72px, 20vw, 96px);
+  height: clamp(72px, 20vw, 96px);
+  border-radius: 26%;
+  border: 3px solid var(--pm-bg, #fff);
   object-fit: cover;
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.35);
   background: var(--pm-bg, #fff);
+}
+
+/* Name, veg badge and open state sit together as one glanceable block. */
+.identity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.open-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-card-bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.open-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+}
+
+.open-state--open { border-color: #22C55E; color: #15803D; }
+.open-state--open .open-state-dot { background: #22C55E; }
+.open-state--closed { border-color: #9CA3AF; color: #6B7280; }
+.open-state--closed .open-state-dot { background: #9CA3AF; }
+
+@media (prefers-color-scheme: dark) {
+  .open-state--open { color: #4ADE80; }
+  .open-state--closed { color: #9CA3AF; }
+}
+
+/* Table + discount share a row and wrap independently when either runs long. */
+.header-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .restaurant-logo--placeholder {
@@ -197,19 +346,19 @@ body.public-menu-body,
 /* Header */
 .public-menu-header {
   background: white;
-  padding: 0 1.25rem 1.25rem;
-  text-align: center;
+  padding: 0 1.25rem 1rem;
+  text-align: left;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .restaurant-info {
-  text-align: center;
+  text-align: left;
   max-width: 680px;
   margin: 0 auto;
 }
 
 .restaurant-info h1 {
-  font-size: clamp(1.5rem, 1.1rem + 3vw, 2.25rem);
+  font-size: clamp(1.25rem, 1rem + 2.2vw, 1.75rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--pm-text, #1F2937);
@@ -218,19 +367,18 @@ body.public-menu-body,
 }
 
 .restaurant-tagline {
-  font-size: clamp(0.9375rem, 0.85rem + 0.6vw, 1.0625rem);
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-primary, #2563EB);
-  margin: 0 auto 0.625rem;
+  margin: 0.5rem 0 0;
   line-height: 1.35;
-  max-width: 36ch;
 }
 
 .restaurant-description {
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.55;
   color: var(--pm-text-secondary, #6B7280);
-  margin: 0.75rem auto 0;
+  margin: 0.625rem 0 0;
   max-width: 56ch;
 }
 
@@ -238,7 +386,7 @@ body.public-menu-body,
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  margin-bottom: 0.5rem;
+  white-space: nowrap;
   padding: 0.25rem 0.625rem;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -281,7 +429,7 @@ body.public-menu-body,
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 0.375rem;
+  flex-shrink: 0;
 }
 
 .table-badge--occupied {
@@ -301,22 +449,45 @@ body.public-menu-body,
   opacity: 0.9;
 }
 
+/* One row per fact, full width. A real street address is long — it must wrap
+   onto as many lines as it needs and never be truncated or centred ragged. */
 .restaurant-details {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.75rem;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.75rem;
 }
 
 .restaurant-detail-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
+  min-height: 36px;
+  padding: 0.375rem 0;
   font-size: 0.8125rem;
+  line-height: 1.45;
   color: var(--pm-text-secondary, #4B5563);
+  text-decoration: none;
+}
+
+.restaurant-detail-item .detail-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.restaurant-detail-item svg {
+  margin-top: 1px;
+}
+
+.restaurant-detail-item--address {
+  color: var(--pm-text, #1F2937);
+}
+
+.detail-chevron {
+  flex-shrink: 0;
+  opacity: 0.45;
+  align-self: center;
 }
 
 .restaurant-detail-item svg {
@@ -326,16 +497,12 @@ body.public-menu-body,
   height: 16px;
 }
 
-.restaurant-detail-item a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: opacity 0.2s;
+a.restaurant-detail-item {
+  color: var(--pm-text, #1F2937);
 }
 
-.restaurant-detail-item a:hover,
-.restaurant-detail-item a:active {
-  opacity: 0.8;
-  text-decoration: underline;
+a.restaurant-detail-item:active {
+  opacity: 0.7;
 }
 
 .restaurant-hours {
@@ -348,11 +515,13 @@ body.public-menu-body,
 }
 
 /* Social Links */
+/* Left-aligned with the rest of the header, and small — these are a nicety,
+   not something a customer at the table is looking for. */
 .restaurant-social-links {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  gap: 0.375rem;
   margin-top: 0.5rem;
 }
 
@@ -392,6 +561,62 @@ body.public-menu-body,
 }
 
 /* Search & Filters Section */
+/* Search and the two persistent actions share one row. */
+.sticky-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sticky-actions-row .search-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.sticky-actions {
+  display: flex;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.public-menu-container .sticky-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--pm-border, #E5E7EB);
+  border-radius: 0.75rem;
+  background: var(--pm-card-bg, #fff);
+  color: var(--pm-text, #1F2937);
+  cursor: pointer;
+}
+
+.public-menu-container .sticky-action-btn:active {
+  transform: scale(0.96);
+}
+
+/* Calling is a live state, so it stays loud until the customer cancels it. */
+.public-menu-container .sticky-action-btn--calling {
+  border-color: #DC2626;
+  background: #DC2626;
+  color: #fff;
+}
+
+.public-menu-container .sticky-action-btn--sent {
+  border-color: #16A34A;
+  color: #16A34A;
+  opacity: 1;
+}
+
+.sticky-action-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .search-filters-section {
   display: flex;
   flex-direction: column;
@@ -1576,9 +1801,9 @@ body.public-menu-body,
 @media (min-width: 640px) {
   /* Banner height is fluid via clamp() in base styles */
   .restaurant-logo {
-    width: 156px;
-    height: 156px;
-    border-width: 4px;
+    width: 104px;
+    height: 104px;
+    border-width: 3px;
   }
 
   .public-menu-header {
@@ -1586,12 +1811,11 @@ body.public-menu-body,
   }
 
   .restaurant-info h1 {
-    font-size: 1.75rem;
+    font-size: 1.625rem;
   }
 
   .discount-banner {
-    margin: 1rem 1.5rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
   }
 
   .search-filters-section {
@@ -1743,18 +1967,11 @@ body.public-menu-body,
   }
 
   .restaurant-info h1 {
-    font-size: 2.25rem;
+    font-size: 1.875rem;
   }
 
   .table-badge {
     font-size: 0.875rem;
-  }
-
-  .restaurant-details {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
   }
 
   .restaurant-detail-item {

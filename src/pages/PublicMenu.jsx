@@ -11,6 +11,7 @@ import { Icon } from '@iconify/react';
 import { publicService } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
+import PhotoViewer from '../components/menu/PhotoViewer';
 import { useToast } from '../components/ui/Toast';
 import { SearchBar, FilterPills } from '../components/ui';
 import { BottomSheet } from '../components/ui/BottomSheet';
@@ -69,6 +70,11 @@ export const PublicMenu = () => {
   const [settings, setSettings] = useState(cached?.settings || null);
   const [menuItems, setMenuItems] = useState(cached?.menuItems || []);
   const [categories, setCategories] = useState(cached?.categories || []);
+  const [photos, setPhotos] = useState(cached?.photos || []);
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
+  // Re-evaluated every minute so the Open/Closed chip flips while the page is open.
+  const [nowTick, setNowTick] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(!cached);
@@ -132,6 +138,36 @@ export const PublicMenu = () => {
     }
     return '₹';
   };
+
+  // Registration stores the owner's name inside the description as "Owner: X".
+  // That is internal — never show it to a customer.
+  const publicDescription = useMemo(() => {
+    const raw = restaurant?.description;
+    if (!raw) return '';
+    return raw
+      .split('\n')
+      .filter((line) => !/^\s*owner\s*:/i.test(line))
+      .join('\n')
+      .trim();
+  }, [restaurant?.description]);
+
+  // "Open · till 10:00 PM" tells a customer more than a raw time range does.
+  const openState = useMemo(() => {
+    const open = settings?.openingTime;
+    const close = settings?.closingTime;
+    if (!open || !close) return null;
+    const mins = (t) => {
+      const [h, m] = String(t).split(':');
+      return parseInt(h, 10) * 60 + parseInt(m, 10);
+    };
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const o = mins(open);
+    const c = mins(close);
+    // A closing time before the opening time means the kitchen runs past midnight.
+    const isOpen = c > o ? nowMins >= o && nowMins < c : nowMins >= o || nowMins < c;
+    return { isOpen, open, close };
+  }, [settings?.openingTime, settings?.closingTime, nowTick]);
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -202,6 +238,36 @@ export const PublicMenu = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Gallery photos are the banner; fall back to the single cover image.
+  const bannerSlides = useMemo(() => (
+    photos.length > 0
+      ? photos
+      : (restaurant?.coverImage ? [{ id: 'cover', url: restaurant.coverImage, caption: null }] : [])
+  ), [photos, restaurant?.coverImage]);
+
+  // Auto-advance the banner. Paused for a single slide, when the tab is hidden,
+  // when the viewer is open, and for anyone who asked for reduced motion.
+  useEffect(() => {
+    if (bannerSlides.length < 2 || photoViewerOpen) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const tick = () => {
+      if (document.hidden) return;
+      setBannerIndex((i) => (i + 1) % bannerSlides.length);
+    };
+    const id = setInterval(tick, 4500);
+    return () => clearInterval(id);
+  }, [bannerSlides.length, photoViewerOpen]);
+
+  // Keep the index valid if the gallery shrinks between loads.
+  useEffect(() => {
+    setBannerIndex((i) => (bannerSlides.length ? i % bannerSlides.length : 0));
+  }, [bannerSlides.length]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
+
   useEffect(() => {
     loadMenuData();
   }, [restaurantId]);
@@ -209,11 +275,13 @@ export const PublicMenu = () => {
   const loadMenuData = async () => {
     try {
       // Fetch in parallel so first paint isn't gated on 4 serial round-trips.
-      const [restaurantData, restaurantSettings, items, cats] = await Promise.all([
+      const [restaurantData, restaurantSettings, items, cats, pics] = await Promise.all([
         publicService.getRestaurant(restaurantId),
         publicService.getSettings(restaurantId),
         publicService.getMenuItems(restaurantId),
         publicService.getCategories(restaurantId),
+        // A restaurant with no gallery is the normal case — never fail the menu for it.
+        publicService.getPhotos(restaurantId).catch(() => []),
       ]);
 
       if (restaurantData) {
@@ -222,6 +290,7 @@ export const PublicMenu = () => {
         setSettings(restaurantSettings);
         setMenuItems(availableItems);
         setCategories(cats || []);
+        setPhotos(Array.isArray(pics) ? pics : []);
         applyRestaurantTheme({
           primaryColor: restaurantSettings?.primaryColor,
           secondaryColor: restaurantSettings?.secondaryColor,
@@ -235,6 +304,7 @@ export const PublicMenu = () => {
           settings: restaurantSettings,
           menuItems: availableItems,
           categories: cats || [],
+          photos: Array.isArray(pics) ? pics : [],
         });
 
         if (tableNumber) {
@@ -619,112 +689,147 @@ export const PublicMenu = () => {
         </div>
       )}
 
-      {/* Restaurant Banner — always rendered so the logo has a home even without a cover */}
-      <div className={`restaurant-banner ${restaurant.coverImage ? '' : 'restaurant-banner--plain'}`}>
-        {restaurant.coverImage && (
-          <img src={restaurant.coverImage} alt={restaurant.name} className="restaurant-banner-image" />
-        )}
+      {/* Restaurant Banner — always rendered so the logo has a home even without a
+          cover. Gallery photos cross-fade here; a single slide never animates. */}
+      <div className={`restaurant-banner ${bannerSlides.length ? '' : 'restaurant-banner--plain'}`}>
+        {bannerSlides.map((slide, i) => (
+          <img
+            key={slide.id || slide.url}
+            src={slide.url}
+            alt={slide.caption || restaurant.name}
+            className={`restaurant-banner-image ${i === bannerIndex ? 'is-active' : ''}`}
+            aria-hidden={i === bannerIndex ? undefined : 'true'}
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
         <div className="restaurant-banner-overlay" />
+
+        {photos.length > 0 && (
+          <button
+            type="button"
+            className="banner-expand-btn"
+            onClick={() => setPhotoViewerOpen(true)}
+            aria-label={`View all ${photos.length} photos`}
+          >
+            <Icon icon="mdi:image-multiple-outline" width={16} />
+            {photos.length}
+          </button>
+        )}
+
+        {bannerSlides.length > 1 && (
+          <div className="banner-dots" role="tablist" aria-label="Restaurant photos">
+            {bannerSlides.map((slide, i) => (
+              <button
+                key={slide.id || slide.url}
+                type="button"
+                role="tab"
+                aria-selected={i === bannerIndex}
+                aria-label={`Photo ${i + 1} of ${bannerSlides.length}`}
+                className={`banner-dot ${i === bannerIndex ? 'is-active' : ''}`}
+                onClick={() => setBannerIndex(i)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {photoViewerOpen && (
+        <PhotoViewer
+          photos={photos}
+          startIndex={bannerIndex < photos.length ? bannerIndex : 0}
+          onClose={() => setPhotoViewerOpen(false)}
+        />
+      )}
 
       <header className="public-menu-header">
         <div className="restaurant-info">
-          <div className="restaurant-identity">
-            {restaurant.logo ? (
-              <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
-            ) : (
-              <div className="restaurant-logo restaurant-logo--placeholder" aria-hidden="true">
-                <Icon icon="mdi:silverware-fork-knife" width={56} />
+          {/* Identity row — logo beside the name rather than above it, so the
+              customer reaches the food in about half the scroll. */}
+          <div className="restaurant-identity-row">
+            <div className="restaurant-identity">
+              {restaurant.logo ? (
+                <img src={restaurant.logo} alt={`${restaurant.name} logo`} className="restaurant-logo" />
+              ) : (
+                <div className="restaurant-logo restaurant-logo--placeholder" aria-hidden="true">
+                  <Icon icon="mdi:silverware-fork-knife" width={34} />
+                </div>
+              )}
+            </div>
+
+            <div className="restaurant-identity-text">
+              <h1>{settings?.restaurantName || restaurant.name}</h1>
+
+              <div className="identity-meta">
+                {FOOD_TYPE_BADGE[restaurant.foodType] && (
+                  <span className={`food-type-badge food-type-badge--${FOOD_TYPE_BADGE[restaurant.foodType].variant}`}>
+                    <span className="food-type-badge-dot" />
+                    {FOOD_TYPE_BADGE[restaurant.foodType].label}
+                  </span>
+                )}
+                {openState && (
+                  <span className={`open-state ${openState.isOpen ? 'open-state--open' : 'open-state--closed'}`}>
+                    <span className="open-state-dot" />
+                    {openState.isOpen
+                      ? `Open · till ${formatTime(openState.close)}`
+                      : `Closed · opens ${formatTime(openState.open)}`}
+                  </span>
+                )}
               </div>
-            )}
+            </div>
           </div>
-          <h1>{settings?.restaurantName || restaurant.name}</h1>
+
           {restaurant.tagline && (
             <p className="restaurant-tagline">{restaurant.tagline}</p>
           )}
-          {FOOD_TYPE_BADGE[restaurant.foodType] && (
-            <span className={`food-type-badge food-type-badge--${FOOD_TYPE_BADGE[restaurant.foodType].variant}`}>
-              <span className="food-type-badge-dot" />
-              {FOOD_TYPE_BADGE[restaurant.foodType].label}
-            </span>
-          )}
-          {restaurant.description && (
-            <p className="restaurant-description">{restaurant.description}</p>
-          )}
-          {tableNumber && (
-            <div className={`table-badge ${tableStatus ? `table-badge--${tableStatus}` : ''}`}>
-              Table {tableNumber}
-              {tableStatus && (
-                <span className="table-status-label">
-                  {tableStatus === 'occupied' && '· Occupied'}
-                  {tableStatus === 'reserved' && '· Reserved'}
-                  {tableStatus === 'maintenance' && '· Under Maintenance'}
-                </span>
+
+          {(tableNumber || settings?.discountText) && (
+            <div className="header-chip-row">
+              {tableNumber && (
+                <div className={`table-badge ${tableStatus ? `table-badge--${tableStatus}` : ''}`}>
+                  Table {tableNumber}
+                  {tableStatus && (
+                    <span className="table-status-label">
+                      {tableStatus === 'occupied' && '· Occupied'}
+                      {tableStatus === 'reserved' && '· Reserved'}
+                      {tableStatus === 'maintenance' && '· Under Maintenance'}
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-          <div className="header-action-row">
-            <button
-              className="check-status-btn"
-              onClick={() => setShowStatusCheck(true)}
-            >
-              <Icon icon="mdi:information-outline" width={16} />
-              Check Order Status
-            </button>
-
-            {settings?.allowCallStaff && tableNumber && tableStatus !== 'maintenance' && (
-              callStatus === 'pending' ? (
-                <button
-                  className="call-staff-btn call-staff-cancel"
-                  onClick={handleStopCall}
-                >
-                  <Icon icon="mdi:close-circle-outline" width={16} />
-                  Stop calling ({callCountdown})
-                </button>
-              ) : (
-                <button
-                  className={`call-staff-btn ${callStatus === 'sent' ? 'call-staff-sent' : ''}`}
-                  onClick={handleCallStaff}
-                  disabled={callStatus === 'sent'}
-                >
-                  <Icon icon={callStatus === 'sent' ? 'mdi:bell-check' : 'mdi:bell-outline'} width={16} />
-                  {callStatus === 'sent' ? 'Staff notified' : 'Call Staff'}
-                </button>
-              )
-            )}
-          </div>
-
-          {settings?.discountText && (
-            <div className="discount-banner">
-              <Icon icon="mdi:tag-outline" width={20} />
-              <span>{settings.discountText}</span>
+              {settings?.discountText && (
+                <div className="discount-banner">
+                  <Icon icon="mdi:tag-outline" width={18} />
+                  <span>{settings.discountText}</span>
+                </div>
+              )}
             </div>
           )}
 
           <div className="restaurant-details">
             {settings?.address && (
-              <div className="restaurant-detail-item">
+              <a
+                className="restaurant-detail-item restaurant-detail-item--address"
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Icon icon="mdi:map-marker-outline" width={16} />
-                <span>{settings.address}</span>
-              </div>
+                <span className="detail-text">{settings.address}</span>
+                <Icon icon="mdi:chevron-right" width={16} className="detail-chevron" />
+              </a>
             )}
 
             {settings?.phone && (
-              <div className="restaurant-detail-item">
+              <a className="restaurant-detail-item" href={`tel:${settings.phone}`}>
                 <Icon icon="mdi:phone-outline" width={16} />
-                <a href={`tel:${settings.phone}`}>{settings.phone}</a>
-              </div>
-            )}
-
-            {settings?.openingTime && settings?.closingTime && (
-              <div className="restaurant-detail-item restaurant-hours">
-                <Icon icon="mdi:clock-outline" width={16} />
-                <span>
-                  {formatTime(settings.openingTime)} - {formatTime(settings.closingTime)}
-                </span>
-              </div>
+                <span className="detail-text">{settings.phone}</span>
+              </a>
             )}
           </div>
+
+          {publicDescription && (
+            <p className="restaurant-description">{publicDescription}</p>
+          )}
 
           {/* Social Links */}
           {(restaurant.website || restaurant.socialLinks?.instagram || restaurant.socialLinks?.facebook || restaurant.socialLinks?.twitter) && (
@@ -754,16 +859,56 @@ export const PublicMenu = () => {
         </div>
       </header>
 
-      {/* Search and Filters */}
       <div className="search-filters-section">
-        <SearchBar
+        <div className="sticky-actions-row">
+          <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Search menu..."
           showFilters={true}
           onFilterClick={() => setShowFilters(true)}
           filterCount={activeFilters.length}
-        />
+          />
+
+          {/* Kept in the sticky bar rather than the header: a seated customer
+              needs these mid-meal, long after the header has scrolled away. */}
+          <div className="sticky-actions">
+            {settings?.allowCallStaff && tableNumber && tableStatus !== 'maintenance' && (
+              callStatus === 'pending' ? (
+                <button
+                  type="button"
+                  className="sticky-action-btn sticky-action-btn--calling"
+                  onClick={handleStopCall}
+                  aria-label={`Stop calling staff (${callCountdown})`}
+                  title={`Stop calling (${callCountdown})`}
+                >
+                  <Icon icon="mdi:close-circle-outline" width={20} />
+                  <span className="sticky-action-count">{callCountdown}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={`sticky-action-btn ${callStatus === 'sent' ? 'sticky-action-btn--sent' : ''}`}
+                  onClick={handleCallStaff}
+                  disabled={callStatus === 'sent'}
+                  aria-label={callStatus === 'sent' ? 'Staff notified' : 'Call staff'}
+                  title={callStatus === 'sent' ? 'Staff notified' : 'Call staff'}
+                >
+                  <Icon icon={callStatus === 'sent' ? 'mdi:bell-check' : 'mdi:bell-outline'} width={20} />
+                </button>
+              )
+            )}
+            <button
+              type="button"
+              className="sticky-action-btn"
+              onClick={() => setShowStatusCheck(true)}
+              aria-label="Check order status"
+              title="Check order status"
+            >
+              <Icon icon="mdi:receipt-text-outline" width={20} />
+            </button>
+          </div>
+        </div>
         <FilterPills
           filters={filterOptions}
           activeFilters={activeFilters}

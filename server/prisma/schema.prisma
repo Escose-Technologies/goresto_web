@@ -242,6 +242,7 @@ model Restaurant {
   subscription    Subscription?
   categories      Category[]
   staffCalls      StaffCall[]
+  photos          RestaurantPhoto[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -710,4 +711,22 @@ model PlatformSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+/// Storefront gallery. Photos rotate as the public menu's banner, so they are
+/// stored as object-storage URLs (never base64) — the public menu fetches every
+/// one of them on load.
+model RestaurantPhoto {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  url       String  @db.Text
+  caption   String?
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([restaurantId, sortOrder])
 }

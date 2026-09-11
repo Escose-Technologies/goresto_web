@@ -573,6 +573,26 @@ export const reviewService = {
   },
 };
 
+// ─── Restaurant Photos (storefront gallery) ─────────────
+
+export const restaurantPhotoService = {
+  async getAll(restaurantId) {
+    return get(`/restaurants/${restaurantId}/photos`);
+  },
+  async create(restaurantId, { url, caption }) {
+    return post(`/restaurants/${restaurantId}/photos`, { url, caption: caption || null });
+  },
+  async update(restaurantId, id, { caption }) {
+    return patch(`/restaurants/${restaurantId}/photos/${id}`, { caption: caption || null });
+  },
+  async remove(restaurantId, id) {
+    return del(`/restaurants/${restaurantId}/photos/${id}`);
+  },
+  async reorder(restaurantId, orderedIds) {
+    return put(`/restaurants/${restaurantId}/photos/reorder`, { orderedIds });
+  },
+};
+
 // ─── Upload Service ─────────────────────────────────────
 
 export const uploadService = {
@@ -602,6 +622,9 @@ export const publicService = {
   },
   async getMenuItems(restaurantId) {
     return get(`/public/restaurants/${restaurantId}/menu`);
+  },
+  async getPhotos(restaurantId) {
+    return get(`/public/restaurants/${restaurantId}/photos`);
   },
   async getCategories(restaurantId) {
     return get(`/public/restaurants/${restaurantId}/menu/categories`);

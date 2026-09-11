@@ -2,6 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { prisma } from '../config/database.js';
 import * as restaurantsService from '../services/restaurants.service.js';
 import * as menuItemsService from '../services/menuItems.service.js';
+import * as restaurantPhotosService from '../services/restaurantPhotos.service.js';
 import * as settingsService from '../services/settings.service.js';
 import * as ordersService from '../services/orders.service.js';
 import * as reviewsService from '../services/reviews.service.js';
@@ -27,6 +28,16 @@ export const getRestaurant = asyncHandler(async (req, res) => {
 export const getMenu = asyncHandler(async (req, res) => {
   const items = await menuItemsService.getAll(req.params.restaurantId, { available: 'true' });
   res.json({ success: true, data: items });
+});
+
+export const getPhotos = asyncHandler(async (req, res) => {
+  const r = await prisma.restaurant.findUnique({
+    where: { id: req.params.restaurantId },
+    select: { status: true },
+  });
+  if (!r || r.status !== 'active') return res.status(403).json(UNAVAILABLE);
+  const photos = await restaurantPhotosService.getAll(req.params.restaurantId);
+  res.json({ success: true, data: photos.map(({ id, url, caption }) => ({ id, url, caption })) });
 });
 
 export const getSettings = asyncHandler(async (req, res) => {
