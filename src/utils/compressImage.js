@@ -10,7 +10,8 @@ export const MAX_PICK_BYTES = 10 * 1024 * 1024;
 
 // Sized by the job each image actually does, rather than one number for all.
 export const IMAGE_PRESETS = {
-  banner: { maxEdge: 1600, maxBytes: 800 * 1024 },   // storefront gallery / cover
+  gallery: { maxEdge: 1800, maxBytes: 850 * 1024 },  // stored uncropped, viewed full screen
+  banner: { maxEdge: 1600, maxBytes: 800 * 1024 },   // cover image
   photo: { maxEdge: 1200, maxBytes: 500 * 1024 },    // menu item
   avatar: { maxEdge: 512, maxBytes: 150 * 1024 },    // logo, staff portrait
 };

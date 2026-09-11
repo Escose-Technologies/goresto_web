@@ -8,16 +8,11 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
-import { ImageCropModal } from '../ImageCropModal';
 import { restaurantPhotoService, uploadService } from '../../services/apiService';
 import { compressImage, MAX_PICK_BYTES } from '../../utils/compressImage';
 import { useToast } from '../ui/Toast';
 
 const MAX_PHOTOS = 10;
-// The public menu shows these as the banner, which is a wide strip — crop to
-// match so nothing important is chopped off on the customer's phone.
-const BANNER_ASPECT = 16 / 9;
-
 export const PhotoGalleryManager = ({ restaurantId }) => {
   const toast = useToast();
   const fileInputRef = useRef(null);
@@ -25,7 +20,6 @@ export const PhotoGalleryManager = ({ restaurantId }) => {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [rawImageSrc, setRawImageSrc] = useState(null);
   const [captionDrafts, setCaptionDrafts] = useState({});
 
   const load = useCallback(async () => {
@@ -43,27 +37,21 @@ export const PhotoGalleryManager = ({ restaurantId }) => {
 
   useEffect(() => { load(); }, [load]);
 
-  const handlePick = (e) => {
+  // No crop step: the photo is stored exactly as shot. A fixed 16:9 crop made
+  // every gallery photo read as another banner and threw away the real framing.
+  // The banner centre-crops for display only; the viewer shows the whole frame.
+  const handlePick = async (e) => {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
     if (file.size > MAX_PICK_BYTES) { toast.warning('Image size should be less than 10MB'); return; }
-    setRawImageSrc(URL.createObjectURL(file));
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
 
-  const closeCrop = () => {
-    if (rawImageSrc) URL.revokeObjectURL(rawImageSrc);
-    setRawImageSrc(null);
-  };
-
-  const handleCropConfirm = async (croppedBlob) => {
-    closeCrop();
     setUploading(true);
     try {
-      const compressed = await compressImage(croppedBlob, 'banner');
-      const file = new File([compressed], 'photo.jpg', { type: 'image/jpeg' });
-      const { url } = await uploadService.uploadImage(file);
+      const compressed = await compressImage(file, 'gallery');
+      const upload = new File([compressed], 'photo.jpg', { type: 'image/jpeg' });
+      const { url } = await uploadService.uploadImage(upload);
       const created = await restaurantPhotoService.create(restaurantId, { url });
       setPhotos((prev) => [...prev, created]);
       toast.success('Photo added');
@@ -118,7 +106,7 @@ export const PhotoGalleryManager = ({ restaurantId }) => {
     <Box>
       <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1} mb={1.5}>
         <Typography variant="caption" color="text.secondary">
-          {photos.length} of {MAX_PHOTOS} used · they rotate as the banner on your public menu, in this order
+          {photos.length} of {MAX_PHOTOS} used · shown on your public menu in this order · customers tap to view them full screen
         </Typography>
         <Button
           size="small"
@@ -197,14 +185,6 @@ export const PhotoGalleryManager = ({ restaurantId }) => {
           ))}
         </Stack>
       )}
-
-      <ImageCropModal
-        open={Boolean(rawImageSrc)}
-        imageSrc={rawImageSrc}
-        aspect={BANNER_ASPECT}
-        onConfirm={handleCropConfirm}
-        onCancel={closeCrop}
-      />
     </Box>
   );
 };
