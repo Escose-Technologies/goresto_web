@@ -1125,8 +1125,16 @@ body.public-menu-body,
   color: #DC2626;
 }
 
-/* Cart Footer */
+/* Cart Footer
+   Pinned to the bottom of the sheet's scrollport so "Place Order" is reachable
+   without scrolling even on a 320x568 screen. `.bottom-sheet-content` is the
+   scroll container and carries --spacing-lg padding, so the footer bleeds out
+   of that padding (negative margins) and sticks to bottom:-<padding>. */
 .cart-footer {
+  position: sticky;
+  bottom: calc(-1 * var(--spacing-lg, 1rem));
+  z-index: 2;
+  margin: 0 calc(-1 * var(--spacing-lg, 1rem)) calc(-1 * var(--spacing-lg, 1rem));
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--pm-divider, #E5E7EB);
   background: var(--pm-card-bg, #F9FAFB);
@@ -1164,6 +1172,15 @@ body.public-menu-body,
   padding: 9px 12px;
   background: transparent;
   color: var(--pm-text, #1F2937);
+}
+
+/* `.bare-controls input:focus` (global.css) paints a border + halo on the raw
+   <input>, which sits ABOVE MUI's notched outline — so the focus line runs
+   straight through the floating label. MUI draws its own focus state. */
+.public-menu-container .MuiInputBase-input:focus,
+.cart-footer .MuiInputBase-input:focus {
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .cart-footer .MuiOutlinedInput-notchedOutline {
