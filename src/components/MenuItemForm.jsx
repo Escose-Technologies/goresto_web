@@ -14,6 +14,7 @@ import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
 import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
 import { uploadService } from '../services/apiService';
+import { compressImage } from '../utils/compressImage';
 import { ImageCropModal } from './ImageCropModal';
 
 const allergenOptions = [
@@ -160,7 +161,8 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     const previewUrl = URL.createObjectURL(croppedBlob);
     setImagePreview(previewUrl);
     try {
-      const file = new File([croppedBlob], 'cropped.jpg', { type: 'image/jpeg' });
+      const compressed = await compressImage(croppedBlob);
+      const file = new File([compressed], 'cropped.jpg', { type: 'image/jpeg' });
       const { url } = await uploadService.uploadImage(file);
       URL.revokeObjectURL(previewUrl);
       setFormData((prev) => ({ ...prev, image: url }));
