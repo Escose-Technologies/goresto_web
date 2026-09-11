@@ -55,6 +55,33 @@ enum OrderStatus {
   cancelled
 }
 
+enum SubscriptionPlan {
+  free_trial
+  standard
+  custom
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  suspended
+  cancelled
+}
+
+enum BillingCycle {
+  monthly
+  yearly
+}
+
+enum PaymentMethodType {
+  cash
+  upi
+  bank_transfer
+  card
+  other
+}
+
 enum FeedbackCategory {
   bug
   feature_request
@@ -212,6 +239,7 @@ model Restaurant {
   discountPresets DiscountPreset[]
   notifications   Notification[]
   feedback        Feedback[]
+  subscription    Subscription?
   categories      Category[]
   staffCalls      StaffCall[]
 
@@ -596,4 +624,90 @@ model Feedback {
   @@index([restaurantId])
   @@index([status])
   @@index([createdAt])
+}
+
+/// One subscription per restaurant. Money is stored as integer paise, not
+/// Float: a recurring amount summed across months and years accumulates float
+/// drift that cannot be reconciled later. Bill uses Float for one-off amounts;
+/// this deliberately does not follow that precedent.
+model Subscription {
+  id           String     @id @default(cuid())
+  restaurantId String     @unique
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  plan         SubscriptionPlan   @default(free_trial)
+  status       SubscriptionStatus @default(trialing)
+  /// e.g. 100000 = Rs 1,000.00
+  pricePaise   Int                @default(0)
+  billingCycle BillingCycle       @default(monthly)
+
+  /// Free period runs from approval. Superadmin may reset or extend it freely.
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+
+  notes String? @db.Text
+
+  events   SubscriptionEvent[]
+  payments SubscriptionPayment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([plan])
+  @@index([trialEndsAt])
+}
+
+/// Append-only audit trail. Every price change, trial extension and suspension
+/// is a money decision; without who/when/why there is no answering "so why is
+/// this restaurant paying Rs 400?" a year from now.
+model SubscriptionEvent {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  restaurantId   String
+
+  type       String
+  detail     Json?
+  reason     String  @db.Text
+  actorEmail String?
+
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId])
+  @@index([restaurantId])
+  @@index([createdAt])
+}
+
+/// Payments are recorded by hand — there is no payment gateway. This is a
+/// ledger of money that moved outside the system.
+model SubscriptionPayment {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  restaurantId   String
+
+  amountPaise     Int
+  method          PaymentMethodType @default(upi)
+  reference       String?
+  periodStart     DateTime?
+  periodEnd       DateTime?
+  recordedByEmail String?
+  notes           String?
+
+  createdAt DateTime @default(now())
+
+  @@index([subscriptionId])
+  @@index([restaurantId])
+  @@index([createdAt])
+}
+
+/// Small key/value store for platform-wide settings the Goresto team controls,
+/// such as how many free-year slots remain. Deliberately generic so the next
+/// such setting does not need another table.
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }

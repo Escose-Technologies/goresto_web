@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { restaurantService, userService, registrationService } from '../services/apiService';
 import ProductFeedbackPanel from '../components/superadmin/ProductFeedbackPanel';
 import ActivationHealthPanel from '../components/superadmin/ActivationHealthPanel';
+import SubscriptionsPanel from '../components/superadmin/SubscriptionsPanel';
 import { useToast } from '../components/ui/Toast';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -283,6 +284,13 @@ export const SuperAdminDashboard = () => {
             sx={{ minHeight: 52, textTransform: 'none', fontWeight: 600 }}
           />
           <Tab
+            value="subscriptions"
+            label="Subscriptions"
+            iconPosition="start"
+            icon={<Icon icon="material-symbols:card-membership-outline-rounded" width={18} />}
+            sx={{ minHeight: 52, textTransform: 'none', fontWeight: 600 }}
+          />
+          <Tab
             value="feedback"
             label="Product Feedback"
             iconPosition="start"
@@ -295,6 +303,8 @@ export const SuperAdminDashboard = () => {
       {/* Content */}
       <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 3 } }}>
         {tab === 'health' && <ActivationHealthPanel toast={toast} />}
+
+        {tab === 'subscriptions' && <SubscriptionsPanel toast={toast} />}
 
         {tab === 'feedback' && (
           <ProductFeedbackPanel restaurants={restaurants} toast={toast} />

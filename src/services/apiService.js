@@ -249,6 +249,31 @@ export const feedbackService = {
   },
 };
 
+export const subscriptionService = {
+  async listAll() {
+    return get('/admin/subscriptions');
+  },
+  async update(restaurantId, payload) {
+    return patch(`/admin/subscriptions/${restaurantId}`, payload);
+  },
+  async restartTrial(restaurantId, payload) {
+    return post(`/admin/subscriptions/${restaurantId}/restart-trial`, payload);
+  },
+  async recordPayment(restaurantId, payload) {
+    return post(`/admin/subscriptions/${restaurantId}/payments`, payload);
+  },
+  async events(restaurantId) {
+    return get(`/admin/subscriptions/${restaurantId}/events`);
+  },
+  async setFreeSlots(slots) {
+    return patch('/admin/subscriptions/free-slots', { slots });
+  },
+  // Restaurant-facing: read your own plan.
+  async mine(restaurantId) {
+    return get(`/restaurants/${restaurantId}/subscription`);
+  },
+};
+
 export const platformHealthService = {
   async overview() {
     return get('/admin/health');

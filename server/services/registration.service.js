@@ -3,6 +3,7 @@ import { hashPassword } from '../utils/password.js';
 import { ConflictError, NotFoundError } from '../errors/index.js';
 import { formatRestaurant } from '../utils/formatters.js';
 import { DEFAULT_CATEGORIES } from '../config/defaultCategories.js';
+import * as subscriptionService from './subscription.service.js';
 
 export const register = async (data) => {
   const { ownerName, email, password, phone, restaurantName, address, cuisineTypes, foodType } = data;
@@ -122,6 +123,17 @@ export const approveRegistration = async (id) => {
     where: { id },
     data: { status: 'active' },
   });
+
+  // The free year runs from approval. Deliberately not inside the update
+  // transaction: a subscription hiccup must never leave a restaurant stuck in
+  // pending after the team has already approved it. Any gap is visible in the
+  // Subscriptions console and fixable there.
+  try {
+    await subscriptionService.createForRestaurant({ restaurantId: id });
+  } catch (err) {
+    console.error('subscription creation failed for', id, err.message);
+  }
+
   return formatRestaurant(updated);
 };
 
