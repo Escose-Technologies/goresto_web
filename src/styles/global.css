@@ -8,7 +8,7 @@
   --color-primary-dark: #2B71CC;
   --color-text-primary: #1F2937;
   --color-text-secondary: #6B7280;
-  --color-text-light: #9CA3AF;
+  --color-text-light: #6B7280;   /* was #9CA3AF — 2.42 contrast, below AA */
   --color-bg-primary: #FFFFFF;
   --color-bg-secondary: #F9FAFB;
   --color-bg-tertiary: #F3F4F6;

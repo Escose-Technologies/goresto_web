@@ -5,6 +5,7 @@
    ================================= */
 
 .public-menu-container {
+  color-scheme: light;
   min-height: 100dvh;
   background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
@@ -23,6 +24,10 @@
 
 /* ---- Native mobile-app feel (scoped to the customer menu via body class) ---- */
 body.public-menu-body {
+  /* The customer menu is light-only by design. Without this, a phone set to
+     dark mode still gets dark-ified form controls, scrollbars and autofill
+     backgrounds from the UA, which is where the unreadable text came from. */
+  color-scheme: light;
   overscroll-behavior: none;            /* no rubber-band / white pull gap */
   -webkit-text-size-adjust: 100%;       /* iOS won't rescale text on rotate */
   text-size-adjust: 100%;
@@ -100,7 +105,8 @@ body.public-menu-body,
 /* Sits beside the table chip, and takes its own full line when the offer text
    is long — an offer must never be truncated. */
 .discount-banner {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  /* Darkened from #10B981/#059669: white on those was 2.54-3.77 contrast. */
+  background: linear-gradient(135deg, #047857 0%, #065F46 100%);
   color: white;
   padding: 0.4375rem 0.75rem;
   border-radius: 9999px;
@@ -317,11 +323,6 @@ body.public-menu-body,
 .open-state--closed { border-color: #9CA3AF; color: #6B7280; }
 .open-state--closed .open-state-dot { background: #9CA3AF; }
 
-@media (prefers-color-scheme: dark) {
-  .open-state--open { color: #4ADE80; }
-  .open-state--closed { color: #9CA3AF; }
-}
-
 /* Table + discount share a row and wrap independently when either runs long. */
 .header-chip-row {
   display: flex;
@@ -411,12 +412,6 @@ body.public-menu-body,
 .food-type-badge--egg .food-type-badge-dot { background: #EAB308; }
 .food-type-badge--both .food-type-badge-dot {
   background: linear-gradient(90deg, #22C55E 50%, #EF4444 50%);
-}
-
-@media (prefers-color-scheme: dark) {
-  .food-type-badge--veg { color: #4ADE80; }
-  .food-type-badge--nonveg { color: #F87171; }
-  .food-type-badge--egg { color: #FACC15; }
 }
 
 .table-badge {
@@ -968,7 +963,7 @@ a.restaurant-detail-item:active {
 
 /* Order Success Banner */
 .order-success-banner {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, #047857 0%, #065F46 100%);
   color: white;
   padding: 0.875rem 1rem;
   display: flex;
@@ -1363,7 +1358,7 @@ a.restaurant-detail-item:active {
   height: 32px;
   border-radius: 9999px;
   background: none;
-  color: var(--pm-text-muted, #9CA3AF);
+  color: var(--pm-text-muted, #6B7280);
   border: none;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -1518,17 +1513,6 @@ a.restaurant-detail-item:active {
   font-weight: 600;
   color: var(--pm-text-secondary, #6B7280);
   text-align: center;
-}
-
-@media (prefers-color-scheme: dark) {
-  /* Keep the order CTA green in dark too — red reads as an alert/danger. */
-  .cart-footer .place-order-btn {
-    background: linear-gradient(135deg, #34D399 0%, #10B981 55%, #059669 100%);
-    box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.55);
-  }
-  .cart-footer .place-order-btn:disabled {
-    background: linear-gradient(135deg, #4B5563, #374151);
-  }
 }
 
 .cart-empty {
@@ -1689,7 +1673,7 @@ a.restaurant-detail-item:active {
 .customer-order-card {
   /* Hardcoded light values here made the whole card invisible in dark mode:
      --pm-text flips to near-white while the background stayed near-white. */
-  background: var(--pm-order-card-bg, #F9FAFB);
+  background: #F9FAFB;
   border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.75rem;
@@ -2242,15 +2226,15 @@ a.restaurant-detail-item:active {
   --pm-card-bg: #ffffff;
   --pm-text: #1F2937;
   --pm-text-secondary: #6B7280;
-  --pm-text-muted: #9CA3AF;
+  --pm-text-muted: #6B7280;          /* 2.42 -> 4.61 on the page bg */
   --pm-border: #E5E7EB;
   --pm-divider: #F3F4F6;
   --pm-badge-popular-bg: #ECFDF5;
-  --pm-badge-popular-text: #059669;
+  --pm-badge-popular-text: #047857;  /* 3.58 -> 5.21 on its badge */
   --pm-badge-new-bg: #FEF3C7;
-  --pm-badge-new-text: #D97706;
+  --pm-badge-new-text: #B45309;      /* 2.86 -> 4.51 on its badge */
   --pm-add-btn-bg: #ffffff;
-  --pm-add-btn-text: #059669;
+  --pm-add-btn-text: #047857;        /* 3.77 -> 5.48 on white */
   --pm-add-btn-border: #059669;
   --pm-qty-bg: #059669;
   --pm-qty-text: #ffffff;
@@ -2260,55 +2244,6 @@ a.restaurant-detail-item:active {
   --pm-input-bg: #F9FAFB;
   --pm-placeholder-bg: #F3F4F6;
   --pm-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  .public-menu-container {
-    --pm-bg: #1a1a1a;
-    --pm-card-bg: #262626;
-    --pm-text: #F3F4F6;
-    --pm-text-secondary: #9CA3AF;
-    --pm-order-card-bg: #2E2E2E;
-    --pm-text-muted: #6B7280;
-    --pm-border: #404040;
-    --pm-divider: #333333;
-    --pm-badge-popular-bg: #064E3B;
-    --pm-badge-popular-text: #6EE7B7;
-    --pm-badge-new-bg: #78350F;
-    --pm-badge-new-text: #FCD34D;
-    --pm-add-btn-bg: #262626;
-    --pm-add-btn-text: #6EE7B7;
-    --pm-add-btn-border: #059669;
-    --pm-qty-bg: #059669;
-    --pm-qty-text: #ffffff;
-    --pm-cart-bar-bg: #E8596B;
-    --pm-cart-bar-text: #ffffff;
-    --pm-detail-footer-bg: #262626;
-    --pm-input-bg: #333333;
-    --pm-placeholder-bg: #333333;
-    --pm-shadow: 0 1px 3px rgba(0,0,0,0.3);
-
-    /* Flip the GLOBAL theme vars for the customer view too. Components like
-       Rating/RatingDisplay and any element using var(--color-text-*) never get
-       a data-theme="dark" ancestor on the public menu (only the admin app sets
-       it), so without this their text/borders stay dark-on-dark. */
-    --color-text-primary: #F1F5F9;
-    --color-text-secondary: #94A3B8;
-    --color-text-light: #64748B;
-    --color-border: #404040;
-    --color-bg-primary: #262626;
-    --color-bg-secondary: #1f1f1f;
-    --color-bg-tertiary: #333333;
-
-    background: var(--pm-bg) !important;
-    color: var(--pm-text);
-  }
-
-  /* Empty review stars: --pm-text-muted (#6B7280) is too dim on the dark
-     review card to read as tappable — brighten the outline. */
-  .public-menu-container .review-star {
-    color: #94A3B8;
-  }
 }
 
 /* --- Override old card styles --- */
@@ -2716,16 +2651,6 @@ a.restaurant-detail-item:active {
   color: var(--pm-text-secondary, #6B7280);
 }
 
-@media (prefers-color-scheme: dark) {
-  .restaurant-tagline {
-    color: #7DB1FF;
-  }
-  .restaurant-logo {
-    border-color: var(--pm-card-bg, #1E2530);
-    box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
-  }
-}
-
 /* --- Fix: Header respects theme --- */
 .public-menu-header {
   background: var(--pm-bg, white) !important;
@@ -2833,191 +2758,11 @@ a.restaurant-detail-item:active {
 }
 
 /* --- Dark theme overrides --- */
-@media (prefers-color-scheme: dark) {
-  .public-menu-container {
-    background: var(--pm-bg) !important;
-  }
-
-  .public-menu-container .search-bar-input-wrapper {
-    background: var(--pm-card-bg);
-    border-radius: var(--radius-lg, 0.75rem);
-  }
-
-  .public-menu-container .search-bar-input {
-    background: var(--pm-card-bg) !important;
-    border-color: var(--pm-border) !important;
-    color: var(--pm-text) !important;
-  }
-
-  .public-menu-container .search-bar-input::placeholder {
-    color: var(--pm-text-muted);
-  }
-
-  .public-menu-container .search-bar-icon {
-    color: var(--pm-text-muted);
-  }
-
-  .public-menu-container .search-bar-clear {
-    color: var(--pm-text-secondary);
-  }
-
-  .public-menu-container .search-bar-filter-btn {
-    color: var(--pm-text-secondary);
-  }
-
-  .public-menu-container .search-filters-section {
-    background: var(--pm-bg) !important;
-    border-color: var(--pm-border) !important;
-  }
-
-  .public-menu-container .filter-pill {
-    border: 1px solid var(--pm-border) !important;
-  }
-
-  .public-menu-container .category-section {
-    background: var(--pm-bg) !important;
-  }
-
-  .item-reviews-section {
-    background: var(--pm-card-bg);
-    color: var(--pm-text);
-  }
-
-  .item-reviews-section h3 {
-    color: var(--pm-text);
-  }
-
-  .item-reviews-section p,
-  .item-reviews-section span,
-  .item-reviews-section .review-author,
-  .item-reviews-section .review-date,
-  .item-reviews-section .review-text {
-    color: var(--pm-text-secondary) !important;
-  }
-
-  .bottom-sheet-overlay {
-    background: rgba(0, 0, 0, 0.7);
-  }
-
-  .public-menu-container .bottom-sheet-content {
-    background: var(--pm-card-bg) !important;
-    color: var(--pm-text);
-  }
-
-  .public-menu-container .bottom-sheet {
-    background: var(--pm-card-bg);
-  }
-
-  .public-menu-container .bottom-sheet-close {
-    background: var(--pm-input-bg);
-    color: var(--pm-text-secondary);
-  }
-
-  .public-menu-container .bottom-sheet-handle-bar {
-    background: var(--pm-border);
-  }
-
-  .public-menu-container .bottom-sheet-header {
-    border-color: var(--pm-border);
-  }
-
-  .swiggy-cooking-input {
-    background: var(--pm-input-bg) !important;
-    border-color: var(--pm-border) !important;
-    color: var(--pm-text) !important;
-  }
-
-  .swiggy-cooking-input::placeholder {
-    color: var(--pm-text-muted) !important;
-  }
-
-  .swiggy-detail-qty button {
-    color: var(--pm-text);
-  }
-
-  /* Rating & meta text contrast */
-  .swiggy-detail-meta span,
-  .swiggy-card-rating span,
-  .rating-display,
-  .rating-count {
-    color: var(--pm-text-secondary) !important;
-  }
-
-  /* Allergen "Contains:" label */
-  .allergen-labels-container span,
-  .allergen-label {
-    color: var(--pm-text-secondary);
-  }
-
-  /* Review form inputs */
-  .review-form input,
-  .review-form textarea {
-    background: var(--pm-input-bg) !important;
-    border-color: var(--pm-border) !important;
-    color: var(--pm-text) !important;
-  }
-
-  .review-form label {
-    color: var(--pm-text-secondary) !important;
-  }
-
-  /* Table badge */
-  .public-menu-container .table-badge {
-    background: var(--pm-card-bg);
-    color: var(--pm-text);
-  }
-
-  /* Cart sheet dark mode */
-  .cart-footer {
-    background: var(--pm-card-bg) !important;
-    border-color: var(--pm-border) !important;
-  }
-
-  .cart-total-section {
-    color: var(--pm-text) !important;
-    border-color: var(--pm-border) !important;
-  }
-
-  .cart-item-info h4 {
-    color: var(--pm-text) !important;
-  }
-
-  .cart-item-price {
-    color: var(--pm-text-secondary) !important;
-  }
-
-  .cart-item-quantity {
-    color: var(--pm-text) !important;
-  }
-
-  .cart-item-total {
-    color: var(--pm-text) !important;
-  }
-
-  .cart-item {
-    border-color: var(--pm-border) !important;
-  }
-
-  .cart-table-info {
-    background: var(--pm-input-bg) !important;
-    color: var(--pm-text) !important;
-  }
-
-  .cart-warning {
-    background: #78350F !important;
-    border-color: #92400E !important;
-  }
-
-  .cart-warning p {
-    color: #FCD34D !important;
-  }
-}
-
 /* --- "from" price label --- */
 .swiggy-from {
   font-size: 0.75rem;
   font-weight: 400;
-  color: var(--pm-text-muted, #9CA3AF);
+  color: var(--pm-text-muted, #6B7280);
 }
 
 /* --- Variant Selector (detail sheet) --- */
@@ -3162,7 +2907,7 @@ a.restaurant-detail-item:active {
 }
 
 .review-comment-input::placeholder {
-  color: var(--pm-text-muted, #9CA3AF);
+  color: var(--pm-text-muted, #6B7280);
 }
 
 .public-menu-container .review-submit-btn {
