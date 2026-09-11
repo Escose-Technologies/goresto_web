@@ -77,6 +77,10 @@ export const PublicMenu = () => {
   const [nowTick, setNowTick] = useState(0);
   // Address, phone and blurb stay collapsed — a seated customer is here to order.
   const [showDetails, setShowDetails] = useState(false);
+  const hasSocialLinks = Boolean(
+    restaurant?.website || restaurant?.socialLinks?.instagram
+    || restaurant?.socialLinks?.facebook || restaurant?.socialLinks?.twitter
+  );
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(!cached);
@@ -84,6 +88,10 @@ export const PublicMenu = () => {
   const [tableStatus, setTableStatus] = useState(null);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  // The cart is two steps: review the items, then give name + mobile. Mixing
+  // both on one screen meant the fields pushed the items out of view and the
+  // customer confirmed an order they could no longer see.
+  const [cartStep, setCartStep] = useState('items');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
@@ -470,6 +478,7 @@ export const PublicMenu = () => {
       });
       setCart([]);
       setShowCart(false);
+      setCartStep('items');
       setCustomerName('');
       setCustomerMobile('');
       setOrderPlaced(true);
@@ -807,7 +816,7 @@ export const PublicMenu = () => {
             </div>
           )}
 
-          {(settings?.address || settings?.phone || publicDescription) && (
+          {(settings?.address || settings?.phone || publicDescription || hasSocialLinks) && (
             <div className="restaurant-extra">
               <button
                 type="button"
@@ -840,36 +849,37 @@ export const PublicMenu = () => {
                   {publicDescription && (
                     <p className="restaurant-description">{publicDescription}</p>
                   )}
+
+          {/* Social Links */}
+                  {(restaurant.website || restaurant.socialLinks?.instagram || restaurant.socialLinks?.facebook || restaurant.socialLinks?.twitter) && (
+                    <div className="restaurant-social-links">
+                      {restaurant.website && (
+                        <a href={restaurant.website.startsWith('http') ? restaurant.website : `https://${restaurant.website}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Website">
+                          <Icon icon="mdi:web" width={18} />
+                        </a>
+                      )}
+                      {restaurant.socialLinks?.instagram && (
+                        <a href={restaurant.socialLinks.instagram.startsWith('http') ? restaurant.socialLinks.instagram : `https://instagram.com/${restaurant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Instagram">
+                          <Icon icon="mdi:instagram" width={18} />
+                        </a>
+                      )}
+                      {restaurant.socialLinks?.facebook && (
+                        <a href={restaurant.socialLinks.facebook.startsWith('http') ? restaurant.socialLinks.facebook : `https://facebook.com/${restaurant.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Facebook">
+                          <Icon icon="mdi:facebook" width={18} />
+                        </a>
+                      )}
+                      {restaurant.socialLinks?.twitter && (
+                        <a href={restaurant.socialLinks.twitter.startsWith('http') ? restaurant.socialLinks.twitter : `https://twitter.com/${restaurant.socialLinks.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Twitter / X">
+                          <Icon icon="ri:twitter-x-fill" width={18} />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Social Links */}
-          {(restaurant.website || restaurant.socialLinks?.instagram || restaurant.socialLinks?.facebook || restaurant.socialLinks?.twitter) && (
-            <div className="restaurant-social-links">
-              {restaurant.website && (
-                <a href={restaurant.website.startsWith('http') ? restaurant.website : `https://${restaurant.website}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Website">
-                  <Icon icon="mdi:web" width={18} />
-                </a>
-              )}
-              {restaurant.socialLinks?.instagram && (
-                <a href={restaurant.socialLinks.instagram.startsWith('http') ? restaurant.socialLinks.instagram : `https://instagram.com/${restaurant.socialLinks.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Instagram">
-                  <Icon icon="mdi:instagram" width={18} />
-                </a>
-              )}
-              {restaurant.socialLinks?.facebook && (
-                <a href={restaurant.socialLinks.facebook.startsWith('http') ? restaurant.socialLinks.facebook : `https://facebook.com/${restaurant.socialLinks.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Facebook">
-                  <Icon icon="mdi:facebook" width={18} />
-                </a>
-              )}
-              {restaurant.socialLinks?.twitter && (
-                <a href={restaurant.socialLinks.twitter.startsWith('http') ? restaurant.socialLinks.twitter : `https://twitter.com/${restaurant.socialLinks.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-btn" title="Twitter / X">
-                  <Icon icon="ri:twitter-x-fill" width={18} />
-                </a>
-              )}
-            </div>
-          )}
         </div>
       </header>
 
@@ -933,7 +943,7 @@ export const PublicMenu = () => {
 
       {/* Swiggy-style Cart Bar */}
       {cart.length > 0 && (
-        <div className="swiggy-cart-bar" onClick={() => setShowCart(true)}>
+        <div className="swiggy-cart-bar" onClick={() => { setCartStep('items'); setShowCart(true); }}>
           <div className="swiggy-cart-bar-left">
             <Icon icon="mdi:silverware-fork-knife" width={20} />
             <span>{getCartItemCount()} item{getCartItemCount() > 1 ? 's' : ''} added</span>
@@ -1176,8 +1186,8 @@ export const PublicMenu = () => {
       {/* Cart Bottom Sheet */}
       <BottomSheet
         isOpen={showCart}
-        onClose={() => setShowCart(false)}
-        title="Your Cart"
+        onClose={() => { setShowCart(false); setCartStep('items'); }}
+        title={cartStep === 'details' ? 'Your Details' : 'Your Cart'}
       >
         {tableNumber && (
           <div className="cart-table-info">
@@ -1191,6 +1201,7 @@ export const PublicMenu = () => {
           </Box>
         ) : (
           <>
+            {cartStep === 'items' && (
             <div className="cart-items">
               {cart.map((item) => (
                 <div key={item.cartKey || item.id} className="cart-item">
@@ -1232,7 +1243,21 @@ export const PublicMenu = () => {
                 </div>
               ))}
             </div>
+            )}
+
+            {cartStep === 'details' && (
+              <div className="cart-review-summary">
+                <Icon icon="mdi:cart-outline" width={18} />
+                <span>
+                  {cart.reduce((n, i) => n + i.quantity, 0)} item{cart.reduce((n, i) => n + i.quantity, 0) === 1 ? '' : 's'}
+                  {' · '}{getCurrencySymbol()}{getCartTotal().toFixed(2)}
+                </span>
+                <button className="cart-review-edit" onClick={() => setCartStep('items')}>Edit</button>
+              </div>
+            )}
+
             <div className="cart-footer">
+              {cartStep === 'details' && (
               <Stack spacing={2} sx={{ mb: 1.5, pt: 0.5 }}>
                 <TextField
                   label="Your Name"
@@ -1252,29 +1277,45 @@ export const PublicMenu = () => {
                   size="small"
                 />
               </Stack>
+              )}
+              {cartStep === 'items' && (
               <div className="cart-total-section">
                 <span className="cart-total-label">
                   {cart.reduce((n, i) => n + i.quantity, 0)} {cart.reduce((n, i) => n + i.quantity, 0) === 1 ? 'item' : 'items'} · Total
                 </span>
                 <strong className="cart-total-amount">{getCurrencySymbol()}{getCartTotal().toFixed(2)}</strong>
               </div>
+              )}
               {!tableNumber && (
                 <div className="cart-warning">
                   <p>Table number is required to place an order. Please access this menu through a table QR code.</p>
                 </div>
               )}
-              <button className="place-order-btn" onClick={handlePlaceOrder} disabled={!tableNumber}>
-                <span className="place-order-btn-label">
-                  <Icon icon="mdi:cart-check" width={20} />
-                  Place Order
-                </span>
-                <span className="place-order-btn-amount">
-                  {getCurrencySymbol()}{getCartTotal().toFixed(2)}
-                  <Icon icon="mdi:arrow-right" width={18} />
-                </span>
-              </button>
-              <button className="cart-continue-link" onClick={() => setShowCart(false)}>
-                Continue Shopping
+              {cartStep === 'items' ? (
+                <button className="place-order-btn" onClick={() => setCartStep('details')} disabled={!tableNumber}>
+                  <span className="place-order-btn-label">
+                    <Icon icon="mdi:check-circle-outline" width={20} />
+                    Confirm items
+                  </span>
+                  <span className="place-order-btn-amount">
+                    {getCurrencySymbol()}{getCartTotal().toFixed(2)}
+                    <Icon icon="mdi:arrow-right" width={18} />
+                  </span>
+                </button>
+              ) : (
+                <button className="place-order-btn" onClick={handlePlaceOrder} disabled={!tableNumber}>
+                  <span className="place-order-btn-label">
+                    <Icon icon="mdi:cart-check" width={20} />
+                    Place Order
+                  </span>
+                  <span className="place-order-btn-amount">
+                    {getCurrencySymbol()}{getCartTotal().toFixed(2)}
+                    <Icon icon="mdi:arrow-right" width={18} />
+                  </span>
+                </button>
+              )}
+              <button className="cart-continue-link" onClick={() => (cartStep === 'details' ? setCartStep('items') : setShowCart(false))}>
+                {cartStep === 'details' ? 'Back to items' : 'Continue Shopping'}
               </button>
             </div>
           </>
