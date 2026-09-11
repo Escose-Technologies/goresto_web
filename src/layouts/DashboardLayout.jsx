@@ -15,6 +15,7 @@ const DashboardLayout = ({
   notifications,
   onNotificationRead,
   onNotificationOpen,
+  onNavigate,
   onNotificationReadAll,
   onNotificationClear,
   connected,
@@ -45,6 +46,8 @@ const DashboardLayout = ({
         notifications={notifications}
         onNotificationRead={onNotificationRead}
         onNotificationOpen={onNotificationOpen}
+        activeTab={activeTab}
+        onNavigate={onNavigate}
         onNotificationReadAll={onNotificationReadAll}
         onNotificationClear={onNotificationClear}
         connected={connected}

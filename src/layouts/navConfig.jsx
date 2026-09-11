@@ -36,21 +36,6 @@ const navConfig = [
     label: 'Analytics',
     icon: <Icon icon="material-symbols:analytics-outline-rounded" width={22} />,
   },
-  {
-    id: 'profile',
-    label: 'Profile',
-    icon: <Icon icon="material-symbols:store-outline-rounded" width={22} />,
-  },
-  {
-    id: 'feedback',
-    label: 'Goresto Feedback',
-    icon: <Icon icon="material-symbols:rate-review-outline-rounded" width={22} />,
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: <Icon icon="material-symbols:settings-outline-rounded" width={22} />,
-  },
 ];
 
 export default navConfig;
