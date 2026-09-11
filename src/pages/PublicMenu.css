@@ -10,7 +10,13 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   width: 100%;
   max-width: 100vw;
+  /* overflow-x:hidden forces overflow-y to compute as `auto` (CSS spec), which
+     creates a scroll container — and position:sticky then anchors to THAT
+     instead of the window, so the category bar scrolled away on long menus.
+     `clip` clips without creating a scroll container. The `hidden` line stays
+     as a fallback for older browsers, which simply keep today's behaviour. */
   overflow-x: hidden;
+  overflow-x: clip;
   /* Kill double-tap zoom while keeping normal scrolling. */
   touch-action: manipulation;
 }
@@ -20,7 +26,13 @@ body.public-menu-body {
   overscroll-behavior: none;            /* no rubber-band / white pull gap */
   -webkit-text-size-adjust: 100%;       /* iOS won't rescale text on rotate */
   text-size-adjust: 100%;
+  /* overflow-x:hidden forces overflow-y to compute as `auto` (CSS spec), which
+     creates a scroll container — and position:sticky then anchors to THAT
+     instead of the window, so the category bar scrolled away on long menus.
+     `clip` clips without creating a scroll container. The `hidden` line stays
+     as a fallback for older browsers, which simply keep today's behaviour. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body.public-menu-body,
@@ -2183,6 +2195,12 @@ body.public-menu-body,
 }
 
 .swiggy-add-btn {
+  /* The overlap onto the photo above is deliberate (the Swiggy/Zomato pattern
+     Indian customers know). What was wrong was the height: at ~30px this was
+     under the 44px minimum touch target, and it is the single most-tapped
+     control on the page. */
+  min-height: 44px;
+  justify-content: center;
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
@@ -2215,6 +2233,7 @@ body.public-menu-body,
 }
 
 .swiggy-qty {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   background: var(--pm-qty-bg);
