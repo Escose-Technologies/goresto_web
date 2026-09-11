@@ -713,8 +713,8 @@ export const PublicMenu = () => {
             onClick={() => setPhotoViewerOpen(true)}
             aria-label={`View all ${photos.length} photos`}
           >
-            <Icon icon="mdi:image-multiple-outline" width={16} />
-            {photos.length}
+            <Icon icon="mdi:image-multiple-outline" width={17} />
+            View {photos.length} photo{photos.length === 1 ? '' : 's'}
           </button>
         )}
 

@@ -51,46 +51,67 @@ export const PhotoViewer = ({ photos = [], startIndex = 0, onClose }) => {
       aria-modal="true"
       aria-label="Restaurant photos"
       onClick={onClose}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
     >
-      <button type="button" className="photo-viewer-close" onClick={onClose} aria-label="Close photos">
-        <Icon icon="mdi:close" width={24} />
-      </button>
-
-      <span className="photo-viewer-counter">{index + 1} / {count}</span>
-
-      <img
-        src={photo.url}
-        alt={photo.caption || `Photo ${index + 1}`}
-        className="photo-viewer-image"
+      <div
+        className="photo-viewer-panel"
         onClick={(e) => e.stopPropagation()}
-      />
-
-      {photo.caption && (
-        <p className="photo-viewer-caption" onClick={(e) => e.stopPropagation()}>{photo.caption}</p>
-      )}
-
-      {count > 1 && (
-        <>
-          <button
-            type="button"
-            className="photo-viewer-nav photo-viewer-nav--prev"
-            onClick={(e) => { e.stopPropagation(); go(-1); }}
-            aria-label="Previous photo"
-          >
-            <Icon icon="mdi:chevron-left" width={28} />
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <div className="photo-viewer-head">
+          <span className="photo-viewer-counter">{index + 1} of {count}</span>
+          <button type="button" className="photo-viewer-close" onClick={onClose} aria-label="Close photos">
+            <Icon icon="mdi:close" width={22} />
           </button>
-          <button
-            type="button"
-            className="photo-viewer-nav photo-viewer-nav--next"
-            onClick={(e) => { e.stopPropagation(); go(1); }}
-            aria-label="Next photo"
-          >
-            <Icon icon="mdi:chevron-right" width={28} />
-          </button>
-        </>
-      )}
+        </div>
+
+        <div className="photo-viewer-stage">
+          <img
+            src={photo.url}
+            alt={photo.caption || `Photo ${index + 1}`}
+            className="photo-viewer-image"
+          />
+
+          {count > 1 && (
+            <>
+              <button
+                type="button"
+                className="photo-viewer-nav photo-viewer-nav--prev"
+                onClick={() => go(-1)}
+                aria-label="Previous photo"
+              >
+                <Icon icon="mdi:chevron-left" width={26} />
+              </button>
+              <button
+                type="button"
+                className="photo-viewer-nav photo-viewer-nav--next"
+                onClick={() => go(1)}
+                aria-label="Next photo"
+              >
+                <Icon icon="mdi:chevron-right" width={26} />
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="photo-viewer-foot">
+          {photo.caption && <p className="photo-viewer-caption">{photo.caption}</p>}
+          {count > 1 && (
+            <div className="photo-viewer-dots">
+              {photos.map((ph, i) => (
+                <button
+                  key={ph.id || ph.url}
+                  type="button"
+                  className={`photo-viewer-dot ${i === index ? 'is-active' : ''}`}
+                  onClick={() => setIndex(i)}
+                  aria-label={`Photo ${i + 1}`}
+                  aria-current={i === index}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

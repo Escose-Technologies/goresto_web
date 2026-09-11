@@ -180,19 +180,22 @@ body.public-menu-body,
   }
 }
 
+/* The row spans the banner so the dots stay centred, which means it sits on
+   top of the "View photos" pill — so the strip itself must not take taps. */
 .banner-dots {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.625rem;
-  z-index: 6;
+  bottom: 0.75rem;
+  z-index: 5;
   display: flex;
   justify-content: center;
   gap: 0.375rem;
+  pointer-events: none;
 }
 
 /* 8px dot inside a 24px tap target — visually small, comfortably tappable. */
-.banner-dot {
+.public-menu-container .banner-dot {
   width: 24px;
   height: 24px;
   padding: 0;
@@ -201,9 +204,10 @@ body.public-menu-body,
   cursor: pointer;
   display: grid;
   place-items: center;
+  pointer-events: auto;
 }
 
-.banner-dot::before {
+.public-menu-container .banner-dot::before {
   content: '';
   width: 8px;
   height: 8px;
@@ -213,40 +217,46 @@ body.public-menu-body,
   transition: width 0.2s ease, background 0.2s ease;
 }
 
-.banner-dot.is-active::before {
+.public-menu-container .banner-dot.is-active::before {
   width: 20px;
   background: #fff;
 }
 
-.banner-expand-btn {
+/* The banner only ever shows a centre-crop; the whole photo lives in the
+   full-screen viewer, so this has to read as an invitation, not a badge. */
+.public-menu-container .banner-expand-btn {
   position: absolute;
-  right: 0.625rem;
-  bottom: 0.625rem;
-  z-index: 6;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 7;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  min-height: 32px;
-  padding: 0 0.625rem;
-  border: 0;
+  gap: 0.375rem;
+  min-height: 40px;
+  padding: 0 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(17, 24, 39, 0.72);
   color: #fff;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
-.banner-expand-btn:active {
-  background: rgba(0, 0, 0, 0.7);
+.public-menu-container .banner-expand-btn:active {
+  background: rgba(17, 24, 39, 0.88);
+  transform: scale(0.97);
 }
 
-/* Dots sit centred, so keep the count pill clear of them on narrow phones. */
+/* Dots are centred, so keep the pill clear of them on narrow phones. */
 @media (max-width: 360px) {
-  .banner-expand-btn {
-    font-size: 0.6875rem;
-    padding: 0 0.5rem;
+  .public-menu-container .banner-expand-btn {
+    font-size: 0.75rem;
+    padding: 0 0.625rem;
+    gap: 0.25rem;
   }
 }
 
