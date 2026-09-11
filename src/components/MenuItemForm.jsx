@@ -14,7 +14,7 @@ import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
 import { searchIndianFoods, INDIAN_FOOD_CATEGORIES } from '../data/indianFoodDatabase';
 import { uploadService } from '../services/apiService';
-import { compressImage } from '../utils/compressImage';
+import { compressImage, MAX_PICK_BYTES } from '../utils/compressImage';
 import { ImageCropModal } from './ImageCropModal';
 
 const allergenOptions = [
@@ -146,7 +146,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
+    if (file.size > MAX_PICK_BYTES) { toast.warning('Image size should be less than 10MB'); return; }
     const blobUrl = URL.createObjectURL(file);
     setRawImageSrc(blobUrl);
     setCropModalOpen(true);
@@ -161,7 +161,7 @@ export const MenuItemForm = ({ item, categories, foodType, onSave, onCancel, onD
     const previewUrl = URL.createObjectURL(croppedBlob);
     setImagePreview(previewUrl);
     try {
-      const compressed = await compressImage(croppedBlob);
+      const compressed = await compressImage(croppedBlob, 'photo');
       const file = new File([compressed], 'cropped.jpg', { type: 'image/jpeg' });
       const { url } = await uploadService.uploadImage(file);
       URL.revokeObjectURL(previewUrl);

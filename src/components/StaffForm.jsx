@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useToast } from './ui/Toast';
+import { compressToDataUrl, MAX_PICK_BYTES } from '../utils/compressImage';
 
 const STAFF_ROLES = ['Waiter', 'Chef', 'Manager', 'Bartender', 'Host/Hostess', 'Cashier', 'Kitchen Staff', 'Other'];
 
@@ -78,27 +79,20 @@ export const StaffForm = ({ staff, onSave, onCancel, onDelete }) => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.warning('Image size should be less than 5MB');
+    if (file.size > MAX_PICK_BYTES) {
+      toast.warning('Image size should be less than 10MB');
       return;
     }
 
     setIsUploading(true);
     try {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setFormData((prev) => ({ ...prev, photo: base64String }));
-        setImagePreview(base64String);
-        setIsUploading(false);
-      };
-      reader.onerror = () => {
-        toast.error('Error reading image file');
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
+      // Stored as base64 in the database — keep only the compressed version.
+      const dataUrl = await compressToDataUrl(file, 'avatar');
+      setFormData((prev) => ({ ...prev, photo: dataUrl }));
+      setImagePreview(dataUrl);
     } catch (error) {
       toast.error('Error processing image: ' + error.message);
+    } finally {
       setIsUploading(false);
     }
   };
