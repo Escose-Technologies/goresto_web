@@ -10,7 +10,13 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   width: 100%;
   max-width: 100vw;
+  /* overflow-x:hidden forces overflow-y to compute as `auto` (CSS spec), which
+     creates a scroll container — and position:sticky then anchors to THAT
+     instead of the window, so the category bar scrolled away on long menus.
+     `clip` clips without creating a scroll container. The `hidden` line stays
+     as a fallback for older browsers, which simply keep today's behaviour. */
   overflow-x: hidden;
+  overflow-x: clip;
   /* Kill double-tap zoom while keeping normal scrolling. */
   touch-action: manipulation;
 }
@@ -20,7 +26,13 @@ body.public-menu-body {
   overscroll-behavior: none;            /* no rubber-band / white pull gap */
   -webkit-text-size-adjust: 100%;       /* iOS won't rescale text on rotate */
   text-size-adjust: 100%;
+  /* overflow-x:hidden forces overflow-y to compute as `auto` (CSS spec), which
+     creates a scroll container — and position:sticky then anchors to THAT
+     instead of the window, so the category bar scrolled away on long menus.
+     `clip` clips without creating a scroll container. The `hidden` line stays
+     as a fallback for older browsers, which simply keep today's behaviour. */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body.public-menu-body,
@@ -1113,8 +1125,16 @@ body.public-menu-body,
   color: #DC2626;
 }
 
-/* Cart Footer */
+/* Cart Footer
+   Pinned to the bottom of the sheet's scrollport so "Place Order" is reachable
+   without scrolling even on a 320x568 screen. `.bottom-sheet-content` is the
+   scroll container and carries --spacing-lg padding, so the footer bleeds out
+   of that padding (negative margins) and sticks to bottom:-<padding>. */
 .cart-footer {
+  position: sticky;
+  bottom: calc(-1 * var(--spacing-lg, 1rem));
+  z-index: 2;
+  margin: 0 calc(-1 * var(--spacing-lg, 1rem)) calc(-1 * var(--spacing-lg, 1rem));
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--pm-divider, #E5E7EB);
   background: var(--pm-card-bg, #F9FAFB);
@@ -1152,6 +1172,15 @@ body.public-menu-body,
   padding: 9px 12px;
   background: transparent;
   color: var(--pm-text, #1F2937);
+}
+
+/* `.bare-controls input:focus` (global.css) paints a border + halo on the raw
+   <input>, which sits ABOVE MUI's notched outline — so the focus line runs
+   straight through the floating label. MUI draws its own focus state. */
+.public-menu-container .MuiInputBase-input:focus,
+.cart-footer .MuiInputBase-input:focus {
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .cart-footer .MuiOutlinedInput-notchedOutline {
@@ -2183,6 +2212,12 @@ body.public-menu-body,
 }
 
 .swiggy-add-btn {
+  /* The overlap onto the photo above is deliberate (the Swiggy/Zomato pattern
+     Indian customers know). What was wrong was the height: at ~30px this was
+     under the 44px minimum touch target, and it is the single most-tapped
+     control on the page. */
+  min-height: 44px;
+  justify-content: center;
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
@@ -2215,6 +2250,7 @@ body.public-menu-body,
 }
 
 .swiggy-qty {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   background: var(--pm-qty-bg);

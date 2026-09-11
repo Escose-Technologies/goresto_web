@@ -21,6 +21,17 @@ import './PublicMenu.css';
 import { orderLabel } from '../utils/orderLabel';
 
 // Customer-facing label + style for the restaurant's food type (set by the admin).
+// 44px is the minimum comfortable touch target (Apple HIG and Material both
+// specify it). These chips were 26px tall and are tapped constantly while
+// someone holds a phone one-handed at a table.
+const CATEGORY_CHIP_SX = {
+  flexShrink: 0,
+  minHeight: 44,
+  borderRadius: 999,
+  px: 0.5,
+  '& .MuiChip-label': { px: 1.5, fontSize: '0.9375rem' },
+};
+
 const FOOD_TYPE_BADGE = {
   pure_veg: { label: 'Pure Veg', variant: 'veg' },
   egg: { label: 'Veg & Egg', variant: 'egg' },
@@ -794,7 +805,7 @@ export const PublicMenu = () => {
               variant={selectedCategory === 'All' ? 'filled' : 'outlined'}
               color={selectedCategory === 'All' ? 'primary' : 'default'}
               onClick={() => setSelectedCategory('All')}
-              sx={{ fontWeight: selectedCategory === 'All' ? 600 : 400, flexShrink: 0 }}
+              sx={{ ...CATEGORY_CHIP_SX, fontWeight: selectedCategory === 'All' ? 600 : 400 }}
             />
             {categories.map((category) => (
               <Chip
@@ -803,7 +814,7 @@ export const PublicMenu = () => {
                 variant={selectedCategory === category ? 'filled' : 'outlined'}
                 color={selectedCategory === category ? 'primary' : 'default'}
                 onClick={() => setSelectedCategory(category)}
-                sx={{ fontWeight: selectedCategory === category ? 600 : 400, flexShrink: 0 }}
+                sx={{ ...CATEGORY_CHIP_SX, fontWeight: selectedCategory === category ? 600 : 400 }}
               />
             ))}
           </Stack>
@@ -1063,7 +1074,7 @@ export const PublicMenu = () => {
               ))}
             </div>
             <div className="cart-footer">
-              <Stack spacing={1.5} sx={{ mb: 1.5 }}>
+              <Stack spacing={2} sx={{ mb: 1.5, pt: 0.5 }}>
                 <TextField
                   label="Your Name"
                   value={customerName}
