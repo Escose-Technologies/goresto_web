@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useToast } from '../ui/Toast';
 import PhotoGalleryManager from './PhotoGalleryManager';
+import { compressToDataUrl, MAX_PICK_BYTES } from '../../utils/compressImage';
 
 const FOOD_TYPES = [
   { value: 'pure_veg', label: 'Pure Veg', desc: 'Strictly vegetarian, no egg' },
@@ -95,24 +96,22 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.warning('Please select an image file'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.warning('Image size should be less than 5MB'); return; }
+    if (file.size > MAX_PICK_BYTES) { toast.warning('Image size should be less than 10MB'); return; }
     setIsUploading(true);
     try {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (type === 'logo') {
-          setFormData((prev) => ({ ...prev, logo: reader.result }));
-          setLogoPreview(reader.result);
-        } else {
-          setFormData((prev) => ({ ...prev, coverImage: reader.result }));
-          setCoverPreview(reader.result);
-        }
-        setIsUploading(false);
-      };
-      reader.onerror = () => { toast.error('Error reading image file'); setIsUploading(false); };
-      reader.readAsDataURL(file);
+      // These are stored as base64 in the database and re-sent on every public
+      // menu load, so the raw file must never be kept.
+      const dataUrl = await compressToDataUrl(file, type === 'logo' ? 'avatar' : 'banner');
+      if (type === 'logo') {
+        setFormData((prev) => ({ ...prev, logo: dataUrl }));
+        setLogoPreview(dataUrl);
+      } else {
+        setFormData((prev) => ({ ...prev, coverImage: dataUrl }));
+        setCoverPreview(dataUrl);
+      }
     } catch (error) {
       toast.error('Error processing image: ' + error.message);
+    } finally {
       setIsUploading(false);
     }
   };
