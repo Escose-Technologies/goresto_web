@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { ImageCropModal } from '../ImageCropModal';
 import { restaurantPhotoService, uploadService } from '../../services/apiService';
+import { compressImage } from '../../utils/compressImage';
 import { useToast } from '../ui/Toast';
 
 const MAX_PHOTOS = 10;
@@ -60,7 +61,8 @@ export const PhotoGalleryManager = ({ restaurantId }) => {
     closeCrop();
     setUploading(true);
     try {
-      const file = new File([croppedBlob], 'photo.jpg', { type: 'image/jpeg' });
+      const compressed = await compressImage(croppedBlob);
+      const file = new File([compressed], 'photo.jpg', { type: 'image/jpeg' });
       const { url } = await uploadService.uploadImage(file);
       const created = await restaurantPhotoService.create(restaurantId, { url });
       setPhotos((prev) => [...prev, created]);

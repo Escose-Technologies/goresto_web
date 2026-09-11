@@ -605,6 +605,9 @@ export const uploadService = {
       headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       body: formData,
     });
+    // A 413 comes from nginx, not the app, so it has no JSON body — say
+    // something useful instead of letting json() throw.
+    if (res.status === 413) throw new Error('That image is too large. Please pick a smaller one.');
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error?.message || 'Upload failed');
     return data.data;

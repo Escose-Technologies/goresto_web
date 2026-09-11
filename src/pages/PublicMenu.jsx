@@ -75,6 +75,8 @@ export const PublicMenu = () => {
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   // Re-evaluated every minute so the Open/Closed chip flips while the page is open.
   const [nowTick, setNowTick] = useState(0);
+  // Address, phone and blurb stay collapsed — a seated customer is here to order.
+  const [showDetails, setShowDetails] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(!cached);
@@ -805,30 +807,42 @@ export const PublicMenu = () => {
             </div>
           )}
 
-          <div className="restaurant-details">
-            {settings?.address && (
-              <a
-                className="restaurant-detail-item restaurant-detail-item--address"
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`}
-                target="_blank"
-                rel="noopener noreferrer"
+          {(settings?.address || settings?.phone || publicDescription) && (
+            <div className="restaurant-extra">
+              <button
+                type="button"
+                className="details-toggle"
+                onClick={() => setShowDetails((v) => !v)}
+                aria-expanded={showDetails}
+                aria-controls="restaurant-details-panel"
               >
-                <Icon icon="mdi:map-marker-outline" width={16} />
-                <span className="detail-text">{settings.address}</span>
-                <Icon icon="mdi:chevron-right" width={16} className="detail-chevron" />
-              </a>
-            )}
+                <Icon icon="mdi:information-outline" width={16} />
+                <span>Restaurant details</span>
+                <Icon icon={showDetails ? 'mdi:chevron-up' : 'mdi:chevron-down'} width={18} className="details-toggle-chevron" />
+              </button>
 
-            {settings?.phone && (
-              <a className="restaurant-detail-item" href={`tel:${settings.phone}`}>
-                <Icon icon="mdi:phone-outline" width={16} />
-                <span className="detail-text">{settings.phone}</span>
-              </a>
-            )}
-          </div>
+              {showDetails && (
+                <div className="restaurant-details" id="restaurant-details-panel">
+                  {settings?.address && (
+                    <div className="restaurant-detail-item restaurant-detail-item--address">
+                      <Icon icon="mdi:map-marker-outline" width={16} />
+                      <span className="detail-text">{settings.address}</span>
+                    </div>
+                  )}
 
-          {publicDescription && (
-            <p className="restaurant-description">{publicDescription}</p>
+                  {settings?.phone && (
+                    <a className="restaurant-detail-item" href={`tel:${settings.phone}`}>
+                      <Icon icon="mdi:phone-outline" width={16} />
+                      <span className="detail-text">{settings.phone}</span>
+                    </a>
+                  )}
+
+                  {publicDescription && (
+                    <p className="restaurant-description">{publicDescription}</p>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Social Links */}
