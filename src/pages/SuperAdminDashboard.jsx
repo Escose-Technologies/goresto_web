@@ -69,7 +69,6 @@ export const SuperAdminDashboard = () => {
     name: '',
     address: '',
     phone: '',
-    adminId: '',
     foodType: 'both',
     cuisineTypes: '',
     website: '',
@@ -133,7 +132,6 @@ export const SuperAdminDashboard = () => {
       name: restaurant.name,
       address: restaurant.address,
       phone: restaurant.phone,
-      adminId: restaurant.adminId || '',
       foodType: restaurant.foodType || 'both',
       cuisineTypes: (restaurant.cuisineTypes || []).join(', '),
       website: restaurant.website || '',
@@ -145,7 +143,7 @@ export const SuperAdminDashboard = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '', address: '', phone: '', adminId: '',
+      name: '', address: '', phone: '',
       foodType: 'both', cuisineTypes: '', website: '', tagline: '',
     });
     setResetData({ password: '', confirm: '', superPassword: '' });
@@ -160,7 +158,7 @@ export const SuperAdminDashboard = () => {
     }
     setResetting(true);
     try {
-      const result = await userService.resetPassword(formData.adminId, {
+      const result = await userService.resetPassword(editingRestaurant.adminId, {
         password: resetData.password,
         superPassword: resetData.superPassword,
       });
@@ -429,12 +427,6 @@ export const SuperAdminDashboard = () => {
                 </Grid>
               </Grid>
 
-              <TextField label="Assign Admin" select value={formData.adminId} onChange={(e) => setFormData({ ...formData, adminId: e.target.value })} fullWidth sx={{ mb: 2 }}>
-                <MenuItem value="">Select Admin</MenuItem>
-                {users.map((user) => (
-                  <MenuItem key={user.id} value={user.id}>{user.email}</MenuItem>
-                ))}
-              </TextField>
               {editingRestaurant && (
                 <Box sx={{ mb: 2.5, p: 2, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
                   <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>
@@ -467,11 +459,11 @@ export const SuperAdminDashboard = () => {
               </Stack>
             </Box>
 
-            {editingRestaurant && formData.adminId && (
+            {editingRestaurant && editingRestaurant.adminId && (
               <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="subtitle1" fontWeight={700}>Reset Admin Password</Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
-                  Overrides the password for {getAdminName(formData.adminId)}. Existing sessions stay signed in.
+                  Overrides the password for {getAdminName(editingRestaurant.adminId)}. Existing sessions stay signed in.
                 </Typography>
                 <Grid container spacing={2} mb={2}>
                   <Grid size={{ xs: 12, sm: 4 }}>
