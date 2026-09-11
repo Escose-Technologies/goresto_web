@@ -29,6 +29,7 @@ import { CurrencyProvider } from '../contexts/CurrencyContext';
 import ReviewsSection from '../components/sections/ReviewsSection';
 import FeedbackSection from '../components/sections/FeedbackSection';
 import SubscriptionSection from '../components/sections/SubscriptionSection';
+import OnboardingChecklist from '../components/OnboardingChecklist';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -656,6 +657,10 @@ export const RestaurantAdminDashboard = () => {
             onCancel={handleCancelEdit}
             onDelete={handleDeleteTable}
           />
+        )}
+
+        {activeTab === 'orders' && (
+          <OnboardingChecklist restaurantId={restaurant.id} onNavigate={setActiveTab} />
         )}
 
         {activeTab === 'orders' && (

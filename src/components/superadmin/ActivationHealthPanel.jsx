@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
-import { platformHealthService } from '../../services/apiService';
+import { platformHealthService, onboardingService } from '../../services/apiService';
 
 // Thresholds mirror the server's CASE expression. Changing one means changing
 // both — kept side by side deliberately rather than duplicated silently.
@@ -21,6 +21,13 @@ const HEALTH = {
   not_started:   { label: 'Not started',   hint: 'no menu, no orders',          color: 'default', icon: 'mdi:progress-question' },
 };
 const ORDER = ['not_started', 'never_ordered', 'lost', 'dormant', 'at_risk', 'slowing', 'healthy'];
+
+// The funnel says how many dropped off; this says who, and on which step —
+// the difference between a metric and a call list.
+const STEP_LABEL = {
+  menu: 'menu', tables: 'tables', kitchenPin: 'kitchen PIN',
+  staff: 'staff', gst: 'GST details', firstOrder: 'first order', firstBill: 'first bill',
+};
 
 const money = (n) => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
@@ -53,11 +60,15 @@ const ActivationHealthPanel = ({ toast }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [setup, setSetup] = useState([]);
 
   const load = () => {
     setLoading(true);
-    platformHealthService.overview()
-      .then(setData)
+    Promise.all([platformHealthService.overview(), onboardingService.all().catch(() => [])])
+      .then(([overview, checklists]) => {
+        setData(overview);
+        setSetup(Array.isArray(checklists) ? checklists : []);
+      })
       .catch((err) => toast?.error('Failed to load platform health: ' + err.message))
       .finally(() => setLoading(false));
   };
@@ -149,6 +160,18 @@ const ActivationHealthPanel = ({ toast }) => {
                       <Chip size="small" color={h.color} label={h.label} variant="outlined" icon={<Icon icon={h.icon} width={14} />} />
                       {r.status !== 'active' && <Chip size="small" label={r.status} />}
                     </Stack>
+                    {(() => {
+                      const s = setup.find((x) => x.restaurantId === r.id);
+                      if (!s || s.complete) return null;
+                      return (
+                        <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.5 }} flexWrap="wrap" useFlexGap>
+                          <Icon icon="mdi:progress-alert" width={14} style={{ color: '#ED6C02' }} />
+                          <Typography variant="caption" sx={{ color: 'warning.dark', fontWeight: 600 }}>
+                            setup incomplete — missing {s.missing.map((m) => STEP_LABEL[m] || m).join(', ')}
+                          </Typography>
+                        </Stack>
+                      );
+                    })()}
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.4 }}>
                       joined {fmtDate(r.joined_at)} · {r.days_since_joined}d ago ·{' '}
                       {r.days_since_order === null

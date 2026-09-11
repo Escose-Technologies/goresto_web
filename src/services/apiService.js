@@ -249,6 +249,15 @@ export const feedbackService = {
   },
 };
 
+export const onboardingService = {
+  async mine(restaurantId) {
+    return get(`/restaurants/${restaurantId}/onboarding`);
+  },
+  async all() {
+    return get('/admin/health/onboarding');
+  },
+};
+
 export const subscriptionService = {
   async listAll() {
     return get('/admin/subscriptions');
