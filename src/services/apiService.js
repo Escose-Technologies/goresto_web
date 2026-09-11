@@ -249,6 +249,12 @@ export const feedbackService = {
   },
 };
 
+export const platformHealthService = {
+  async overview() {
+    return get('/admin/health');
+  },
+};
+
 export const restaurantService = {
   async getAll() {
     return get('/restaurants');
