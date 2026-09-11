@@ -27,6 +27,7 @@ const publicOrderSchema = z.object({
 router.get('/:restaurantId', validate(restaurantIdParamSchema, 'params'), publicController.getRestaurant);
 router.get('/:restaurantId/menu', validate(restaurantIdParamSchema, 'params'), publicController.getMenu);
 router.get('/:restaurantId/menu/categories', validate(restaurantIdParamSchema, 'params'), publicController.getCategories);
+router.get('/:restaurantId/photos', validate(restaurantIdParamSchema, 'params'), publicController.getPhotos);
 router.get('/:restaurantId/settings', validate(restaurantIdParamSchema, 'params'), publicController.getSettings);
 router.post('/:restaurantId/orders', publicOrderLimiter, validate(restaurantIdParamSchema, 'params'), validate(publicOrderSchema), publicController.placeOrder);
 router.get('/:restaurantId/orders/status', validate(restaurantIdParamSchema, 'params'), publicController.checkOrderStatus);

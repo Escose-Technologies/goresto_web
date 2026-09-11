@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Icon } from '@iconify/react';
 import { useToast } from '../ui/Toast';
+import PhotoGalleryManager from './PhotoGalleryManager';
 
 const FOOD_TYPES = [
   { value: 'pure_veg', label: 'Pure Veg', desc: 'Strictly vegetarian, no egg' },
@@ -295,6 +296,13 @@ export const RestaurantProfileForm = ({ restaurant, settings, onSave, onCancel }
                   slotProps={{ input: { startAdornment: <InputAdornment position="start"><Icon icon="ri:twitter-x-fill" width={18} /></InputAdornment> } }}
                 />
               </Stack>
+            </SectionCard>
+          </Grid>
+
+          {/* Photo gallery */}
+          <Grid size={12}>
+            <SectionCard icon="mdi:image-multiple-outline" title="Photo gallery" subtitle="Rotates as the banner on your public menu">
+              <PhotoGalleryManager restaurantId={restaurant?.id} />
             </SectionCard>
           </Grid>
 

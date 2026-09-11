@@ -11,6 +11,7 @@ import { Icon } from '@iconify/react';
 import { publicService } from '../services/apiService';
 import { applyRestaurantTheme } from '../utils/applyTheme';
 import { useSocket } from '../hooks/useSocket';
+import PhotoViewer from '../components/menu/PhotoViewer';
 import { useToast } from '../components/ui/Toast';
 import { SearchBar, FilterPills } from '../components/ui';
 import { BottomSheet } from '../components/ui/BottomSheet';
@@ -69,6 +70,9 @@ export const PublicMenu = () => {
   const [settings, setSettings] = useState(cached?.settings || null);
   const [menuItems, setMenuItems] = useState(cached?.menuItems || []);
   const [categories, setCategories] = useState(cached?.categories || []);
+  const [photos, setPhotos] = useState(cached?.photos || []);
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(!cached);
@@ -202,6 +206,31 @@ export const PublicMenu = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Gallery photos are the banner; fall back to the single cover image.
+  const bannerSlides = useMemo(() => (
+    photos.length > 0
+      ? photos
+      : (restaurant?.coverImage ? [{ id: 'cover', url: restaurant.coverImage, caption: null }] : [])
+  ), [photos, restaurant?.coverImage]);
+
+  // Auto-advance the banner. Paused for a single slide, when the tab is hidden,
+  // when the viewer is open, and for anyone who asked for reduced motion.
+  useEffect(() => {
+    if (bannerSlides.length < 2 || photoViewerOpen) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const tick = () => {
+      if (document.hidden) return;
+      setBannerIndex((i) => (i + 1) % bannerSlides.length);
+    };
+    const id = setInterval(tick, 4500);
+    return () => clearInterval(id);
+  }, [bannerSlides.length, photoViewerOpen]);
+
+  // Keep the index valid if the gallery shrinks between loads.
+  useEffect(() => {
+    setBannerIndex((i) => (bannerSlides.length ? i % bannerSlides.length : 0));
+  }, [bannerSlides.length]);
+
   useEffect(() => {
     loadMenuData();
   }, [restaurantId]);
@@ -209,11 +238,13 @@ export const PublicMenu = () => {
   const loadMenuData = async () => {
     try {
       // Fetch in parallel so first paint isn't gated on 4 serial round-trips.
-      const [restaurantData, restaurantSettings, items, cats] = await Promise.all([
+      const [restaurantData, restaurantSettings, items, cats, pics] = await Promise.all([
         publicService.getRestaurant(restaurantId),
         publicService.getSettings(restaurantId),
         publicService.getMenuItems(restaurantId),
         publicService.getCategories(restaurantId),
+        // A restaurant with no gallery is the normal case — never fail the menu for it.
+        publicService.getPhotos(restaurantId).catch(() => []),
       ]);
 
       if (restaurantData) {
@@ -222,6 +253,7 @@ export const PublicMenu = () => {
         setSettings(restaurantSettings);
         setMenuItems(availableItems);
         setCategories(cats || []);
+        setPhotos(Array.isArray(pics) ? pics : []);
         applyRestaurantTheme({
           primaryColor: restaurantSettings?.primaryColor,
           secondaryColor: restaurantSettings?.secondaryColor,
@@ -235,6 +267,7 @@ export const PublicMenu = () => {
           settings: restaurantSettings,
           menuItems: availableItems,
           categories: cats || [],
+          photos: Array.isArray(pics) ? pics : [],
         });
 
         if (tableNumber) {
@@ -619,13 +652,57 @@ export const PublicMenu = () => {
         </div>
       )}
 
-      {/* Restaurant Banner — always rendered so the logo has a home even without a cover */}
-      <div className={`restaurant-banner ${restaurant.coverImage ? '' : 'restaurant-banner--plain'}`}>
-        {restaurant.coverImage && (
-          <img src={restaurant.coverImage} alt={restaurant.name} className="restaurant-banner-image" />
-        )}
+      {/* Restaurant Banner — always rendered so the logo has a home even without a
+          cover. Gallery photos cross-fade here; a single slide never animates. */}
+      <div className={`restaurant-banner ${bannerSlides.length ? '' : 'restaurant-banner--plain'}`}>
+        {bannerSlides.map((slide, i) => (
+          <img
+            key={slide.id || slide.url}
+            src={slide.url}
+            alt={slide.caption || restaurant.name}
+            className={`restaurant-banner-image ${i === bannerIndex ? 'is-active' : ''}`}
+            aria-hidden={i === bannerIndex ? undefined : 'true'}
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
         <div className="restaurant-banner-overlay" />
+
+        {photos.length > 0 && (
+          <button
+            type="button"
+            className="banner-expand-btn"
+            onClick={() => setPhotoViewerOpen(true)}
+            aria-label={`View all ${photos.length} photos`}
+          >
+            <Icon icon="mdi:image-multiple-outline" width={16} />
+            {photos.length}
+          </button>
+        )}
+
+        {bannerSlides.length > 1 && (
+          <div className="banner-dots" role="tablist" aria-label="Restaurant photos">
+            {bannerSlides.map((slide, i) => (
+              <button
+                key={slide.id || slide.url}
+                type="button"
+                role="tab"
+                aria-selected={i === bannerIndex}
+                aria-label={`Photo ${i + 1} of ${bannerSlides.length}`}
+                className={`banner-dot ${i === bannerIndex ? 'is-active' : ''}`}
+                onClick={() => setBannerIndex(i)}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
+      {photoViewerOpen && (
+        <PhotoViewer
+          photos={photos}
+          startIndex={bannerIndex < photos.length ? bannerIndex : 0}
+          onClose={() => setPhotoViewerOpen(false)}
+        />
+      )}
 
       <header className="public-menu-header">
         <div className="restaurant-info">
