@@ -232,7 +232,7 @@ body.public-menu-body,
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 0.875rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
@@ -464,8 +464,8 @@ body.public-menu-body,
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  min-height: 36px;
-  padding: 0 0.75rem 0 0.625rem;
+  min-height: 44px;
+  padding: 0 0.875rem 0 0.75rem;
   border: 1px solid var(--pm-border, #E5E7EB);
   border-radius: 9999px;
   background: var(--pm-card-bg, #fff);
@@ -558,8 +558,8 @@ a.restaurant-detail-item:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #F3F4F6;
   color: #4B5563;
@@ -2246,9 +2246,9 @@ a.restaurant-detail-item:active {
   --pm-add-btn-bg: #ffffff;
   --pm-add-btn-text: #047857;        /* 3.77 -> 5.48 on white */
   --pm-add-btn-border: #059669;
-  --pm-qty-bg: #059669;
+  --pm-qty-bg: #047857;        /* white on #059669 was 3.77 */
   --pm-qty-text: #ffffff;
-  --pm-cart-bar-bg: #059669;
+  --pm-cart-bar-bg: #047857;   /* white on #059669 was 3.77 */
   --pm-cart-bar-text: #ffffff;
   --pm-detail-footer-bg: #ffffff;
   --pm-input-bg: #F9FAFB;
@@ -2639,7 +2639,7 @@ a.restaurant-detail-item:active {
   color: var(--pm-text);
 }
 
-.swiggy-detail-add-btn {
+.public-menu-container .swiggy-detail-add-btn {
   flex: 1;
   background: var(--pm-cart-bar-bg);
   color: var(--pm-cart-bar-text);
@@ -2758,8 +2758,10 @@ a.restaurant-detail-item:active {
   border-color: var(--pm-divider, #E5E7EB) !important;
 }
 
-.swiggy-detail-add-btn {
-  background: var(--color-primary, #059669) !important;
+.public-menu-container .swiggy-detail-add-btn {
+  background: var(--pm-cart-bar-bg, #047857) !important;
+  color: #fff !important;
+  min-height: 48px;
 }
 
 /* --- Fix: Category section background --- */
@@ -2999,4 +3001,109 @@ a.restaurant-detail-item:active {
   .swiggy-cart-bar {
     max-width: 480px;
   }
+}
+
+/* ── MUI controls inside `.bare-controls` ──────────────────────────────────
+   `.bare-controls` (global.css) strips native controls to nothing: no border,
+   transparent background, inherited colour, and a tall min-height. That is
+   right for the hand-rolled buttons on this page, but MUI renders its own
+   fully-styled elements and the reset's `.bare-controls button` (0-1-1) beats
+   MUI's single-class styles — a contained Button lost its background and read
+   as plain text, and text fields grew to ~90px. Restore them once here rather
+   than patching each sheet. */
+.public-menu-container .MuiButton-contained {
+  min-height: 44px;
+  border-radius: 0.75rem;
+  background-color: var(--pm-cart-bar-bg, #047857);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-transform: none;
+  box-shadow: none;
+}
+
+.public-menu-container .MuiButton-contained:active {
+  background-color: var(--pm-cart-bar-bg, #047857);
+  filter: brightness(0.92);
+}
+
+.public-menu-container .MuiButton-contained.Mui-disabled {
+  background-color: #D1D5DB;
+  color: #6B7280;
+}
+
+.public-menu-container .MuiButton-outlined,
+.public-menu-container .MuiButton-text {
+  min-height: 44px;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.public-menu-container .MuiOutlinedInput-root {
+  background: var(--pm-input-bg, #F9FAFB);
+  border-radius: 0.625rem;
+}
+
+.public-menu-container .MuiOutlinedInput-input {
+  min-height: 0;
+  padding: 12px 14px;
+  background: transparent;
+  color: var(--pm-text, #1F2937);
+  /* 16px or iOS zooms the whole page when the field is focused. */
+  font-size: 16px;
+}
+
+.public-menu-container .MuiOutlinedInput-notchedOutline {
+  border-color: var(--pm-border, #E5E7EB);
+}
+
+.public-menu-container .MuiInputLabel-root {
+  color: var(--pm-text-secondary, #6B7280);
+}
+
+.public-menu-container .MuiInputLabel-root.Mui-focused,
+.public-menu-container .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  color: var(--pm-cart-bar-bg, #047857);
+  border-color: var(--pm-cart-bar-bg, #047857);
+}
+
+/* The reset paints a border + halo on the raw <input>, which sits above MUI's
+   notched outline and strikes through the floating label. */
+.public-menu-container .MuiInputBase-input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* ── Cart: two steps ───────────────────────────────────────────────────────
+   Step 1 reviews the items, step 2 collects name + mobile. */
+/* On step 2 the items are out of view, so keep what is being paid for visible. */
+.cart-review-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--pm-border, #E5E7EB);
+  border-radius: 0.75rem;
+  background: var(--pm-card-bg, #fff);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pm-text, #1F2937);
+}
+
+.cart-review-summary svg {
+  color: var(--pm-cart-bar-bg, #047857);
+  flex-shrink: 0;
+}
+
+.public-menu-container .cart-review-edit {
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--pm-cart-bar-bg, #047857);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
 }
