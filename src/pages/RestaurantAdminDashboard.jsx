@@ -28,6 +28,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import { CurrencyProvider } from '../contexts/CurrencyContext';
 import ReviewsSection from '../components/sections/ReviewsSection';
 import FeedbackSection from '../components/sections/FeedbackSection';
+import SubscriptionSection from '../components/sections/SubscriptionSection';
 
 export const RestaurantAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -587,6 +588,7 @@ export const RestaurantAdminDashboard = () => {
       notifications={notifications}
       onNotificationRead={handleNotificationRead}
       onNotificationOpen={handleNotificationOpen}
+      onNavigate={setActiveTab}
       onNotificationReadAll={handleNotificationReadAll}
       onNotificationClear={handleNotificationClear}
       connected={true}
@@ -715,6 +717,10 @@ export const RestaurantAdminDashboard = () => {
             onCancel={handleCancelEdit}
             onDelete={handleDeleteStaff}
           />
+        )}
+
+        {activeTab === 'subscription' && (
+          <SubscriptionSection restaurantId={restaurant.id} toast={toast} />
         )}
 
         {activeTab === 'feedback' && (

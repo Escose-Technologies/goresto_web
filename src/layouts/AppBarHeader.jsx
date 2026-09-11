@@ -28,6 +28,14 @@ const timeAgo = (dateStr) => {
 
 // Presentation per notification type. Anything unknown falls back to the bell,
 // so a new server-side type never renders as a broken row.
+// Moved out of the left nav and into the account menu, beside Logout.
+const ACCOUNT_ITEMS = [
+  { id: 'profile',      label: 'Profile',           icon: 'material-symbols:store-outline-rounded' },
+  { id: 'subscription', label: 'Subscription Plan', icon: 'material-symbols:card-membership-outline-rounded' },
+  { id: 'feedback',     label: 'Goresto Feedback',  icon: 'material-symbols:rate-review-outline-rounded' },
+  { id: 'settings',     label: 'Settings',          icon: 'material-symbols:settings-outline-rounded' },
+];
+
 const TYPE_META = {
   order_new:  { icon: 'mdi:receipt-text-outline', bg: 'info.light',    fg: 'info.dark' },
   staff_call: { icon: 'mdi:bell-ring',            bg: 'warning.light', fg: 'warning.dark' },
@@ -42,6 +50,8 @@ const AppBarHeader = ({
   restaurantName,
   userName,
   onLogout,
+  activeTab,
+  onNavigate,
   notifications = [],
   onNotificationRead,
   onNotificationOpen,
@@ -270,6 +280,27 @@ const AppBarHeader = ({
               </Typography>
             </Box>
             <Divider />
+
+            {/* Account-level destinations live here rather than in the left
+                nav: they are settings you visit occasionally, not the daily
+                work of running service. */}
+            {ACCOUNT_ITEMS.map((item) => (
+              <MenuItem
+                key={item.id}
+                selected={activeTab === item.id}
+                onClick={() => {
+                  setAnchorEl(null);
+                  onNavigate?.(item.id);
+                }}
+              >
+                <ListItemIcon>
+                  <Icon icon={item.icon} width={18} />
+                </ListItemIcon>
+                <Typography variant="body2">{item.label}</Typography>
+              </MenuItem>
+            ))}
+
+            <Divider sx={{ my: 0.5 }} />
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
