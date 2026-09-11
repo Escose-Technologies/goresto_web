@@ -16,6 +16,7 @@ import staffCallsRoutes from './staffCalls.routes.js';
 import notificationsRoutes from './notifications.routes.js';
 import feedbackRoutes from './feedback.routes.js';
 import adminFeedbackRoutes from './adminFeedback.routes.js';
+import adminHealthRoutes from './adminHealth.routes.js';
 import publicRoutes from './public.routes.js';
 import registrationRoutes from './registration.routes.js';
 import uploadRoutes from './upload.routes.js';
@@ -44,6 +45,7 @@ router.use('/restaurants/:restaurantId/staff-calls', staffCallsRoutes);
 router.use('/restaurants/:restaurantId/notifications', notificationsRoutes);
 router.use('/restaurants/:restaurantId/feedback', feedbackRoutes);
 router.use('/admin/feedback', adminFeedbackRoutes);
+router.use('/admin/health', adminHealthRoutes);
 
 // Public endpoints (no auth)
 router.use('/public/restaurants', publicRoutes);
